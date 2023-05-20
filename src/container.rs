@@ -95,7 +95,7 @@ impl Validation for Container<'_> {
 
         // Check that there is at least one source and a single ground
         valid &= self.elements.iter().any(|x| x.class.is_source());
-        valid &= (self.elements.iter().filter(|x| x.class == Ground).count() == 1);
+        valid &= self.elements.iter().filter(|x| x.class == Ground).count() == 1;
 
         // TODO Shorted Elements
 

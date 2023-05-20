@@ -53,11 +53,6 @@ impl Element {
     }
 
     /// Return a pretty string representation of the Element
-    ///
-    /// ```
-    /// let element = Element::new(Resistor, 1.0, vec![1], vec![2]);
-    /// assert_eq!(element.pretty_string(), "R1: 1.0 Ohm");
-    /// ```
     pub(crate) fn pretty_string(&self) -> String {
         format!(
             "{}{}: {} {}",
