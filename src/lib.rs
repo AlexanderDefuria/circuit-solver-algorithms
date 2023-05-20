@@ -1,46 +1,17 @@
+mod tests;
+mod components;
+mod elements;
+mod tools;
+mod container;
 
-/// Possible Component Types
-enum Component {
-    Ground,
-    Voltage,
-    Current,
-    Resistor,
-    // Inductor,
-    // Capacitor,
-}
-
-/// Current State of an Element
-enum State {
-    Solved,
-    Unknown,
-    Partial,
-}
-
-/// Representation of a Schematic Element
-struct Element {
-    name: str,
-    id: usize,
-    value: f64,
-    class: Component,
-    positive: Vec<usize>, // Link to other elements
-    negative: Vec<usize>,
-}
-
-/// Node Voltage used with KCL
-struct Node<'a> {
-    id: usize,
-    elements: Vec<&'a Element>
-}
-
-/// Mesh used with KVL
-struct Mesh<'a> {
-
-}
-
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-
-}
+pub fn solve(){}
+pub fn simplify(){}
+pub fn decide_tool(){}
+pub fn create_mesh(){}
+pub fn create_nodes(){}
+pub fn create_super_mesh(){}
+pub fn create_super_nodes(){}
+pub fn create_thevenin(){}
+pub fn create_norton(){}
+pub fn serialize(){}
+pub fn deserialize(){}
