@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-use serde_json::Result;
 
 /// Possible Component Types
 #[derive(Serialize, Deserialize, PartialEq, Debug)]

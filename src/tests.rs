@@ -2,7 +2,6 @@
 mod tests {
     use crate::components::Component;
     use crate::elements::Element;
-    use crate::*;
     use assert_json_diff::assert_json_include;
     use serde_json::json;
 

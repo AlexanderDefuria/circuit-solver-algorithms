@@ -1,13 +1,19 @@
+use crate::components::Component;
 use crate::components::Component::Ground;
 use crate::elements::Element;
 use crate::tools::Tool;
+use crate::validation::StatusError::KnownIssue;
+use crate::validation::{
+    Validation, check_duplicates, get_all_internal_status_errors, Status, StatusError,
+    ValidationResult,
+};
 use serde::{Deserialize, Serialize};
-use serde_json::Result;
-use std::fmt::Debug;
+use std::error::Error;
+use std::fmt::{Debug, Display, Formatter};
 
 /// Current State of an Element
-#[derive(Serialize, Deserialize, PartialEq)]
-enum State {
+#[derive(PartialEq)]
+enum SolutionState {
     Solved,
     Unknown,
     Partial,
@@ -17,19 +23,15 @@ enum State {
 ///
 /// Container is a collection of Elements and Tools we are using to solve the circuit
 #[derive(PartialEq)]
-struct Container<'a> {
+pub struct Container<'a> {
     elements: Vec<Element>,
     tools: Vec<Tool<'a>>,
     ground: usize,
-    state: State,
-}
-
-pub(crate) trait Validation {
-    fn validate(&self) -> bool;
+    state: SolutionState,
 }
 
 impl Debug for Container<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Container")
             .field(
                 "elements",
@@ -46,94 +48,168 @@ impl Debug for Container<'_> {
     }
 }
 
-impl Container<'_> {
-    fn new() -> Container<'static> {
+/// Container is a collection of Elements and Tools we are using to solve the circuit
+/// All Elements and Tools are stored in a Vec and are referenced by their index in the Vec
+/// All Functions within Container are used to build out the circuit correctly.
+///
+/// <br>
+impl<'a> Container<'a> {
+    fn new() -> Container<'a> {
         Container {
             elements: Vec::new(),
             tools: Vec::new(),
             ground: 0,
-            state: State::Unknown,
+            state: SolutionState::Unknown,
         }
     }
 
-    fn add_element(&mut self, mut element: Element) {
-        element.id = self.elements.len();
+    /// Add an Element to the Container
+    ///
+    /// This function will add an Element to the Container and return the index of the Element
+    pub fn add_element(&mut self, mut element: Element) -> Result<usize, StatusError> {
+        let id: usize = self.add_element_core(element);
+        let check = self.validate();
+        if check.is_err() {
+            self.elements.pop();
+            return Err(check.unwrap_err());
+        }
+        Ok(id)
+    }
+
+    fn add_element_core(&mut self, mut element: Element) -> usize {
+        let id: usize = self.elements.len();
+        element.id = id;
         self.elements.push(element);
+        id
+    }
+
+    fn add_tool<'tool: 'a>(&mut self, tool: Tool<'tool>) {
+        // TODO
+        self.tools.push(tool);
+    }
+
+    /// Manually set the ground element
+    ///
+    /// This function is used to manually set the ground element.
+    /// This should be avoided if possible and will <strong>replace the current ground</strong>.
+    fn manually_set_ground(&mut self, ground: Element) {
+        assert_eq!(ground.class, Ground);
+        self.ground = self.add_element(ground).unwrap();
+    }
+
+    /// Set the ground element
+    pub fn set_ground(&mut self) -> Result<(), StatusError> {
+        let ground: Element = Element::new(Ground, 0.0, vec![], vec![]);
+        self.manually_set_ground(ground);
+        let check = self.validate();
+        if check.is_err() {
+            self.elements.pop();
+            return Err(check.unwrap_err());
+        }
+        Ok(())
+    }
+
+    /// Validate the Container and the circuit within are usable.
+    ///
+    /// This function will check that the Container is in a valid state to be solved.
+    /// It will make calls to validate functions in the elements themselves and let
+    /// them handle their own internal validation. This will take care of the high
+    /// level validation.
+    ///
+    /// * All Elements have a valid Component, Value, Positive, and Negative
+    /// * No duplicate Elements or Tools
+    /// * Contains at least one source and a single ground
+    /// * No floating Elements, Tools, etc.
+    /// * No shorted or open Elements
+    pub fn check_validity(&self) -> ValidationResult {
+        self.validate()
     }
 }
 
-/// Validate the Container and the circuit within are usable.
-///
-/// This function will check that the Container is in a valid state to be solved.
-/// It will make calls to validate functions in the elements themselves and let
-/// them handle their own internal validation. This will take care of the high
-/// level validation.
-///
-/// * All Elements have a valid Component, Value, Positive, and Negative
-/// * No duplicate Elements or Tools
-/// * Contains at least one source and a single ground
-/// * No floating Elements, Tools, etc.
-/// * No shorted or open Elements
 impl Validation for Container<'_> {
-    fn validate(&self) -> bool {
-        let mut valid: bool = true;
+    fn validate(&self) -> ValidationResult {
+        let mut errors: Vec<StatusError> = Vec::new();
 
         // Check that all elements and tools are valid individually
-        // - Floating, Opens, Values, etc.
-        valid &= self.elements.iter().all(|x| x.validate());
-        valid &= self.tools.iter().all(|x| x.validate());
+        errors.append(&mut get_all_internal_status_errors(&self.elements));
+        errors.append(&mut get_all_internal_status_errors(&self.tools));
 
         // Check that there are no duplicates in elements or tools
-        valid &= !self
-                .elements
-                .iter()
-                .any(|x| self.elements.iter().filter(|y| x == *y).count() > 1);
-        valid &= !self
-                .tools
-                .iter()
-                .any(|x| self.tools.iter().filter(|y| x == *y).count() > 1);
+        errors.append(&mut check_duplicates(&self.elements));
+        errors.append(&mut check_duplicates(&self.tools));
 
         // Check that there is at least one source and a single ground
-        valid &= self.elements.iter().any(|x| x.class.is_source());
-        valid &= self.elements.iter().filter(|x| x.class == Ground).count() == 1;
+        if !self.elements.iter().any(|x| x.class.is_source()) {
+            errors.push(KnownIssue("No Sources".parse().unwrap()));
+        }
+        if self.elements.iter().filter(|x| x.class == Ground).count() != 1 {
+            errors.push(KnownIssue("Multiple Grounds".parse().unwrap()));
+        }
 
-        // TODO Shorted Elements
-
-        valid
+        match errors.len() {
+            0 => Ok(Status::Valid),
+            1 => Err(errors[0].clone()),
+            _ => Err(StatusError::MultipleIssues(errors)),
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::components::Component;
     use crate::components::Component::{Ground, Resistor, VoltageSrc};
-    use crate::container::{Container, Validation};
+    use crate::container::Container;
     use crate::elements::Element;
-    use crate::*;
+    use crate::validation::{Status, StatusError, Validation};
 
     use regex::Regex;
+
+    fn create_basic_container<'a>() -> Container<'a> {
+        let mut container = Container::new();
+        container.add_element_core(Element::new(Resistor, 1.0, vec![2], vec![3]));
+        container.add_element_core(Element::new(Resistor, 1.0, vec![2], vec![3]));
+        container.add_element_core(Element::new(Ground, 1.0, vec![2], vec![]));
+        container.add_element_core(Element::new(VoltageSrc, 1.0, vec![2], vec![3]));
+        container
+    }
 
     #[test]
     fn test_debug() {
         let re = Regex::new(r#"Container \{ elements: \["R0: 1 Ohm", "R1: 1 Ohm"] }"#).unwrap();
 
         let mut container = Container::new();
-        container.add_element(Element::new(Resistor, 1.0, vec![2], vec![3]));
-        container.add_element(Element::new(Resistor, 1.0, vec![2], vec![3]));
+        container.add_element_core(Element::new(Resistor, 1.0, vec![2], vec![3]));
+        container.add_element_core(Element::new(Resistor, 1.0, vec![2], vec![3]));
         assert!(re.is_match(&format!("{:?}", container)));
     }
 
     #[test]
     fn test_validate() {
-        let mut container = Container::new();
-        container.add_element(Element::new(Resistor, 1.0, vec![2], vec![3]));
-        container.add_element(Element::new(Resistor, 1.0, vec![2], vec![3]));
-        container.add_element(Element::new(Ground, 1.0, vec![2], vec![]));
-        container.add_element(Element::new(VoltageSrc, 1.0, vec![2], vec![3]));
-        assert_eq!(container.validate(), true);
+        let mut container = create_basic_container();
+        assert_eq!(container.validate().unwrap(), Status::Valid);
 
         // Test duplicate elements, this should be invalid.
         container.elements[0].id = 1;
-        assert_eq!(container.validate(), false);
+        assert!(container.validate().is_err());
+
+        // Test no sources, this should be invalid.
+        container.elements[3].class = Resistor;
+        assert!(container.validate().is_err());
+
+        // Test multiple grounds, this should be invalid.
+        container.elements[3].class = VoltageSrc;
+        container
+            .elements
+            .push(Element::new(Ground, 1.0, vec![2], vec![]));
+        assert!(container.validate().is_err());
+    }
+
+    #[test]
+    fn test_add_element() {
+        let mut container = create_basic_container();
+
+        // Test add_element with invalid element
+        let result: Result<usize, StatusError> =
+            container.add_element(Element::new(Ground, 1.0, vec![2], vec![]));
+        assert!(result.is_err());
     }
 }

@@ -1,11 +1,14 @@
 use crate::components::Component;
 use crate::components::Component::Ground;
-use crate::container::Validation;
+use crate::validation::Status::Valid;
+use crate::validation::StatusError::{KnownIssue, Unknown};
+use crate::validation::{Validation, ValidationResult};
 use serde::{Deserialize, Serialize};
+use std::fmt::Display;
 
 /// Representation of a Schematic Element
 #[derive(Serialize, Deserialize)]
-pub(crate) struct Element {
+pub struct Element {
     pub(crate) name: String,
     pub(crate) id: usize,
     pub(crate) value: f64,
@@ -17,7 +20,7 @@ pub(crate) struct Element {
 impl Element {
     /// Create a new Element
     ///
-    /// It is recommended to use the `circuit::add_element` function instead
+    /// It is recommended to use the `circuit::add_element` function with this function
     pub(crate) fn new(
         class: Component,
         value: f64,
@@ -74,12 +77,31 @@ impl PartialEq<Self> for Element {
 }
 
 impl Validation for Element {
-    fn validate(&self) -> bool {
-        // TODO
-        true
+    fn validate(&self) -> ValidationResult {
+        match self.class {
+            Ground => {
+                return if self.positive.len() != 0 && self.negative.len() != 0 {
+                    Err(KnownIssue(
+                        "Ground element cannot have dual polarity".to_string(),
+                    ))
+                } else {
+                    Ok(Valid)
+                }
+            }
+            _ => {
+                // TODO: Check if the element is valid for other components
+                // Resistor, Capacitor, Inductor, VoltageSource, CurrentSource
+                Ok(Valid)
+            }
+        }
     }
 }
 
+impl Display for Element {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.pretty_string())
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -103,6 +125,5 @@ mod tests {
         assert_eq!(element.class, Component::Ground);
         assert_eq!(element.positive, vec![1]);
         assert_eq!(element.negative, Vec::<usize>::new());
-
     }
 }

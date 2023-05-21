@@ -1,8 +1,9 @@
-mod components;
-mod container;
-mod elements;
+pub mod components;
+pub mod container;
+pub mod elements;
 mod tests;
-mod tools;
+pub mod tools;
+pub mod validation;
 
 pub fn solve() {}
 pub fn simplify() {}
