@@ -124,6 +124,13 @@ impl<'a> Container<'a> {
     pub fn check_validity(&self) -> ValidationResult {
         self.validate()
     }
+
+    pub fn create_mesh(&mut self) {}
+    pub fn create_nodes(&mut self) {}
+    pub fn create_super_mesh(&mut self) {}
+    pub fn create_super_nodes(&mut self) {}
+    pub fn create_thevenin(&mut self) {}
+    pub fn create_norton(&mut self) {}
 }
 
 impl Validation for Container<'_> {

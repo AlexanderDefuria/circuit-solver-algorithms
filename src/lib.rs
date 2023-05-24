@@ -1,18 +1,23 @@
+use wasm_bindgen::prelude::*;
+
 pub mod components;
 pub mod container;
 pub mod elements;
-mod tests;
 pub mod tools;
 pub mod validation;
+mod tests;
 
-pub fn solve() {}
+#[wasm_bindgen]
+pub fn solve() -> String {
+    String::from("Hello, world!")
+}
+
+#[wasm_bindgen]
+pub fn add(x: i32, y: i32) -> i32 {
+    x + y
+}
+
 pub fn simplify() {}
-pub fn decide_tool() {}
-pub fn create_mesh() {}
-pub fn create_nodes() {}
-pub fn create_super_mesh() {}
-pub fn create_super_nodes() {}
-pub fn create_thevenin() {}
-pub fn create_norton() {}
+
 pub fn serialize() {}
 pub fn deserialize() {}
