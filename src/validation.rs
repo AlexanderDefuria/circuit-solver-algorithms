@@ -14,11 +14,11 @@ pub enum Status {
 /// Possible Issues
 ///
 /// Valid: Container is valid
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum StatusError {
     Unknown,
-    KnownIssue(String),
-    MultipleIssues(Vec<StatusError>),
+    Known(String),
+    Multiple(Vec<StatusError>),
     // TODO: Add more variants?
 }
 
@@ -26,6 +26,9 @@ pub type ValidationResult = Result<Status, StatusError>;
 
 pub trait Validation {
     fn validate(&self) -> ValidationResult;
+    fn clean(&mut self) -> &Self {
+        self
+    }
 }
 
 impl Display for Status {
@@ -41,8 +44,8 @@ impl Display for StatusError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             StatusError::Unknown => write!(f, "Unknown Issue"),
-            StatusError::KnownIssue(str) => write!(f, "Known Issue: {}", str),
-            StatusError::MultipleIssues(error_list) => {
+            StatusError::Known(str) => write!(f, "Known Issue: {}", str),
+            StatusError::Multiple(error_list) => {
                 write!(f, "Multiple Issues: {:?}", error_list)
             }
         }
@@ -77,7 +80,7 @@ pub(crate) fn check_duplicates<T: Validation + PartialEq + Display>(
     let mut seen: Vec<&T> = Vec::new();
     for x in list {
         if seen.contains(&x) {
-            errors.push(StatusError::KnownIssue(format!("Duplicate: {}", x)));
+            errors.push(StatusError::Known(format!("Duplicate: {}", x)));
         }
         seen.push(x);
     }

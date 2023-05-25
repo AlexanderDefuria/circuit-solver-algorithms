@@ -1,13 +1,13 @@
 use crate::components::Component;
 use crate::components::Component::Ground;
 use crate::validation::Status::Valid;
-use crate::validation::StatusError::{KnownIssue, Unknown};
+use crate::validation::StatusError::{Known, Unknown};
 use crate::validation::{Validation, ValidationResult};
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 
 /// Representation of a Schematic Element
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Element {
     pub(crate) name: String,
     pub(crate) id: usize,
@@ -80,25 +80,47 @@ impl Validation for Element {
     fn validate(&self) -> ValidationResult {
         match self.class {
             Ground => {
-                return if self.positive.len() != 0 && self.negative.len() != 0 {
-                    Err(KnownIssue(
+                if self.positive.len() != 0 && self.negative.len() != 0 {
+                    return Err(Known(
                         "Ground element cannot have dual polarity".to_string(),
-                    ))
-                } else {
-                    Ok(Valid)
+                    ));
                 }
+                if self.value != 0.0 {
+                    return Err(Known("Ground element cannot have a value".to_string()));
+                };
             }
             _ => {
                 // TODO: Check if the element is valid for other components
                 // Resistor, Capacitor, Inductor, VoltageSource, CurrentSource
-                Ok(Valid)
+                if self.value <= 0.0 {
+                    return Err(Known("Value cannot be zero or negative".to_string()));
+                }
+                if self.negative.iter().any(|x| x == &self.id)
+                    || self.positive.iter().any(|x| x == &self.id)
+                {
+                    return Err(Known(format!(
+                        "Element cannot be connected to itself\n{}",
+                        self.pretty_string()
+                    )));
+                }
             }
         }
+        if self.positive.len() == 0 && self.negative.len() == 0 {
+            return Err(Known("Element has no connections".to_string()));
+        }
+
+        Ok(Valid)
+    }
+
+    fn clean(&mut self) -> &Self {
+        self.name = self.name.chars().filter(|c| !c.is_digit(10)).collect();
+        self
     }
 }
 
 impl Display for Element {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.validate().unwrap();
         write!(f, "{}", self.pretty_string())
     }
 }

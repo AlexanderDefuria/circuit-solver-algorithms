@@ -19,10 +19,11 @@ pub(crate) enum ToolType {
 /// Tools are used to solve circuits
 ///
 /// Representation of a Tool (Node, Mesh, SuperNode, SuperMesh)
+#[derive(Debug)]
 pub(crate) struct Tool<'a> {
-    id: usize,
-    pseudo_type: ToolType,
-    elements: Vec<&'a Element>,
+    pub(crate) id: usize,
+    pub(crate) pseudo_type: ToolType,
+    pub(crate) elements: Vec<&'a Element>,
 }
 
 impl<'a> Tool<'a> {
@@ -78,6 +79,6 @@ impl Display for Tool<'_> {
 
 impl Display for ToolType {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self)
+        write!(f, "{:#?}", self)
     }
 }
