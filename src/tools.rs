@@ -1,8 +1,9 @@
 use crate::elements::Element;
 use crate::validation::Status::Valid;
-use crate::validation::{Status, Validation, ValidationResult};
+use crate::validation::{Validation, ValidationResult};
 use serde::{Deserialize, Serialize};
-use std::fmt::{write, Display, Formatter};
+use std::fmt::{Display, Formatter};
+use std::rc::{Rc, Weak};
 
 /// Possible Tool Types
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
@@ -20,60 +21,63 @@ pub(crate) enum ToolType {
 ///
 /// Representation of a Tool (Node, Mesh, SuperNode, SuperMesh)
 #[derive(Debug)]
-pub(crate) struct Tool<'a> {
+pub(crate) struct Tool {
     pub(crate) id: usize,
-    pub(crate) pseudo_type: ToolType,
-    pub(crate) elements: Vec<&'a Element>,
+    pub(crate) class: ToolType,
+    pub(crate) elements: Vec<Weak<Element>>,
 }
 
-impl<'a> Tool<'a> {
-    /// Create a new Tool
-    ///
-    /// It is recommended to use the `circuit::add_tool` function with this function
-    pub(crate) fn new(pseudo_type: ToolType) -> Tool<'a> {
-        Tool {
-            id: 0,
-            pseudo_type,
-            elements: vec![],
-        }
-    }
-
+impl Tool {
     /// Create a mesh from the elements
-    pub(crate) fn create_mesh(elements: Vec<&'a Element>) -> Tool<'a> {
-        // TODO
-        let mut mesh = Tool::new(ToolType::Mesh);
-        mesh.elements = elements;
-        mesh
+    pub(crate) fn create_mesh(elements: Vec<Weak<Element>>) -> Tool {
+        Tool::create(ToolType::Mesh, elements)
     }
 
     /// Create a node from the elements
-    pub(crate) fn create_node(elements: Vec<&'a Element>) -> Tool<'a> {
-        // TODO
-        let mut node = Tool::new(ToolType::Node);
-        node.elements = elements;
-        node
+    pub(crate) fn create_node(elements: Vec<Weak<Element>>) -> Tool {
+        Tool::create(ToolType::Node, elements)
+    }
+
+    fn create(class: ToolType, elements: Vec<Weak<Element>>) -> Tool {
+        let mut tool = Tool {
+            id: 0,
+            class,
+            elements: vec![],
+        };
+        tool.elements = elements;
+        tool
+    }
+
+    /// Check if the tool contains an element
+    pub(crate) fn contains(&self, element: Weak<Element>) -> bool {
+        let element = element.upgrade().unwrap();
+        self.elements
+            .iter()
+            .any(|e| e.upgrade().unwrap().id == element.id)
     }
 }
 
 /// Implement PartialEq for Tool
 ///
 /// Compare two Tool by their id
-impl PartialEq<Self> for Tool<'_> {
+impl PartialEq<Self> for Tool {
     fn eq(&self, other: &Self) -> bool {
         self.id == other.id
     }
 }
 
-impl Validation for Tool<'_> {
+impl Validation for Tool {
     fn validate(&self) -> ValidationResult {
         // TODO
+        // Check if the elements are valid
+        // check id != ZERO
         Ok(Valid)
     }
 }
 
-impl Display for Tool<'_> {
+impl Display for Tool {
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        write!(f, "Tool: {}", self.pseudo_type)
+        write!(f, "Tool: {}", self.class)
     }
 }
 

@@ -1,6 +1,5 @@
 use crate::components::Component;
 use crate::components::Component::Ground;
-use crate::container::SolutionState::Partial;
 use crate::elements::Element;
 use crate::tools::{Tool, ToolType};
 use crate::validation::StatusError::Known;
@@ -8,9 +7,8 @@ use crate::validation::{
     check_duplicates, get_all_internal_status_errors, Status, StatusError, Validation,
     ValidationResult,
 };
-use serde::{Deserialize, Serialize};
-use std::error::Error;
-use std::fmt::{Debug, Display, Formatter};
+use std::fmt::{Debug, Formatter};
+use std::rc::{Rc, Weak};
 
 /// Current State of an Element
 #[derive(PartialEq)]
@@ -24,29 +22,11 @@ enum SolutionState {
 ///
 /// Container is a collection of Elements and Tools we are using to solve the circuit
 #[derive(PartialEq)]
-pub struct Container<'a> {
-    elements: Vec<Element>,
-    tools: Vec<Tool<'a>>,
+pub struct Container {
+    elements: Vec<Rc<Element>>,
+    tools: Vec<Rc<Tool>>,
     ground: usize,
     state: SolutionState,
-}
-
-impl Debug for Container<'_> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Container")
-            .field(
-                "elements",
-                &self
-                    .elements
-                    .iter()
-                    .map(|x: &Element| x.pretty_string())
-                    .collect::<Vec<String>>(),
-            )
-            // .field("tools", &self.tools)
-            // .field("ground", &self.ground)
-            // .field("state", &self.state)
-            .finish()
-    }
 }
 
 /// Container is a collection of Elements and Tools we are using to solve the circuit
@@ -54,8 +34,8 @@ impl Debug for Container<'_> {
 /// All Functions within Container are used to build out the circuit correctly.
 ///
 /// <br>
-impl<'a> Container<'a> {
-    fn new() -> Container<'a> {
+impl Container {
+    fn new() -> Container {
         Container {
             elements: Vec::new(),
             tools: Vec::new(),
@@ -67,7 +47,7 @@ impl<'a> Container<'a> {
     /// Add an Element to the Container
     ///
     /// This function will add an Element to the Container and return the index of the Element
-    pub fn add_element(&mut self, mut element: Element) -> Result<usize, StatusError> {
+    pub fn add_element(&mut self, element: Element) -> Result<usize, StatusError> {
         let id: usize = self.add_element_core(element);
         let check = self.validate();
         if check.is_err() {
@@ -80,39 +60,18 @@ impl<'a> Container<'a> {
     fn add_element_core(&mut self, mut element: Element) -> usize {
         let id: usize = self.elements.len();
         element.id = id;
-        self.elements.push(element);
+        self.elements.push(Rc::new(element));
         id
     }
 
-    fn add_tool<'tool: 'a>(mut tool: Tool<'tool>, tool_list: &mut  Vec<Tool<'tool>>) {
+    fn add_tool(mut tool: Tool, tool_list: &mut Vec<Rc<Tool>>) {
         if !tool_list.is_empty() {
             let new_id: usize = tool_list.get(tool_list.len() - 1).unwrap().id + 1;
             tool.id = new_id;
         } else {
             tool.id = 0;
         }
-        tool_list.push(tool);
-    }
-
-    /// Manually set the ground element
-    ///
-    /// This function is used to manually set the ground element.
-    /// This should be avoided if possible and will <strong>replace the current ground</strong>.
-    fn manually_set_ground(&mut self, ground: Element) {
-        assert_eq!(ground.class, Ground);
-        self.ground = self.add_element(ground).unwrap();
-    }
-
-    /// Set the ground element
-    pub fn set_ground(&mut self) -> Result<(), StatusError> {
-        let ground: Element = Element::new(Ground, 0.0, vec![], vec![]);
-        self.manually_set_ground(ground);
-        let check = self.validate();
-        if check.is_err() {
-            self.elements.pop();
-            return Err(check.unwrap_err());
-        }
-        Ok(())
+        tool_list.push(Rc::new(tool));
     }
 
     /// Validate the Container and the circuit within are usable.
@@ -137,9 +96,10 @@ impl<'a> Container<'a> {
     /// comparing the samples to see if they are the same. If they are the same
     /// then they are connected and should be added to the same node.
     /// By by filtering our duplicates we can create a pure list of nodes.
-    pub fn create_nodes(&'a mut self) -> &'a Self {
+    pub fn create_nodes(&mut self) -> &mut Self {
         for element in &self.elements {
-            let mut positive_elements: Vec<&Element> = element
+            // Need a list of all elements connected to the positive side node.
+            let mut node_elements: Vec<Weak<Element>> = element
                 .positive
                 .iter()
                 .filter_map(|positive_id: &usize| {
@@ -147,21 +107,57 @@ impl<'a> Container<'a> {
                         .iter()
                         .find(|container_element| container_element.id == *positive_id)
                 })
+                .map(|x| Rc::downgrade(x))
                 .collect();
+            node_elements.push(Rc::downgrade(element));
 
-            positive_elements.push(element);
-
+            // Check if the node already exists
             if !self.tools.iter().any(|x| {
                 // Only care about nodes
-                if x.pseudo_type == ToolType::Node {
-                    x.elements
-                        .iter()
-                        .all(|tool_elements| positive_elements.contains(tool_elements))
+                if x.class == ToolType::Node {
+                    x.elements.iter().all(|tool_element| {
+                        node_elements.iter().any(|node_element| {
+                            node_element.upgrade().unwrap().id == tool_element.upgrade().unwrap().id
+                        })
+                    })
                 } else {
                     false
                 }
             }) {
-                Container::add_tool(Tool::create_node(positive_elements), &mut self.tools);
+                // Create the node and add it to the tools
+                Container::add_tool(Tool::create_node(node_elements), &mut self.tools);
+            }
+        }
+
+        self
+    }
+
+    pub fn create_super_nodes(&mut self) -> &Self {
+        'element: for element in &self.elements {
+            match element.class {
+                Component::VoltageSrc => {
+                    // Check that the source is not connected to a ground
+                    if element.positive.contains(&self.ground)
+                        || element.negative.contains(&self.ground)
+                    {
+                        continue 'element;
+                    }
+                    // Get the positive and negative nodes
+                    let positive_node: &Tool = self
+                        .tools
+                        .iter()
+                        .find(|tool| tool.contains(Rc::downgrade(&element)))
+                        .unwrap();
+                    let negative_node: &Tool = self
+                        .tools
+                        .iter()
+                        .find(|tool| tool.contains(Rc::downgrade(&element)))
+                        .unwrap();
+
+                    println!("Positive Node: {:?}", positive_node);
+                    println!("Negative Node: {:?}", negative_node);
+                }
+                _ => {}
             }
         }
 
@@ -170,12 +166,11 @@ impl<'a> Container<'a> {
 
     pub fn create_mesh(&mut self) {}
     pub fn create_super_mesh(&mut self) {}
-    pub fn create_super_nodes(&mut self) {}
     pub fn create_thevenin(&mut self) {}
     pub fn create_norton(&mut self) {}
 }
 
-impl Validation for Container<'_> {
+impl Validation for Container {
     fn validate(&self) -> ValidationResult {
         let mut errors: Vec<StatusError> = Vec::new();
 
@@ -209,12 +204,13 @@ mod tests {
     use crate::container::Container;
     use crate::elements::Element;
     use crate::validation::{Status, StatusError, Validation};
+    use std::rc::Rc;
 
-    use crate::tools::ToolType::Node;
-    use regex::Regex;
+    use crate::tools::ToolType::SuperNode;
     use crate::validation::Status::Valid;
+    use regex::Regex;
 
-    fn create_basic_container<'a>() -> Container<'a> {
+    fn create_basic_container() -> Container {
         let mut container = Container::new();
         container.add_element_core(Element::new(VoltageSrc, 1.0, vec![2, 3], vec![1]));
         container.add_element_core(Element::new(Resistor, 1.0, vec![0], vec![2]));
@@ -236,21 +232,22 @@ mod tests {
     #[test]
     fn test_validate() {
         let mut container = create_basic_container();
-        assert_eq!(container.validate(), Ok(Status::Valid));
+        assert_eq!(container.validate(), Ok(Valid));
 
-        // Test duplicate elements, this should be invalid.
-        container.elements[0].id = 1;
+        // Test duplicate elements
+        let element = Element::new(Resistor, 1.0, vec![2], vec![3]);
+        container.elements.push(Rc::new(element));
         assert!(container.validate().is_err());
 
-        // Test no sources, this should be invalid.
-        container.elements[3].class = Resistor;
+        // Test no sources
+        container.elements.remove(3);
         assert!(container.validate().is_err());
 
-        // Test multiple grounds, this should be invalid.
-        container.elements[3].class = VoltageSrc;
+        // Test multiple grounds
+        container = create_basic_container();
         container
             .elements
-            .push(Element::new(Ground, 1.0, vec![2], vec![]));
+            .push(Rc::from(Element::new(Ground, 1.0, vec![2], vec![])));
         assert!(container.validate().is_err());
     }
 
@@ -270,8 +267,43 @@ mod tests {
         let x = container.create_nodes();
         assert_eq!(x.validate(), Ok(Valid));
         assert_eq!(x.tools.len(), 3);
-        assert_eq!(x.tools[0].elements, vec![&x.elements[2], &x.elements[3], &x.elements[0]]);
-        assert_eq!(x.tools[1].elements, vec![&x.elements[0], &x.elements[1]]);
-        assert_eq!(x.tools[2].elements, vec![&x.elements[1], &x.elements[2]]);
+
+        let mut test_vectors = vec![
+            vec![x.elements[2].id, x.elements[3].id, x.elements[0].id],
+            vec![x.elements[0].id, x.elements[1].id],
+            vec![x.elements[1].id, x.elements[2].id]
+        ];
+        for test in 0..3 {
+            for (i, c) in x.tools[test].elements.iter().enumerate() {
+                assert_eq!(test_vectors[test][i], c.upgrade().unwrap().id);
+            }
+        }
+    }
+
+    #[test]
+    fn test_create_super_nodes() {
+        let mut container = create_basic_container();
+        let mut x = container.create_nodes();
+        assert_eq!(x.validate(), Ok(Valid));
+
+        assert!(x.tools.iter().any(|x| x.class == SuperNode));
+    }
+}
+
+impl Debug for Container {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Container")
+            .field(
+                "elements",
+                &self
+                    .elements
+                    .iter()
+                    .map(|x| x.pretty_string())
+                    .collect::<Vec<String>>(),
+            )
+            // .field("tools", &self.tools)
+            // .field("ground", &self.ground)
+            // .field("state", &self.state)
+            .finish()
     }
 }
