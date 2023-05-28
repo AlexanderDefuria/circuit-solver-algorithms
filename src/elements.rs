@@ -1,7 +1,7 @@
 use crate::components::Component;
 use crate::components::Component::Ground;
 use crate::validation::Status::Valid;
-use crate::validation::StatusError::{Known, Unknown};
+use crate::validation::StatusError::Known;
 use crate::validation::{Validation, ValidationResult};
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;

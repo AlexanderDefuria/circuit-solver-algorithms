@@ -1,5 +1,3 @@
-use wasm_bindgen::prelude::*;
-
 pub mod components;
 pub mod container;
 pub mod elements;
