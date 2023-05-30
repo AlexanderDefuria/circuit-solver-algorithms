@@ -3,7 +3,7 @@ use crate::validation::Status::Valid;
 use crate::validation::{Validation, ValidationResult};
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
-use std::rc::{Rc, Weak};
+use std::rc::Weak;
 
 /// Possible Tool Types
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
@@ -36,6 +36,11 @@ impl Tool {
     /// Create a node from the elements
     pub(crate) fn create_node(elements: Vec<Weak<Element>>) -> Tool {
         Tool::create(ToolType::Node, elements)
+    }
+
+    /// Create a supernode from the elements
+    pub(crate) fn create_supernode(elements: Vec<Weak<Element>>) -> Tool {
+        Tool::create(ToolType::SuperNode, elements)
     }
 
     fn create(class: ToolType, elements: Vec<Weak<Element>>) -> Tool {
@@ -77,12 +82,40 @@ impl Validation for Tool {
 
 impl Display for Tool {
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        write!(f, "Tool: {}", self.class)
+        write!(
+            f,
+            "Tool: {} Id:{} Elements:{:?}",
+            self.class,
+            self.id,
+            self.elements
+                .iter()
+                .map(|x| x.upgrade().unwrap().id)
+                .collect::<Vec<usize>>()
+        )
     }
 }
 
 impl Display for ToolType {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:#?}", self)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    #[test]
+    fn test_create() {
+        // TODO
+    }
+
+    #[test]
+    fn test_contains() {
+        // TODO
+    }
+
+    #[test]
+    fn test_validate() {
+        // TODO
     }
 }

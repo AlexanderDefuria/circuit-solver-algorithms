@@ -1,3 +1,4 @@
+use crate::util::PrettyString;
 use serde::{Deserialize, Serialize};
 
 /// Possible Component Types
@@ -12,15 +13,6 @@ pub(crate) enum Component {
 }
 
 impl Component {
-    pub(crate) fn pretty_string(&self) -> String {
-        match self {
-            Component::Ground => "Ground".to_string(),
-            Component::Resistor => "Resistor".to_string(),
-            Component::VoltageSrc => "Voltage".to_string(),
-            Component::CurrentSrc => "Current".to_string(),
-        }
-    }
-
     pub(crate) fn basic_string(&self) -> String {
         match self {
             Component::Ground => "GND".to_string(),
@@ -39,21 +31,22 @@ impl Component {
         }
     }
 
-    pub(crate) fn from_string(string: &str) -> Component {
-        match string {
-            "Ground" => Component::Ground,
-            "Resistor" => Component::Resistor,
-            "Voltage" => Component::VoltageSrc,
-            "Current" => Component::CurrentSrc,
-            _ => panic!("Invalid Component Type"),
-        }
-    }
-
     pub(crate) fn is_source(&self) -> bool {
         match self {
             Component::VoltageSrc => true,
             Component::CurrentSrc => true,
             _ => false,
+        }
+    }
+}
+
+impl PrettyString for Component {
+    fn pretty_string(&self) -> String {
+        match self {
+            Component::Ground => "Ground".to_string(),
+            Component::Resistor => "Resistor".to_string(),
+            Component::VoltageSrc => "Voltage".to_string(),
+            Component::CurrentSrc => "Current".to_string(),
         }
     }
 }
