@@ -1,5 +1,6 @@
 use crate::components::Component;
 use crate::components::Component::Ground;
+use crate::util::PrettyString;
 use crate::validation::Status::Valid;
 use crate::validation::StatusError::Known;
 use crate::validation::{Validation, ValidationResult};
@@ -28,6 +29,8 @@ impl Element {
         negative: Vec<usize>,
     ) -> Element {
         if class == Ground {
+            // We make no assumptions about the polarity of the ground element
+            // Only that it is connected to either positive or negative not both.
             if positive.len() != 0 && negative.len() != 0 {
                 panic!("Ground element cannot have dual polarity");
             } else {
@@ -54,9 +57,10 @@ impl Element {
             negative,
         }
     }
+}
 
-    /// Return a pretty string representation of the Element
-    pub(crate) fn pretty_string(&self) -> String {
+impl PrettyString for Element {
+    fn pretty_string(&self) -> String {
         format!(
             "{}{}: {} {}",
             self.name,
@@ -109,6 +113,13 @@ impl Validation for Element {
             return Err(Known("Element has no connections".to_string()));
         }
 
+        if self.positive.contains(&self.id) || self.negative.contains(&self.id) {
+            return Err(Known(format!(
+                "Element cannot be connected to itself\n{}",
+                self.pretty_string()
+            )));
+        }
+
         Ok(Valid)
     }
 
@@ -147,5 +158,10 @@ mod tests {
         assert_eq!(element.class, Component::Ground);
         assert_eq!(element.positive, vec![1]);
         assert_eq!(element.negative, Vec::<usize>::new());
+    }
+
+    #[test]
+    fn test_validate() {
+        //TODO
     }
 }

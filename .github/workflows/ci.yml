@@ -41,21 +41,12 @@ jobs:
         with:
           # Optional version of wasm-pack to install(eg. 'v0.9.1', 'latest')
           version: 'v0.9.1'
-      - run: wasm-pack build --verbose --target web --release
+      - run: wasm-pack build --target web --release
       - name: Copy wasm to public
         uses: actions/upload-artifact@v2
         with:
           name: wasm
           path: ./pkg/
-
-  format:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: mbrobbel/rustfmt-check@master
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
   print_doc_coverage:
     name: Print documentation coverage

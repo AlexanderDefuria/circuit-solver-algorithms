@@ -2,6 +2,7 @@ use crate::components::Component;
 use crate::components::Component::Ground;
 use crate::elements::Element;
 use crate::tools::{Tool, ToolType};
+use crate::util::PrettyString;
 use crate::validation::StatusError::Known;
 use crate::validation::{
     check_duplicates, get_all_internal_status_errors, Status, StatusError, Validation,
@@ -132,7 +133,7 @@ impl Container {
         self
     }
 
-    pub fn create_super_nodes(&mut self) -> &Self {
+    pub fn create_super_nodes(&mut self) -> &mut Self {
         'element: for element in &self.elements {
             match element.class {
                 Component::VoltageSrc => {
@@ -151,17 +152,22 @@ impl Container {
                     let negative_node: &Tool = self
                         .tools
                         .iter()
-                        .find(|tool| tool.contains(Rc::downgrade(&element)))
+                        .find(|tool|
+                            tool.contains(Rc::downgrade(&element))
+                            &&
+                            tool.id != positive_node.id)
                         .unwrap();
 
-                    println!("Positive Node: {:?}", positive_node);
-                    println!("Negative Node: {:?}", negative_node);
+                    Container::add_tool(Tool::create_supernode(vec![]), &mut self.tools);
                 }
                 _ => {}
             }
         }
-
         self
+    }
+
+    fn add_tool_self(&mut self, tool: Tool) {
+        Container::add_tool(tool, &mut self.tools);
     }
 
     pub fn create_mesh(&mut self) {}
@@ -219,6 +225,17 @@ mod tests {
         container
     }
 
+    fn create_basic_supernode_container() -> Container {
+        let mut container = Container::new();
+        container.add_element_core(Element::new(Ground, 10., vec![5, 3], vec![]));
+        container.add_element_core(Element::new(VoltageSrc, 10., vec![4], vec![2, 3]));
+        container.add_element_core(Element::new(Resistor, 10., vec![1, 3], vec![4, 5]));
+        container.add_element_core(Element::new(Resistor, 10., vec![1, 2], vec![0, 5]));
+        container.add_element_core(Element::new(Resistor, 10., vec![1], vec![2, 5]));
+        container.add_element_core(Element::new(VoltageSrc, 10., vec![2, 4], vec![0, 3]));
+        container
+    }
+
     #[test]
     fn test_debug() {
         let re = Regex::new(r#"Container \{ elements: \["R0: 1 Ohm", "R1: 1 Ohm"] }"#).unwrap();
@@ -271,7 +288,7 @@ mod tests {
         let mut test_vectors = vec![
             vec![x.elements[2].id, x.elements[3].id, x.elements[0].id],
             vec![x.elements[0].id, x.elements[1].id],
-            vec![x.elements[1].id, x.elements[2].id]
+            vec![x.elements[1].id, x.elements[2].id],
         ];
         for test in 0..3 {
             for (i, c) in x.tools[test].elements.iter().enumerate() {
@@ -282,11 +299,29 @@ mod tests {
 
     #[test]
     fn test_create_super_nodes() {
-        let mut container = create_basic_container();
-        let mut x = container.create_nodes();
-        assert_eq!(x.validate(), Ok(Valid));
+        let mut container = create_basic_supernode_container();
+        container.create_nodes().create_super_nodes();
+        assert_eq!(container.validate(), Ok(Valid));
 
-        assert!(x.tools.iter().any(|x| x.class == SuperNode));
+        // Check that there is only one supernode
+        // Expected to be around VoltageSource id: 1
+        let expected_super_node_count = 1;
+        assert_eq!(
+            container
+                .tools
+                .iter()
+                .filter(|x| x.class == SuperNode)
+                .count(),
+            expected_super_node_count
+        );
+        // assert_eq!(
+        //     container.tools.iter().find(|x| x.class == SuperNode).unwrap(),
+        //     Tool {
+        //         id: 0,
+        //         class: SuperNode,
+        //         elements: vec![],
+        //     }
+        // )
     }
 }
 
