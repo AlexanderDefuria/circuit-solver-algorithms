@@ -57,6 +57,10 @@ impl Element {
             negative,
         }
     }
+
+    pub(crate) fn contains_ground(&self) -> bool {
+        self.positive.contains(&0) || self.negative.contains(&0)
+    }
 }
 
 impl PrettyString for Element {
