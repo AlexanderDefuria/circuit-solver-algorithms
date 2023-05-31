@@ -9,7 +9,6 @@ use std::rc::Rc;
 pub enum Status {
     Valid,
     Simplified,
-    // TODO: Add more variants?
 }
 
 /// Possible Issues
@@ -20,7 +19,6 @@ pub enum StatusError {
     Unknown,
     Known(String),
     Multiple(Vec<StatusError>),
-    // TODO: Add more variants?
 }
 
 pub type ValidationResult = Result<Status, StatusError>;
