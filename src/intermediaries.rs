@@ -11,7 +11,7 @@ pub fn load(x: JsValue) -> String {
     if y.elements.len() == 0 {
         return String::from("No elements");
     }
-    y.elements[0].clean().pretty_string().to_string()
+    y.elements[0].pretty_string().to_string()
 }
 
 #[derive(Serialize, Deserialize)]

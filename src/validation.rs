@@ -51,14 +51,6 @@ impl Display for StatusError {
     }
 }
 
-impl Error for StatusError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        match *self {
-            _ => None,
-        }
-    }
-}
-
 pub(crate) fn get_all_internal_status_errors<T: Validation>(list: &Vec<Rc<T>>) -> Vec<StatusError> {
     list.iter()
         .enumerate()
@@ -84,4 +76,36 @@ pub(crate) fn check_duplicates<T: Validation + PartialEq + Display>(
         seen.push(x);
     }
     errors
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_printing() {
+        let statuses = [
+            (Status::Valid, "Valid"),
+            (Status::Simplified, "Simplified"),
+        ];
+
+        let errors = [
+            (StatusError::Known("Test".to_string()), "Known Issue: Test"),
+            (
+                StatusError::Multiple(vec![
+                    StatusError::Known("Test".to_string()),
+                    StatusError::Known("Test2".to_string()),
+                ]),
+                "Multiple Issues: [Known(\"Test\"), Known(\"Test2\")]",
+            ),
+        ];
+
+        for test in statuses {
+            assert_eq!(format!("{}", test.0), test.1);
+        }
+
+        for test in errors {
+            assert_eq!(format!("{}", test.0), test.1);
+        }
+    }
 }

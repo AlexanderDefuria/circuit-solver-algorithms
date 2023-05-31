@@ -1,9 +1,7 @@
-use crate::components::Component;
 use crate::components::Component::{Ground, VoltageSrc};
 use crate::elements::Element;
 use crate::simplification::Simplification;
-use crate::tools::ToolType::Node;
-use crate::tools::{SuperTool, Tool, ToolType};
+use crate::tools::{Tool, ToolType};
 use crate::util::PrettyString;
 use crate::validation::StatusError::Known;
 use crate::validation::{
@@ -14,7 +12,7 @@ use std::fmt::{Debug, Formatter};
 use std::rc::{Rc, Weak};
 
 /// Current State of an Element
-#[derive(Debug, PartialEq)]
+#[derive(Debug)]
 enum SolutionState {
     Solved,
     Unknown,
@@ -24,12 +22,10 @@ enum SolutionState {
 /// Representation of a Schematic Container
 ///
 /// Container is a collection of Elements and Tools we are using to solve the circuit
-#[derive(PartialEq)]
 pub struct Container {
     elements: Vec<Rc<Element>>,
     tools: Vec<Rc<Tool>>,
-    // simplifications: Vec<Rc<Simplification>>,
-    // compound_tools: Vec<Rc<SuperTool>>,
+    simplifications: Vec<Rc<Simplification>>,
     ground: usize,
     state: SolutionState,
 }
@@ -44,8 +40,7 @@ impl Container {
         Container {
             elements: Vec::new(),
             tools: Vec::new(),
-            // simplifications: vec![],
-            // compound_tools: vec![],
+            simplifications: vec![],
             ground: 0,
             state: SolutionState::Unknown,
         }
@@ -83,22 +78,6 @@ impl Container {
 
     fn get_element_by_id(&self, id: usize) -> &Rc<Element> {
         self.elements.get(id).unwrap()
-    }
-
-    /// Validate the Container and the circuit within are usable.
-    ///
-    /// This function will check that the Container is in a valid state to be solved.
-    /// It will make calls to validate functions in the elements themselves and let
-    /// them handle their own internal validation. This will take care of the high
-    /// level validation.
-    ///
-    /// * All Elements have a valid Component, Value, Positive, and Negative
-    /// * No duplicate Elements or Tools
-    /// * Contains at least one source and a single ground
-    /// * No floating Elements, Tools, etc.
-    /// * No shorted or open Elements
-    pub fn check_validity(&self) -> ValidationResult {
-        self.validate()
     }
 
     /// Create the Nodes and add them to the Container Tools
@@ -177,13 +156,28 @@ impl Container {
         self
     }
 
-    pub fn create_mesh(&mut self) {}
-    pub fn create_super_mesh(&mut self) {}
-    pub fn create_thevenin(&mut self) {}
-    pub fn create_norton(&mut self) {}
+    // pub fn create_mesh(&mut self) {
+    //
+    // }
+    //
+    // pub fn create_super_mesh(&mut self) {}
+    // pub fn create_thevenin(&mut self) {}
+    // pub fn create_norton(&mut self) {}
 }
 
 impl Validation for Container {
+    /// Validate the Container and the circuit within are usable.
+    ///
+    /// This function will check that the Container is in a valid state to be solved.
+    /// It will make calls to validate functions in the elements themselves and let
+    /// them handle their own internal validation. This will take care of the high
+    /// level validation.
+    ///
+    /// * All Elements have a valid Component, Value, Positive, and Negative
+    /// * No duplicate Elements or Tools
+    /// * Contains at least one source and a single ground
+    /// * No floating Elements, Tools, etc.
+    /// * No shorted or open Elements
     fn validate(&self) -> ValidationResult {
         let mut errors: Vec<StatusError> = Vec::new();
 
@@ -216,13 +210,11 @@ mod tests {
     use crate::components::Component::{Ground, Resistor, VoltageSrc};
     use crate::container::Container;
     use crate::elements::Element;
-    use crate::validation::{Status, StatusError, Validation};
-    use std::rc::Rc;
-
-    use crate::tools::Tool;
     use crate::tools::ToolType::SuperNode;
     use crate::validation::Status::Valid;
+    use crate::validation::{StatusError, Validation};
     use regex::Regex;
+    use std::rc::Rc;
 
     fn create_basic_container() -> Container {
         let mut container = Container::new();
@@ -247,7 +239,7 @@ mod tests {
     #[test]
     fn test_debug() {
         let re = Regex::new(
-            r#"Container \{ elements: \["R0: 1 Ohm", "R1: 1 Ohm"], tools: \[], state: Unknown }"#,
+            r#"Container \{ elements: \["R0: 1 Ω", "R1: 1 Ω"], tools: \[], state: Unknown }"#,
         )
         .unwrap();
 
@@ -260,6 +252,7 @@ mod tests {
     #[test]
     fn test_validate() {
         let mut container = create_basic_container();
+        assert_eq!(container.validate(), Ok(Valid));
         assert_eq!(container.validate(), Ok(Valid));
 
         // Test duplicate elements
@@ -287,13 +280,17 @@ mod tests {
         let result: Result<usize, StatusError> =
             container.add_element(Element::new(Ground, 1.0, vec![2], vec![]));
         assert!(result.is_err());
+
+        let result: Result<usize, StatusError> =
+            container.add_element(Element::new(Resistor, 1.0, vec![2], vec![]));
+        assert!(result.is_ok());
     }
 
     #[test]
     fn test_create_nodes() {
         let mut container = create_basic_container();
         let x = container.create_nodes();
-        let mut test_vectors = vec![
+        let test_vectors = vec![
             vec![x.elements[0].id, x.elements[1].id],
             vec![x.elements[1].id, x.elements[2].id],
         ];
