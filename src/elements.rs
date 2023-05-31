@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 
 /// Representation of a Schematic Element
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Element {
     pub(crate) name: String,
     pub(crate) id: usize,
@@ -29,13 +29,9 @@ impl Element {
         negative: Vec<usize>,
     ) -> Element {
         if class == Ground {
-            // We make no assumptions about the polarity of the ground element
-            // Only that it is connected to either positive or negative not both.
-            if positive.len() != 0 && negative.len() != 0 {
-                panic!("Ground element cannot have dual polarity");
-            } else {
-                return Element::new_full(class, 0.0, positive, negative, 0);
-            }
+            // Ground element cannot have dual polarity
+            let connections = [&positive[..], &negative[..]].concat();
+            return Element::new_full(class, 0.0, connections, vec![], 0);
         }
 
         Element::new_full(class, value, positive, negative, 0)
@@ -101,15 +97,19 @@ impl Validation for Element {
                 // TODO: Check if the element is valid for other components
                 // Resistor, Capacitor, Inductor, VoltageSource, CurrentSource
                 if self.value <= 0.0 {
-                    return Err(Known("Value cannot be zero or negative".to_string()));
-                }
-                if self.negative.iter().any(|x| x == &self.id)
-                    || self.positive.iter().any(|x| x == &self.id)
-                {
                     return Err(Known(format!(
-                        "Element cannot be connected to itself\n{}",
+                        "Value cannot be zero or negative {}",
                         self.pretty_string()
                     )));
+                }
+
+                for x in self.positive.iter() {
+                    if self.negative.contains(x) {
+                        return Err(Known(format!(
+                            "Element cannot be shorted {}",
+                            self.pretty_string()
+                        )));
+                    }
                 }
             }
         }
@@ -119,7 +119,7 @@ impl Validation for Element {
 
         if self.positive.contains(&self.id) || self.negative.contains(&self.id) {
             return Err(Known(format!(
-                "Element cannot be connected to itself\n{}",
+                "Element cannot be connected to itself {}",
                 self.pretty_string()
             )));
         }
@@ -127,10 +127,6 @@ impl Validation for Element {
         Ok(Valid)
     }
 
-    fn clean(&mut self) -> &Self {
-        self.name = self.name.chars().filter(|c| !c.is_digit(10)).collect();
-        self
-    }
 }
 
 impl Display for Element {
@@ -142,8 +138,11 @@ impl Display for Element {
 
 #[cfg(test)]
 mod tests {
+    use crate::assert_known_error;
     use crate::components::Component;
     use crate::elements::Element;
+    use crate::validation::StatusError::Known;
+    use crate::validation::Validation;
 
     #[test]
     fn test_new() {
@@ -166,6 +165,33 @@ mod tests {
 
     #[test]
     fn test_validate() {
-        //TODO
+        let mut a = Element::new(Component::Resistor, 1.0, vec![1], vec![2]);
+        assert!(a.validate().is_ok());
+        a.value = -0.5;
+        assert_known_error!(a.validate(), "Value cannot be zero or negative R0: -0.5 Ω");
+
+        let b = Element::new(Component::Resistor, 1.0, vec![1], vec![1]);
+        assert_known_error!(b.validate(), "Element cannot be shorted R0: 1 Ω");
+
+        let mut c = Element::new(Component::Resistor, 1.0, vec![1], vec![2]);
+        c.id = 1;
+        assert_known_error!(c.validate(), "Element cannot be connected to itself R1: 1 Ω");
+
+        let mut d = Element {
+            name: "".to_string(),
+            id: 0,
+            value: 0.0,
+            class: Component::Ground,
+            positive: vec![1],
+            negative: vec![2],
+        };
+        assert_known_error!(d.validate(), "Ground element cannot have dual polarity");
+
+        let mut e = Element::new(Component::Ground, 1.0, vec![1], vec![]);
+        e.value = 1.0;
+        assert_known_error!(e.validate(), "Ground element cannot have a value");
+
+        let mut f = Element::new(Component::Resistor, 1.0, vec![], vec![]);
+        assert_known_error!(f.validate(), "Element has no connections");
     }
 }

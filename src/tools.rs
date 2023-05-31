@@ -143,6 +143,9 @@ mod tests {
     #[test]
     fn test_validate() {
         let bad_tool = Tool::create(ToolType::Node, vec![]);
-        // assert_eq!(bad_tool.validate().unwrap(), Known("Tool has no members".parse().unwrap()));
+        assert_eq!(
+            bad_tool.validate().unwrap_err(),
+            Known("Tool has no members".parse().unwrap())
+        );
     }
 }
