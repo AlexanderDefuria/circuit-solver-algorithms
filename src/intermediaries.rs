@@ -1,7 +1,6 @@
 use crate::components::Component;
 use crate::elements::Element;
 use crate::util::PrettyString;
-use crate::validation::Validation;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 

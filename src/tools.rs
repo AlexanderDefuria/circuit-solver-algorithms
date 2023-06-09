@@ -4,8 +4,7 @@ use crate::tools::ToolType::*;
 use crate::validation::Status::Valid;
 use crate::validation::StatusError::Known;
 use crate::validation::{StatusError, Validation, ValidationResult};
-use petgraph::algo::MinSpanningTree;
-use petgraph::graph::{Graph, NodeIndex, UnGraph};
+use petgraph::graph::UnGraph;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
 use std::rc::Weak;
@@ -71,9 +70,7 @@ impl Tool {
         })
     }
 
-    fn nodes_to_graph_edges(
-        nodes: &Vec<Weak<Tool>>,
-    ) -> Result<Vec<(u32, u32)>, StatusError> {
+    fn node_edges(nodes: &Vec<Weak<Tool>>) -> Result<Vec<(u32, u32)>, StatusError> {
         // If no nodes are present, return an error
         if !nodes.iter().any(|p| {
             return if let Some(x) = p.upgrade() {
@@ -122,11 +119,9 @@ impl Tool {
     }
 
     pub fn nodes_to_graph(nodes: &Vec<Weak<Tool>>) -> Result<UnGraph<i32, ()>, StatusError> {
-        let edges: Vec<(u32, u32)> = Tool::nodes_to_graph_edges(nodes)?;
-        let mut graph = UnGraph::<i32, ()>::from_edges(edges.as_slice());
-        Ok(graph)
+        let edges: Vec<(u32, u32)> = Tool::node_edges(nodes)?;
+        Ok(UnGraph::<i32, ()>::from_edges(edges.as_slice()))
     }
-
 }
 
 /// Implement PartialEq for Tool
@@ -181,14 +176,12 @@ impl Display for ToolType {
 #[cfg(test)]
 mod tests {
     use crate::container::Container;
-    use crate::tests::helpers::{create_basic_container, create_basic_super_mesh_container, create_basic_supernode_container};
+    use crate::tests::helpers::{create_basic_container, create_basic_super_mesh_container};
     use crate::tools::{Tool, ToolType};
     use crate::validation::StatusError::Known;
     use crate::validation::Validation;
-    use std::rc::Weak;
-    use petgraph::algo;
-    use petgraph::algo::{min_spanning_tree, MinSpanningTree};
     use petgraph::graph::UnGraph;
+    use std::rc::Weak;
 
     #[test]
     fn test_validate() {
@@ -203,7 +196,7 @@ mod tests {
     fn test_create_node_graph() {
         let mut basic: Container = create_basic_container();
         let container: Vec<Weak<Tool>> = basic.create_nodes().nodes();
-        let edges = Tool::nodes_to_graph_edges(&container).unwrap();
+        let edges = Tool::node_edges(&container).unwrap();
         let expected = vec![(1, 0), (1, 2), (2, 0)];
 
         assert_eq!(edges.len(), expected.len());
@@ -217,9 +210,9 @@ mod tests {
         assert_eq!(graph.edge_count(), 3);
 
         let mut super_node = create_basic_super_mesh_container();
-        let container: Vec<Weak<Tool>> = super_node.create_nodes().nodes();
-        let graph: UnGraph<i32, ()> = Tool::nodes_to_graph(&super_node.nodes()).unwrap();
-        assert!(algo::is_cyclic_directed(&graph));
+        let graph: UnGraph<i32, ()> =
+            Tool::nodes_to_graph(&super_node.create_nodes().nodes()).unwrap();
+        assert_eq!(graph.node_count(), 5);
+        assert_eq!(graph.edge_count(), 7);
     }
-
 }

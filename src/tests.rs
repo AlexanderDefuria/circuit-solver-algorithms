@@ -1,5 +1,4 @@
 pub(crate) mod helpers {
-    use crate::components::Component;
     use crate::components::Component::{CurrentSrc, Ground, Resistor, VoltageSrc};
     use crate::container::Container;
     use crate::elements::Element;
