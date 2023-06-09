@@ -13,15 +13,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="52c330b2-a72e-46d5-bbef-071fc6e5ee26" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/intermediaries.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/ci.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/ci.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/container.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/container.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/elements.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/elements.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tools.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/tools.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/validation.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/validation.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,15 +56,16 @@
     "WebServerToolWindowFactoryState": "false",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "main",
-    "last_opened_file_path": "/home/alexander/Desktop/circuit-solver",
+    "git-widget-placeholder": "nodal-analysis",
+    "last_opened_file_path": "/home/alexander/Desktop/circuit-solver-algorithms/.github",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "org.rust.cargo.project.model.PROJECT_DISCOVERY": "true",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "settings.editor.selected.configurable": "language.rust.build.tool.cargo",
+    "structure.view.defaults.are.configured": "true",
     "ts.external.directory.path": "/home/alexander/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/231.9011.31/plugins/javascript-impl/jsLanguageServicesImpl/external",
     "vue.rearranger.settings.migration": "true"
   },
@@ -83,13 +77,16 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/.github" />
       <recent name="$PROJECT_DIR$/.github/workflows" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/tools" />
+      <recent name="$PROJECT_DIR$/src/tool" />
       <recent name="$PROJECT_DIR$" />
     </key>
   </component>
-  <component name="RunManager" selected="Cargo.Test container::tests::test_create_nodes">
+  <component name="RunManager" selected="Cargo.Test">
     <configuration name="Test container::tests::test_create_nodes" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="command" value="test --package circuit-solver-algorithms --lib container::tests::test_create_nodes -- --exact" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
@@ -181,7 +178,15 @@
       <workItem from="1684868206639" duration="2700000" />
       <workItem from="1684880880993" duration="1100000" />
       <workItem from="1684893603529" duration="8929000" />
-      <workItem from="1684952541374" duration="12342000" />
+      <workItem from="1684952541374" duration="21432000" />
+      <workItem from="1685118819701" duration="10465000" />
+      <workItem from="1685290092883" duration="1624000" />
+      <workItem from="1685395294686" duration="3778000" />
+      <workItem from="1685463457709" duration="8576000" />
+      <workItem from="1685487840162" duration="39871000" />
+      <workItem from="1686191396721" duration="1287000" />
+      <workItem from="1686243559203" duration="641000" />
+      <workItem from="1686258699842" duration="22819000" />
     </task>
     <servers />
   </component>

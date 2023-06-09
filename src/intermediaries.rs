@@ -1,16 +1,16 @@
 use crate::components::Component;
 use crate::elements::Element;
-use crate::validation::Validation;
+use crate::util::PrettyString;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
 pub fn load(x: JsValue) -> String {
-    let mut y: ContainerWasm = serde_wasm_bindgen::from_value(x).unwrap();
+    let y: ContainerWasm = serde_wasm_bindgen::from_value(x).unwrap();
     if y.elements.len() == 0 {
         return String::from("No elements");
     }
-    y.elements[0].clean().pretty_string().to_string()
+    y.elements[0].pretty_string().to_string()
 }
 
 #[derive(Serialize, Deserialize)]

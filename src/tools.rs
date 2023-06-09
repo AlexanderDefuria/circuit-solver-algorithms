@@ -1,84 +1,218 @@
+use crate::components::Component::Ground;
 use crate::elements::Element;
+use crate::tools::ToolType::*;
 use crate::validation::Status::Valid;
-use crate::validation::{Status, Validation, ValidationResult};
+use crate::validation::StatusError::Known;
+use crate::validation::{StatusError, Validation, ValidationResult};
+use petgraph::graph::UnGraph;
 use serde::{Deserialize, Serialize};
-use std::fmt::{write, Display, Formatter};
+use std::fmt::{Display, Formatter};
+use std::rc::Weak;
 
 /// Possible Tool Types
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Copy, Clone)]
 pub(crate) enum ToolType {
     Node,
     Mesh,
     SuperNode,
     SuperMesh,
-    Thevenin,
-    Norton,
-    Simplification,
 }
 
 /// Tools are used to solve circuits
 ///
 /// Representation of a Tool (Node, Mesh, SuperNode, SuperMesh)
 #[derive(Debug)]
-pub(crate) struct Tool<'a> {
+pub struct Tool {
     pub(crate) id: usize,
-    pub(crate) pseudo_type: ToolType,
-    pub(crate) elements: Vec<&'a Element>,
+    pub(crate) class: ToolType,
+    pub(crate) members: Vec<Weak<Element>>,
 }
 
-impl<'a> Tool<'a> {
-    /// Create a new Tool
-    ///
-    /// It is recommended to use the `circuit::add_tool` function with this function
-    pub(crate) fn new(pseudo_type: ToolType) -> Tool<'a> {
-        Tool {
-            id: 0,
-            pseudo_type,
-            elements: vec![],
-        }
-    }
-
+impl Tool {
     /// Create a mesh from the elements
-    pub(crate) fn create_mesh(elements: Vec<&'a Element>) -> Tool<'a> {
-        // TODO
-        let mut mesh = Tool::new(ToolType::Mesh);
-        mesh.elements = elements;
-        mesh
+    pub(crate) fn create_mesh(elements: Vec<Weak<Element>>) -> Tool {
+        Tool::create(Mesh, elements)
     }
 
     /// Create a node from the elements
-    pub(crate) fn create_node(elements: Vec<&'a Element>) -> Tool<'a> {
-        // TODO
-        let mut node = Tool::new(ToolType::Node);
-        node.elements = elements;
-        node
+    pub(crate) fn create_node(elements: Vec<Weak<Element>>) -> Tool {
+        Tool::create(Node, elements)
+    }
+
+    /// Create a supernode from the elements
+    pub(crate) fn create_supernode(elements: Vec<Weak<Element>>) -> Tool {
+        Tool::create(SuperNode, elements)
+    }
+
+    fn create(class: ToolType, elements: Vec<Weak<Element>>) -> Tool {
+        let mut tool = Tool {
+            id: 0,
+            class,
+            members: vec![],
+        };
+        tool.members = elements;
+        tool
+    }
+
+    /// Check if the tool contains an element
+    pub(crate) fn contains(&self, element: Weak<Element>) -> bool {
+        let element = element.upgrade().unwrap();
+        self.members
+            .iter()
+            .any(|e| e.upgrade().unwrap().id == element.id)
+    }
+
+    pub(crate) fn contains_all(&self, elements: &Vec<Weak<Element>>) -> bool {
+        self.members.iter().all(|tool_element| {
+            elements.iter().any(|node_element| {
+                node_element.upgrade().unwrap().id == tool_element.upgrade().unwrap().id
+            })
+        })
+    }
+
+    fn node_edges(nodes: &Vec<Weak<Tool>>) -> Result<Vec<(u32, u32)>, StatusError> {
+        // If no nodes are present, return an error
+        if !nodes.iter().any(|p| {
+            return if let Some(x) = p.upgrade() {
+                x.class == Node
+            } else {
+                false
+            };
+        }) {
+            return Err(Known("No nodes present".to_string()));
+        }
+
+        let mut edges: Vec<(u32, u32)> = Vec::new();
+
+        // Check each permutation of nodes
+        for node in nodes {
+            let node = node.upgrade().unwrap();
+            if node.class == Node {
+                if node
+                    .members
+                    .iter()
+                    .any(|x| x.upgrade().unwrap().contains_ground())
+                {
+                    let x = (node.id as u32, 0);
+
+                    if !edges.contains(&x) && (x.0 != x.1) {
+                        edges.push(x);
+                    }
+                }
+
+                for second in nodes {
+                    // Check for a connection between the nodes (if they share an element)
+                    for element in &node.members {
+                        if second.upgrade().unwrap().contains(element.clone()) {
+                            let x = (node.id as u32, second.upgrade().unwrap().id as u32);
+                            let y = (second.upgrade().unwrap().id as u32, node.id as u32);
+                            if !edges.contains(&x) && !edges.contains(&y) && x.0 != x.1 {
+                                edges.push(x);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Ok(edges)
+    }
+
+    pub fn nodes_to_graph(nodes: &Vec<Weak<Tool>>) -> Result<UnGraph<i32, ()>, StatusError> {
+        let edges: Vec<(u32, u32)> = Tool::node_edges(nodes)?;
+        Ok(UnGraph::<i32, ()>::from_edges(edges.as_slice()))
     }
 }
 
 /// Implement PartialEq for Tool
 ///
 /// Compare two Tool by their id
-impl PartialEq<Self> for Tool<'_> {
+impl PartialEq<Self> for Tool {
     fn eq(&self, other: &Self) -> bool {
         self.id == other.id
     }
 }
 
-impl Validation for Tool<'_> {
+impl Validation for Tool {
     fn validate(&self) -> ValidationResult {
         // TODO
+        // Check if the elements are valid
+        if self.members.len() == 0 {
+            return Err(Known("Tool has no members".to_string()));
+        }
+        if self
+            .members
+            .iter()
+            .any(|x| x.upgrade().unwrap().class == Ground)
+        {
+            return Err(Known("Tool contains a ground element".to_string()));
+        }
+
         Ok(Valid)
     }
 }
 
-impl Display for Tool<'_> {
+impl Display for Tool {
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        write!(f, "Tool: {}", self.pseudo_type)
+        write!(
+            f,
+            "Tool: {} Id:{} Elements:{:?}",
+            self.class,
+            self.id,
+            self.members
+                .iter()
+                .map(|x| x.upgrade().unwrap().id)
+                .collect::<Vec<usize>>()
+        )
     }
 }
 
 impl Display for ToolType {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:#?}", self)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::container::Container;
+    use crate::tests::helpers::{create_basic_container, create_basic_super_mesh_container};
+    use crate::tools::{Tool, ToolType};
+    use crate::validation::StatusError::Known;
+    use crate::validation::Validation;
+    use petgraph::graph::UnGraph;
+    use std::rc::Weak;
+
+    #[test]
+    fn test_validate() {
+        let bad_tool = Tool::create(ToolType::Node, vec![]);
+        assert_eq!(
+            bad_tool.validate().unwrap_err(),
+            Known("Tool has no members".parse().unwrap())
+        );
+    }
+
+    #[test]
+    fn test_create_node_graph() {
+        let mut basic: Container = create_basic_container();
+        let container: Vec<Weak<Tool>> = basic.create_nodes().nodes();
+        let edges = Tool::node_edges(&container).unwrap();
+        let expected = vec![(1, 0), (1, 2), (2, 0)];
+
+        assert_eq!(edges.len(), expected.len());
+        for edge in edges {
+            assert!(expected.contains(&edge));
+        }
+
+        let container: Vec<Weak<Tool>> = basic.create_nodes().nodes();
+        let graph = Tool::nodes_to_graph(&container).unwrap();
+        assert_eq!(graph.node_count(), 3);
+        assert_eq!(graph.edge_count(), 3);
+
+        let mut super_node = create_basic_super_mesh_container();
+        let graph: UnGraph<i32, ()> =
+            Tool::nodes_to_graph(&super_node.create_nodes().nodes()).unwrap();
+        assert_eq!(graph.node_count(), 5);
+        assert_eq!(graph.edge_count(), 7);
     }
 }
