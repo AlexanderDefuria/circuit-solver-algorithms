@@ -14,8 +14,6 @@ pub struct Simplification {
     value: f64,
     positive: Vec<usize>,
     negative: Vec<usize>,
-    // The original has to be preserved?
-    // original: Vec<Element>
     // original: PartialContainer // This seems the move...
 }
 

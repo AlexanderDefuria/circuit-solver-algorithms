@@ -7,7 +7,7 @@ use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
 pub fn load(x: JsValue) -> String {
-    let mut y: ContainerWasm = serde_wasm_bindgen::from_value(x).unwrap();
+    let y: ContainerWasm = serde_wasm_bindgen::from_value(x).unwrap();
     if y.elements.len() == 0 {
         return String::from("No elements");
     }

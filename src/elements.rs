@@ -126,7 +126,6 @@ impl Validation for Element {
 
         Ok(Valid)
     }
-
 }
 
 impl Display for Element {
@@ -175,9 +174,12 @@ mod tests {
 
         let mut c = Element::new(Component::Resistor, 1.0, vec![1], vec![2]);
         c.id = 1;
-        assert_known_error!(c.validate(), "Element cannot be connected to itself R1: 1 Ω");
+        assert_known_error!(
+            c.validate(),
+            "Element cannot be connected to itself R1: 1 Ω"
+        );
 
-        let mut d = Element {
+        let d = Element {
             name: "".to_string(),
             id: 0,
             value: 0.0,
@@ -191,7 +193,7 @@ mod tests {
         e.value = 1.0;
         assert_known_error!(e.validate(), "Ground element cannot have a value");
 
-        let mut f = Element::new(Component::Resistor, 1.0, vec![], vec![]);
+        let f = Element::new(Component::Resistor, 1.0, vec![], vec![]);
         assert_known_error!(f.validate(), "Element has no connections");
     }
 }

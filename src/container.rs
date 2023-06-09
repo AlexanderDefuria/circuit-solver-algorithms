@@ -2,7 +2,7 @@ use crate::components::Component::{Ground, VoltageSrc};
 use crate::elements::Element;
 use crate::simplification::Simplification;
 use crate::tools::{Tool, ToolType};
-use crate::util::PrettyString;
+use crate::util::{PrettyString, SolutionState};
 use crate::validation::StatusError::Known;
 use crate::validation::{
     check_duplicates, get_all_internal_status_errors, Status, StatusError, Validation,
@@ -10,14 +10,8 @@ use crate::validation::{
 };
 use std::fmt::{Debug, Formatter};
 use std::rc::{Rc, Weak};
-
-/// Current State of an Element
-#[derive(Debug)]
-enum SolutionState {
-    Solved,
-    Unknown,
-    Partial,
-}
+use petgraph::algo::{min_spanning_tree, MinSpanningTree};
+use petgraph::graph::UnGraph;
 
 /// Representation of a Schematic Container
 ///
@@ -36,13 +30,13 @@ pub struct Container {
 ///
 /// <br>
 impl Container {
-    fn new() -> Container {
+    pub(crate) fn new() -> Container {
         Container {
             elements: Vec::new(),
             tools: Vec::new(),
             simplifications: vec![],
             ground: 0,
-            state: SolutionState::Unknown,
+            state: SolutionState::new(),
         }
     }
 
@@ -59,7 +53,7 @@ impl Container {
         Ok(id)
     }
 
-    fn add_element_core(&mut self, mut element: Element) -> usize {
+    pub(crate) fn add_element_core(&mut self, mut element: Element) -> usize {
         let id: usize = self.elements.len();
         element.id = id;
         self.elements.push(Rc::new(element));
@@ -71,13 +65,21 @@ impl Container {
             let new_id: usize = self.tools.get(self.tools.len() - 1).unwrap().id + 1;
             tool.id = new_id;
         } else {
-            tool.id = 0;
+            tool.id = 1;
         }
         self.tools.push(Rc::new(tool));
     }
 
     fn get_element_by_id(&self, id: usize) -> &Rc<Element> {
         self.elements.get(id).unwrap()
+    }
+
+    pub fn nodes(&self) -> Vec<Weak<Tool>> {
+        self.tools
+            .iter()
+            .filter(|x| x.class == ToolType::Node)
+            .map(|x| Rc::downgrade(x))
+            .collect()
     }
 
     /// Create the Nodes and add them to the Container Tools
@@ -156,10 +158,12 @@ impl Container {
         self
     }
 
-    // pub fn create_mesh(&mut self) {
-    //
-    // }
-    //
+    pub fn create_mesh(&mut self) {
+        let graph: UnGraph<i32, ()> = Tool::nodes_to_graph(&self.nodes()).unwrap();
+        let mst: MinSpanningTree<&UnGraph<i32, ()>> = min_spanning_tree(&graph);
+
+    }
+
     // pub fn create_super_mesh(&mut self) {}
     // pub fn create_thevenin(&mut self) {}
     // pub fn create_norton(&mut self) {}
@@ -207,34 +211,15 @@ impl Validation for Container {
 
 #[cfg(test)]
 mod tests {
-    use crate::components::Component::{Ground, Resistor, VoltageSrc};
+    use crate::components::Component::{Ground, Resistor};
     use crate::container::Container;
     use crate::elements::Element;
+    use crate::tests::helpers::*;
     use crate::tools::ToolType::SuperNode;
     use crate::validation::Status::Valid;
     use crate::validation::{StatusError, Validation};
     use regex::Regex;
     use std::rc::Rc;
-
-    fn create_basic_container() -> Container {
-        let mut container = Container::new();
-        container.add_element_core(Element::new(VoltageSrc, 1.0, vec![2, 3], vec![1]));
-        container.add_element_core(Element::new(Resistor, 1.0, vec![0], vec![2]));
-        container.add_element_core(Element::new(Resistor, 1.0, vec![1], vec![0, 3]));
-        container.add_element_core(Element::new(Ground, 1.0, vec![0, 2], vec![]));
-        container
-    }
-
-    fn create_basic_supernode_container() -> Container {
-        let mut container = Container::new();
-        container.add_element_core(Element::new(Ground, 10., vec![5, 3], vec![]));
-        container.add_element_core(Element::new(VoltageSrc, 10., vec![4], vec![2, 3]));
-        container.add_element_core(Element::new(Resistor, 10., vec![1, 3], vec![4, 5]));
-        container.add_element_core(Element::new(Resistor, 10., vec![1, 2], vec![0, 5]));
-        container.add_element_core(Element::new(Resistor, 10., vec![1], vec![2, 5]));
-        container.add_element_core(Element::new(VoltageSrc, 10., vec![2, 4], vec![0, 3]));
-        container
-    }
 
     #[test]
     fn test_debug() {
@@ -294,12 +279,30 @@ mod tests {
             vec![x.elements[0].id, x.elements[1].id],
             vec![x.elements[1].id, x.elements[2].id],
         ];
-        println!("{:?}", x);
+
         assert_eq!(x.validate(), Ok(Valid));
         assert_eq!(x.tools.len(), test_vectors.len());
 
         for test in 0..test_vectors.len() {
             for (i, c) in x.tools[test].members.iter().enumerate() {
+                assert_eq!(test_vectors[test][i], c.upgrade().unwrap().id);
+            }
+        }
+    }
+
+    #[test]
+    fn test_get_nodes() {
+        let mut x = create_basic_container();
+        let mut c = x.create_nodes();
+        let test_vectors = vec![
+            vec![c.elements[0].id, c.elements[1].id],
+            vec![c.elements[1].id, c.elements[2].id],
+        ];
+        assert_eq!(c.validate(), Ok(Valid));
+        assert_eq!(c.tools.len(), test_vectors.len());
+
+        for test in 0..test_vectors.len() {
+            for (i, c) in c.tools[test].members.iter().enumerate() {
                 assert_eq!(test_vectors[test][i], c.upgrade().unwrap().id);
             }
         }

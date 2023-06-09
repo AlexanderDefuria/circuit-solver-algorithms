@@ -1,4 +1,3 @@
-use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
 use std::rc::Rc;
 
@@ -84,10 +83,7 @@ mod tests {
 
     #[test]
     fn test_printing() {
-        let statuses = [
-            (Status::Valid, "Valid"),
-            (Status::Simplified, "Simplified"),
-        ];
+        let statuses = [(Status::Valid, "Valid"), (Status::Simplified, "Simplified")];
 
         let errors = [
             (StatusError::Known("Test".to_string()), "Known Issue: Test"),
