@@ -8,10 +8,11 @@ use crate::validation::{
     check_duplicates, get_all_internal_status_errors, Status, StatusError, Validation,
     ValidationResult,
 };
+use petgraph::graph::UnGraph;
+use petgraph::prelude::NodeIndex;
+use rustworkx_core::connectivity;
 use std::fmt::{Debug, Formatter};
 use std::rc::{Rc, Weak};
-use petgraph::algo::{min_spanning_tree, MinSpanningTree};
-use petgraph::graph::UnGraph;
 
 /// Representation of a Schematic Container
 ///
@@ -78,6 +79,14 @@ impl Container {
         self.tools
             .iter()
             .filter(|x| x.class == ToolType::Node)
+            .map(|x| Rc::downgrade(x))
+            .collect()
+    }
+
+    pub fn meshes(&self) -> Vec<Weak<Tool>> {
+        self.tools
+            .iter()
+            .filter(|x| x.class == ToolType::Mesh)
             .map(|x| Rc::downgrade(x))
             .collect()
     }
@@ -158,10 +167,24 @@ impl Container {
         self
     }
 
-    pub fn create_mesh(&mut self) {
+    pub fn create_mesh(&mut self) -> &mut Self {
         let graph: UnGraph<i32, ()> = Tool::nodes_to_graph(&self.nodes()).unwrap();
-        let mst: MinSpanningTree<&UnGraph<i32, ()>> = min_spanning_tree(&graph);
+        let root = Some(self.ground);
+        let x: Vec<Vec<usize>> = connectivity::cycle_basis(&graph, root.map(NodeIndex::new))
+            .into_iter()
+            .map(|res_map| res_map.into_iter().map(|x| x.index()).collect())
+            .collect();
 
+        for mesh in x {
+            self.add_tool(Tool::create_mesh(
+                mesh.iter()
+                    .map(|x| self.get_element_by_id(*x))
+                    .map(|x| Rc::downgrade(x))
+                    .collect(),
+            ));
+        }
+
+        self
     }
 
     // pub fn create_super_mesh(&mut self) {}
@@ -215,11 +238,12 @@ mod tests {
     use crate::container::Container;
     use crate::elements::Element;
     use crate::tests::helpers::*;
+    use crate::tools::Tool;
     use crate::tools::ToolType::SuperNode;
     use crate::validation::Status::Valid;
     use crate::validation::{StatusError, Validation};
     use regex::Regex;
-    use std::rc::Rc;
+    use std::rc::{Rc, Weak};
 
     #[test]
     fn test_debug() {
@@ -293,7 +317,7 @@ mod tests {
     #[test]
     fn test_get_nodes() {
         let mut x = create_basic_container();
-        let mut c = x.create_nodes();
+        let c = x.create_nodes();
         let test_vectors = vec![
             vec![c.elements[0].id, c.elements[1].id],
             vec![c.elements[1].id, c.elements[2].id],
@@ -335,6 +359,22 @@ mod tests {
         assert_eq!(super_node.members.len(), expected_ids.len());
         for member in super_node.members.iter() {
             assert!(expected_ids.contains(&member.upgrade().unwrap().id));
+        }
+    }
+
+    #[test]
+    fn test_create_mesh() {
+        let mut basic: Container = create_basic_container();
+        basic.create_nodes();
+        basic.create_mesh();
+        assert_eq!(basic.validate(), Ok(Valid));
+        assert_eq!(basic.tools.len(), 3);
+
+        let mesh_members: Vec<usize> = vec![0, 1, 2];
+        let mesh = basic.meshes().get(0).unwrap().upgrade().unwrap();
+        assert_eq!(mesh.members.len(), mesh_members.len());
+        for member in mesh.members.iter() {
+            assert!(mesh_members.contains(&member.upgrade().unwrap().id),);
         }
     }
 }
