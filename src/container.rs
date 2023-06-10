@@ -45,6 +45,7 @@ impl Container {
     ///
     /// This function will add an Element to the Container and return the index of the Element
     pub fn add_element(&mut self, element: Element) -> Result<usize, StatusError> {
+        element.validate()?;
         let id: usize = self.add_element_core(element);
         let check = self.validate();
         if check.is_err() {

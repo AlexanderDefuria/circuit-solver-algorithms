@@ -1,5 +1,9 @@
 use std::fmt::{Debug, Display, Formatter};
 use std::rc::Rc;
+use wasm_bindgen::convert::ReturnWasmAbi;
+use wasm_bindgen::describe::WasmDescribe;
+use wasm_bindgen::prelude::wasm_bindgen;
+use wasm_bindgen::JsValue;
 
 /// Possible Ok Statuses
 ///
@@ -47,6 +51,12 @@ impl Display for StatusError {
                 write!(f, "Multiple Issues: {:?}", error_list)
             }
         }
+    }
+}
+
+impl Into<JsValue> for StatusError {
+    fn into(self) -> JsValue {
+        JsValue::from_str(&format!("{}", self))
     }
 }
 

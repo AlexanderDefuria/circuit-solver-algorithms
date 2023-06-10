@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 /// Possible Component Types
 #[derive(PartialEq, Debug, Serialize, Deserialize)]
-pub(crate) enum Component {
+pub enum Component {
     Ground,
     Resistor,
     VoltageSrc,

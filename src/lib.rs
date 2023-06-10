@@ -2,7 +2,7 @@ pub mod components;
 pub mod container;
 pub mod controller;
 pub mod elements;
-pub mod intermediaries;
+pub mod interfaces;
 pub mod partial_container;
 pub mod simplification;
 mod tests;

@@ -22,7 +22,7 @@ impl Element {
     /// Create a new Element
     ///
     /// It is recommended to use the `circuit::add_element` function with this function
-    pub(crate) fn new(
+    pub fn new(
         class: Component,
         value: f64,
         positive: Vec<usize>,
