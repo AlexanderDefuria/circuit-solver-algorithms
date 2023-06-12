@@ -2,8 +2,8 @@ use crate::components::Component::Ground;
 use crate::elements::Element;
 use crate::tools::ToolType::*;
 use crate::validation::Status::Valid;
-use crate::validation::StatusError::Known;
-use crate::validation::{StatusError, Validation, ValidationResult};
+use crate::validation::StatusError::{Known, Multiple};
+use crate::validation::{check_duplicates, StatusError, Validation, ValidationResult};
 use petgraph::graph::UnGraph;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
@@ -11,11 +11,12 @@ use std::rc::Weak;
 
 /// Possible Tool Types
 #[derive(Serialize, Deserialize, Debug, PartialEq, Copy, Clone)]
-pub(crate) enum ToolType {
+pub enum ToolType {
     Node,
     Mesh,
     SuperNode,
     SuperMesh,
+    None
 }
 
 /// Tools are used to solve circuits
@@ -136,16 +137,25 @@ impl PartialEq<Self> for Tool {
 impl Validation for Tool {
     fn validate(&self) -> ValidationResult {
         // TODO
-        // Check if the elements are valid
+        if self.class == None {
+            return Err(Known("Tool has no class".to_string()));
+        }
+
         if self.members.len() == 0 {
             return Err(Known("Tool has no members".to_string()));
         }
+
         if self
             .members
             .iter()
             .any(|x| x.upgrade().unwrap().class == Ground)
         {
             return Err(Known("Tool contains a ground element".to_string()));
+        }
+
+        let duplicates = check_duplicates(&self.members);
+        if duplicates.len() > 0 {
+            return Err(Multiple(duplicates));
         }
 
         Ok(Valid)

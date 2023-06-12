@@ -14,7 +14,7 @@ pub struct Simplification {
     value: f64,
     positive: Vec<usize>,
     negative: Vec<usize>,
-    // original: PartialContainer // This seems the move...
+    // original: PartialCogit ntainer // This seems the move...
 }
 
 impl Simplification {

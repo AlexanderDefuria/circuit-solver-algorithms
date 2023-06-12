@@ -1,4 +1,5 @@
 use std::fmt::{Debug, Display, Formatter};
+use crate::simplification::Method;
 
 pub(crate) trait PrettyString {
     fn pretty_string(&self) -> String;

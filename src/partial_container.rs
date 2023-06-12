@@ -1,5 +1,12 @@
+use crate::components::Component;
 use crate::container::Container;
+use crate::elements::Element;
+use std::rc::{Rc, Weak};
 
-pub(crate) struct PartialContainer {
-    pub container: Container,
+#[derive(Debug, PartialEq)]
+pub struct PartialContainer {
+    container: Vec<Rc<Element>>,
+    positive: usize,
+    negative: usize,
 }
+

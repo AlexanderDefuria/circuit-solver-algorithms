@@ -92,6 +92,14 @@ impl Container {
             .collect()
     }
 
+    pub fn components(&self) -> Vec<Weak<Element>> {
+        self.elements
+            .iter()
+            .filter(|x| x.class != Ground)
+            .map(|x| Rc::downgrade(x))
+            .collect()
+    }
+
     /// Create the Nodes and add them to the Container Tools
     ///
     /// This process can be done by sampling one side of every element and then
@@ -168,7 +176,7 @@ impl Container {
         self
     }
 
-    pub fn create_mesh(&mut self) -> &mut Self {
+    pub fn create_meshes(&mut self) -> &mut Self {
         let graph: UnGraph<i32, ()> = Tool::nodes_to_graph(&self.nodes()).unwrap();
         let root = Some(self.ground);
         let x: Vec<Vec<usize>> = connectivity::cycle_basis(&graph, root.map(NodeIndex::new))
@@ -188,9 +196,8 @@ impl Container {
         self
     }
 
-    // pub fn create_super_mesh(&mut self) {}
-    // pub fn create_thevenin(&mut self) {}
-    // pub fn create_norton(&mut self) {}
+    pub fn create_super_mesh(&mut self) {}
+
 }
 
 impl Validation for Container {
@@ -239,12 +246,11 @@ mod tests {
     use crate::container::Container;
     use crate::elements::Element;
     use crate::tests::helpers::*;
-    use crate::tools::Tool;
     use crate::tools::ToolType::SuperNode;
     use crate::validation::Status::Valid;
     use crate::validation::{StatusError, Validation};
     use regex::Regex;
-    use std::rc::{Rc, Weak};
+    use std::rc::Rc;
 
     #[test]
     fn test_debug() {
@@ -367,7 +373,7 @@ mod tests {
     fn test_create_mesh() {
         let mut basic: Container = create_basic_container();
         basic.create_nodes();
-        basic.create_mesh();
+        basic.create_meshes();
         assert_eq!(basic.validate(), Ok(Valid));
         assert_eq!(basic.tools.len(), 3);
 

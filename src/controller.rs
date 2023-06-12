@@ -1,4 +1,6 @@
 use crate::container::Container;
+use crate::simplification;
+use crate::tools::ToolType;
 
 /// This will be the main interface for the user to interact with the program.
 ///
@@ -10,7 +12,9 @@ pub struct Controller {
     pub container: Container,
 }
 
-pub struct Options {
-    pub simplify: bool,
-    pub solve: bool,
+
+pub enum Operations {
+    Simplify(simplification::Method),
+    Solve(ToolType),
+    Validate,
 }

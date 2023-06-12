@@ -1,15 +1,21 @@
+use crate::partial_container::PartialContainer;
 use crate::util::PrettyString;
 use serde::{Deserialize, Serialize};
 
 /// Possible Component Types
 #[derive(PartialEq, Debug, Serialize, Deserialize)]
 pub enum Component {
+    #[serde(skip_serializing, skip_deserializing)]
+    Compound(PartialContainer),
     Ground,
     Resistor,
     VoltageSrc,
     CurrentSrc,
-    // DependentVoltage, DependentCurrent
-    // Switch, Inductor, Capacitor,
+    DependentVoltage,
+    DependentCurrent,
+    Switch,
+    Inductor,
+    Capacitor,
 }
 
 impl Component {
@@ -17,8 +23,9 @@ impl Component {
         match self {
             Component::Ground => "GND".to_string(),
             Component::Resistor => "R".to_string(),
-            Component::VoltageSrc => "V_src".to_string(),
-            Component::CurrentSrc => "C_src".to_string(),
+            Component::VoltageSrc => "SRC(V)".to_string(),
+            Component::CurrentSrc => "SRC(C)".to_string(),
+            _ => "Unknown".to_string(),
         }
     }
 
@@ -28,6 +35,7 @@ impl Component {
             Component::Resistor => "Ω".to_string(),
             Component::VoltageSrc => "V".to_string(),
             Component::CurrentSrc => "A".to_string(),
+            _ => "Unknown".to_string(),
         }
     }
 
@@ -47,6 +55,7 @@ impl PrettyString for Component {
             Component::Resistor => "Resistor".to_string(),
             Component::VoltageSrc => "Voltage".to_string(),
             Component::CurrentSrc => "Current".to_string(),
+            _ => "Unknown".to_string(),
         }
     }
 }
