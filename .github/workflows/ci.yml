@@ -50,6 +50,7 @@ jobs:
         with:
           name: wasm
           path: ./pkg/
+      - run: cp ./package.json ./pkg/
       - uses: actions/setup-node@v3
         with:
           node-version: '16.x'
