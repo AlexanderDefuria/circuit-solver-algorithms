@@ -3,7 +3,7 @@ use crate::elements::Element;
 use crate::tools::ToolType::*;
 use crate::validation::Status::Valid;
 use crate::validation::StatusError::{Known, Multiple};
-use crate::validation::{check_duplicates, StatusError, Validation, ValidationResult};
+use crate::validation::{check_duplicates, check_weak_duplicates, StatusError, Validation, ValidationResult};
 use petgraph::graph::UnGraph;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
@@ -153,7 +153,7 @@ impl Validation for Tool {
             return Err(Known("Tool contains a ground element".to_string()));
         }
 
-        let duplicates = check_duplicates(&self.members);
+        let duplicates = check_weak_duplicates(&self.members);
         if duplicates.len() > 0 {
             return Err(Multiple(duplicates));
         }

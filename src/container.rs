@@ -2,7 +2,8 @@ use crate::components::Component::{Ground, VoltageSrc};
 use crate::elements::Element;
 use crate::simplification::Simplification;
 use crate::tools::{Tool, ToolType};
-use crate::util::{PrettyString, SolutionState};
+use crate::util::PrettyString;
+use crate::solution::SolutionState;
 use crate::validation::StatusError::Known;
 use crate::validation::{
     check_duplicates, get_all_internal_status_errors, Status, StatusError, Validation,

@@ -58,5 +58,5 @@ fn test_load() {
         ground: 0,
     };
     let x: JsValue = serde_wasm_bindgen::to_value(&c).unwrap();
-    assert_eq!(Ok("Loaded".to_string()), load_wasm_container(x));
+    assert_eq!(Ok("Loaded Successfully".to_string()), load_wasm_container(x));
 }

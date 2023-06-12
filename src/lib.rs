@@ -9,3 +9,4 @@ mod tests;
 pub mod tools;
 mod util;
 pub mod validation;
+mod solution;

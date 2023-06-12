@@ -1,6 +1,5 @@
 use crate::container::Container;
 use crate::elements::Element;
-use crate::util::PrettyString;
 use crate::validation::{StatusError, Validation};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
@@ -15,7 +14,7 @@ pub fn load_wasm_container(x: JsValue) -> Result<String, StatusError> {
     let container: Container = y.into();
     container.validate()?;
 
-    Ok(String::from("Loaded"))
+    Ok(String::from("Loaded Successfully"))
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]

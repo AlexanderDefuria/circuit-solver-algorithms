@@ -41,12 +41,18 @@ jobs:
         with:
           # Optional version of wasm-pack to install(eg. 'v0.9.1', 'latest')
           version: 'v0.9.1'
-      - run: wasm-pack build --target web --release
+      - name: Test wasm
+        run: wasm-pack test --node
+      - name: Build wasm
+        run: wasm-pack build --target web --release
       - name: Copy wasm to public
         uses: actions/upload-artifact@v2
         with:
           name: wasm
           path: ./pkg/
+      - run: wasm-pack publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   print_doc_coverage:
     name: Print documentation coverage
@@ -59,3 +65,24 @@ jobs:
       - id: coverage
         uses: bewee/rustdoc-coverage-action@v1
       - run: echo ${{ steps.coverage.outputs.documented }}
+
+  publish-wasm-package:
+    runs-on: ubuntu-latest
+    needs:
+      - wasm
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v3
+      # Setup .npmrc file to publish to GitHub Packages
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+          registry-url: 'https://npm.pkg.github.com'
+          # Defaults to the user or organization that owns the workflow file
+          scope: '@AlexanderDeFuria'
+      - run: npm ci
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

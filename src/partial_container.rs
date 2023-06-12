@@ -1,7 +1,5 @@
-use crate::components::Component;
-use crate::container::Container;
 use crate::elements::Element;
-use std::rc::{Rc, Weak};
+use std::rc::Rc;
 
 #[derive(Debug, PartialEq)]
 pub struct PartialContainer {

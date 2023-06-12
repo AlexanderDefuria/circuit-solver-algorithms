@@ -1,5 +1,5 @@
 use std::fmt::{Debug, Display, Formatter};
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 use wasm_bindgen::convert::ReturnWasmAbi;
 use wasm_bindgen::describe::WasmDescribe;
 use wasm_bindgen::prelude::wasm_bindgen;
@@ -68,6 +68,12 @@ pub(crate) fn get_all_internal_status_errors<T: Validation>(list: &Vec<Rc<T>>) -
             _ => None,
         })
         .collect()
+}
+
+pub(crate) fn check_weak_duplicates<T: Validation + PartialEq + Display>(
+    list: &Vec<Weak<T>>
+) -> Vec<StatusError> {
+    check_duplicates(&list.iter().filter_map(|x| x.upgrade()).collect())
 }
 
 /// Check for duplicates in a list

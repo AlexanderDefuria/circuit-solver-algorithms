@@ -13,15 +13,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="52c330b2-a72e-46d5-bbef-071fc6e5ee26" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/solution.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.github/workflows/ci.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/ci.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/components.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/container.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/container.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/controller.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/controller.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/interfaces.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/interfaces.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/partial_container.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/partial_container.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/simplification.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/simplification.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/tools.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/tools.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/util.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/util.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/validation.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/validation.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/wasm.rs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/wasm.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -156,7 +160,8 @@
       <workItem from="1686258699842" duration="22819000" />
       <workItem from="1686415779391" duration="2393000" />
       <workItem from="1686526700186" duration="601000" />
-      <workItem from="1686532459292" duration="4515000" />
+      <workItem from="1686532459292" duration="5658000" />
+      <workItem from="1686585787553" duration="2949000" />
     </task>
     <servers />
   </component>
