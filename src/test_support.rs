@@ -41,6 +41,7 @@ pub(crate) mod helpers {
 mod tests {
     use crate::components::Component;
     use crate::elements::Element;
+    use crate::test_support::helpers::create_basic_container;
     use assert_json_diff::assert_json_include;
     use serde_json::json;
 
@@ -58,11 +59,15 @@ mod tests {
             name: "R1".to_string(),
             id: 1,
             value: 1.0,
+            current: 0.0,
+            voltage_drop: 0.0,
             class: Component::Resistor,
             positive: vec![2],
             negative: vec![3],
         };
         assert_eq!(element.name, "R1");
         assert_json_include!(actual: element, expected: json);
+
+        println!("{:?}", create_basic_container());
     }
 }

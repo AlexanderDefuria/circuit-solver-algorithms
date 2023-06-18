@@ -6,8 +6,9 @@ use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
 pub fn load_wasm_container(x: JsValue) -> Result<String, StatusError> {
-    let y: ContainerWasm = serde_wasm_bindgen::from_value(x).unwrap();
-    if y.elements.len() == 0 {
+    /// This JsValue is a ContainerInterface and also needs operations
+    let y: Vec<Element> = serde_wasm_bindgen::from_value(x).unwrap();
+    if y.len() == 0 {
         return Ok(String::from("No elements"));
     }
 
@@ -17,16 +18,10 @@ pub fn load_wasm_container(x: JsValue) -> Result<String, StatusError> {
     Ok(String::from("Loaded Successfully"))
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
-pub struct ContainerWasm {
-    pub elements: Vec<Element>,
-    pub ground: usize,
-}
-
-impl From<ContainerWasm> for Container {
-    fn from(wasm: ContainerWasm) -> Container {
+impl From<Vec<Element>> for Container {
+    fn from(wasm: Vec<Element>) -> Container {
         let mut container = Container::new();
-        for element in wasm.elements {
+        for element in wasm {
             container.add_element_core(element);
         }
         container

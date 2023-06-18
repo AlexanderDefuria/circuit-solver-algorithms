@@ -1,5 +1,5 @@
-use std::fmt::{Debug, Display, Formatter};
 use crate::simplification::Method;
+use std::fmt::{Debug, Display, Formatter};
 
 pub(crate) trait PrettyString {
     fn pretty_string(&self) -> String;
@@ -14,4 +14,3 @@ macro_rules! assert_known_error {
         }
     };
 }
-

@@ -1,7 +1,10 @@
 use crate::container::Container;
+use crate::elements::Element;
 use crate::simplification::Method;
 use crate::tools::ToolType;
 use crate::validation::{StatusError, Validation};
+use ndarray::Array2;
+use serde_json::Value::Array;
 
 /// This will be the main interface for the user to interact with the program.
 ///
@@ -11,11 +14,10 @@ use crate::validation::{StatusError, Validation};
 /// this will begin development when the solver is structurally complete or V0.1.
 pub struct Controller {
     pub container: Container,
-    pub operations: Vec<Operations>,
+    pub operations: Vec<Operation>,
 }
 
-
-pub enum Operations {
+pub enum Operation {
     Simplify(Method),
     Solve(ToolType),
     Validate,
@@ -29,7 +31,7 @@ impl Controller {
         }
     }
 
-    pub fn add_operation(&mut self, operation: Operations) {
+    pub fn add_operation(&mut self, operation: Operation) {
         self.operations.push(operation);
     }
 
@@ -38,4 +40,19 @@ impl Controller {
     }
 }
 
+impl From<Vec<Element>> for Controller {
+    fn from(elements: Vec<Element>) -> Controller {
+        let mut container = Container::new();
+        for element in elements {
+            container.add_element_core(element);
+        }
+        Controller {
+            container,
+            operations: vec![],
+        }
+    }
+}
 
+fn nodal_analysis() {
+    let mut matrix = Array2::<f64>::zeros((3, 3));
+}

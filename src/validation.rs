@@ -71,7 +71,7 @@ pub(crate) fn get_all_internal_status_errors<T: Validation>(list: &Vec<Rc<T>>) -
 }
 
 pub(crate) fn check_weak_duplicates<T: Validation + PartialEq + Display>(
-    list: &Vec<Weak<T>>
+    list: &Vec<Weak<T>>,
 ) -> Vec<StatusError> {
     check_duplicates(&list.iter().filter_map(|x| x.upgrade()).collect())
 }

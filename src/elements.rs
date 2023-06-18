@@ -4,15 +4,21 @@ use crate::util::PrettyString;
 use crate::validation::Status::Valid;
 use crate::validation::StatusError::Known;
 use crate::validation::{Validation, ValidationResult};
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, Serializer};
 use std::fmt::Display;
+use std::rc::Rc;
 
 /// Representation of a Schematic Element
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Element {
+    #[serde(skip_deserializing)]
     pub(crate) name: String,
     pub(crate) id: usize,
     pub(crate) value: f64,
+    #[serde(skip_deserializing)]
+    pub(crate) current: f64,
+    #[serde(skip_deserializing)]
+    pub(crate) voltage_drop: f64,
     pub(crate) class: Component,
     pub(crate) positive: Vec<usize>, // Link to other elements
     pub(crate) negative: Vec<usize>,
@@ -48,6 +54,8 @@ impl Element {
             name: class.basic_string(),
             id,
             value,
+            current: 0.0,
+            voltage_drop: 0.0,
             class,
             positive,
             negative,
@@ -183,6 +191,8 @@ mod tests {
             name: "".to_string(),
             id: 0,
             value: 0.0,
+            current: 0.0,
+            voltage_drop: 0.0,
             class: Component::Ground,
             positive: vec![1],
             negative: vec![2],

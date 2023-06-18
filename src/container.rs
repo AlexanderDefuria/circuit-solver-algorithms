@@ -3,7 +3,6 @@ use crate::elements::Element;
 use crate::simplification::Simplification;
 use crate::tools::{Tool, ToolType};
 use crate::util::PrettyString;
-use crate::solution::SolutionState;
 use crate::validation::StatusError::Known;
 use crate::validation::{
     check_duplicates, get_all_internal_status_errors, Status, StatusError, Validation,
@@ -12,18 +11,19 @@ use crate::validation::{
 use petgraph::graph::UnGraph;
 use petgraph::prelude::NodeIndex;
 use rustworkx_core::connectivity;
+use serde::Serialize;
 use std::fmt::{Debug, Formatter};
 use std::rc::{Rc, Weak};
 
 /// Representation of a Schematic Container
 ///
 /// Container is a collection of Elements and Tools we are using to solve the circuit
+#[derive(Clone)]
 pub struct Container {
     elements: Vec<Rc<Element>>,
     tools: Vec<Rc<Tool>>,
     simplifications: Vec<Rc<Simplification>>,
     ground: usize,
-    state: SolutionState,
 }
 
 /// Container is a collection of Elements and Tools we are using to solve the circuit
@@ -38,7 +38,6 @@ impl Container {
             tools: Vec::new(),
             simplifications: vec![],
             ground: 0,
-            state: SolutionState::new(),
         }
     }
 
@@ -198,7 +197,6 @@ impl Container {
     }
 
     pub fn create_super_mesh(&mut self) {}
-
 }
 
 impl Validation for Container {
@@ -246,7 +244,7 @@ mod tests {
     use crate::components::Component::{Ground, Resistor};
     use crate::container::Container;
     use crate::elements::Element;
-    use crate::tests::helpers::*;
+    use crate::test_support::helpers::*;
     use crate::tools::ToolType::SuperNode;
     use crate::validation::Status::Valid;
     use crate::validation::{StatusError, Validation};
@@ -256,13 +254,14 @@ mod tests {
     #[test]
     fn test_debug() {
         let re = Regex::new(
-            r#"Container \{ elements: \["R0: 1 Ω", "R1: 1 Ω"], tools: \[], state: Unknown }"#,
+            r#"Container \{ elements: \["R0: 1 Ω", "R1: 1 Ω"], tools: \[], state: .+\) }"#,
         )
         .unwrap();
 
         let mut container = Container::new();
         container.add_element_core(Element::new(Resistor, 1.0, vec![2], vec![3]));
         container.add_element_core(Element::new(Resistor, 1.0, vec![2], vec![3]));
+        println!("{:?}", container);
         assert!(re.is_match(&format!("{:?}", container)));
     }
 
@@ -399,7 +398,7 @@ impl Debug for Container {
                     .collect::<Vec<String>>(),
             )
             .field("tools", &self.tools)
-            .field("state", &self.state)
+            .field("state", &self.validate())
             .finish()
     }
 }

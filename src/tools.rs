@@ -3,7 +3,9 @@ use crate::elements::Element;
 use crate::tools::ToolType::*;
 use crate::validation::Status::Valid;
 use crate::validation::StatusError::{Known, Multiple};
-use crate::validation::{check_duplicates, check_weak_duplicates, StatusError, Validation, ValidationResult};
+use crate::validation::{
+    check_duplicates, check_weak_duplicates, StatusError, Validation, ValidationResult,
+};
 use petgraph::graph::UnGraph;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
@@ -16,7 +18,7 @@ pub enum ToolType {
     Mesh,
     SuperNode,
     SuperMesh,
-    None
+    None,
 }
 
 /// Tools are used to solve circuits
@@ -186,7 +188,7 @@ impl Display for ToolType {
 #[cfg(test)]
 mod tests {
     use crate::container::Container;
-    use crate::tests::helpers::{create_basic_container, create_basic_super_mesh_container};
+    use crate::test_support::helpers::{create_basic_container, create_basic_super_mesh_container};
     use crate::tools::{Tool, ToolType};
     use crate::validation::StatusError::Known;
     use crate::validation::Validation;

@@ -7,4 +7,3 @@ pub struct PartialContainer {
     positive: usize,
     negative: usize,
 }
-
