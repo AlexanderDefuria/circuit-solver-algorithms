@@ -1,5 +1,5 @@
-use crate::components::Component;
-use crate::components::Component::Ground;
+use crate::component::Component;
+use crate::component::Component::Ground;
 use crate::util::PrettyString;
 use crate::validation::Status::Valid;
 use crate::validation::StatusError::Known;
@@ -146,7 +146,7 @@ impl Display for Element {
 #[cfg(test)]
 mod tests {
     use crate::assert_known_error;
-    use crate::components::Component;
+    use crate::component::Component;
     use crate::elements::Element;
     use crate::validation::StatusError::Known;
     use crate::validation::Validation;

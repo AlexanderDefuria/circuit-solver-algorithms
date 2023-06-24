@@ -1,4 +1,4 @@
-use crate::components::Component::Ground;
+use crate::component::Component::Ground;
 use crate::elements::Element;
 use crate::tools::ToolType::*;
 use crate::validation::Status::Valid;
@@ -188,7 +188,7 @@ impl Display for ToolType {
 #[cfg(test)]
 mod tests {
     use crate::container::Container;
-    use crate::test_support::helpers::{create_basic_container, create_basic_super_mesh_container};
+    use crate::helpers::{create_basic_container, create_basic_super_mesh_container};
     use crate::tools::{Tool, ToolType};
     use crate::validation::StatusError::Known;
     use crate::validation::Validation;

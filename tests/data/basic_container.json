@@ -18,11 +18,11 @@
       "value": 1.0,
       "class": "Resistor",
       "positive": [1],
-      "negative": [2, 3]
+      "negative": [0, 3]
     },
     {
       "id": 3,
-      "value": 1.0,
+      "value": 0.0,
       "class": "Ground",
       "positive": [0, 2],
       "negative": []

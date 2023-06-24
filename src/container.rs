@@ -1,4 +1,4 @@
-use crate::components::Component::{Ground, VoltageSrc};
+use crate::component::Component::{Ground, VoltageSrc};
 use crate::elements::Element;
 use crate::simplification::Simplification;
 use crate::tools::{Tool, ToolType};
@@ -197,6 +197,18 @@ impl Container {
     }
 
     pub fn create_super_mesh(&mut self) {}
+
+    pub fn get_elements(&self) -> &Vec<Rc<Element>> {
+        &self.elements
+    }
+
+    pub fn get_tools(&self) -> &Vec<Rc<Tool>> {
+        &self.tools
+    }
+
+    pub fn get_ground(&self) -> &Rc<Element> {
+        self.elements.get(self.ground).unwrap()
+    }
 }
 
 impl Validation for Container {
@@ -241,10 +253,10 @@ impl Validation for Container {
 
 #[cfg(test)]
 mod tests {
-    use crate::components::Component::{Ground, Resistor};
+    use crate::component::Component::{Ground, Resistor};
     use crate::container::Container;
     use crate::elements::Element;
-    use crate::test_support::helpers::*;
+    use crate::helpers::*;
     use crate::tools::ToolType::SuperNode;
     use crate::validation::Status::Valid;
     use crate::validation::{StatusError, Validation};

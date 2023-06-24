@@ -10,8 +10,10 @@ use wasm_bindgen::JsValue;
 /// Valid: Container is valid
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub enum Status {
+    New,
     Valid,
     Simplified,
+    Solved,
 }
 
 /// Possible Issues
@@ -36,8 +38,10 @@ pub trait Validation {
 impl Display for Status {
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
         match *self {
+            Status::New => write!(f, "New"),
             Status::Valid => write!(f, "Valid"),
             Status::Simplified => write!(f, "Simplified"),
+            Status::Solved => write!(f, "Solved"),
         }
     }
 }

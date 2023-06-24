@@ -13,24 +13,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="52c330b2-a72e-46d5-bbef-071fc6e5ee26" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/tests/data/basic_container.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/ci.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/ci.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/helpers.rs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/solvers.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/component.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/container.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/container.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/controller.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/controller.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/elements.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/elements.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/interfaces.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/interfaces.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/partial_container.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/partial_container.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/simplification.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/simplification.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/solution.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tests.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/test_support.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test_support.rs" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/tools.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/tools.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/util.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/util.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/validation.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/validation.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/data/basic_container.json" beforeDir="false" afterPath="$PROJECT_DIR$/tests/data/basic_container.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/tests.rs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/tests.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/wasm.rs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/wasm.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/wasm.rs" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -205,7 +203,13 @@
       <workItem from="1686982226219" duration="58000" />
       <workItem from="1687037533799" duration="788000" />
       <workItem from="1687041480827" duration="3471000" />
-      <workItem from="1687068963827" duration="1448000" />
+      <workItem from="1687068963827" duration="4661000" />
+      <workItem from="1687111824496" duration="611000" />
+      <workItem from="1687195137337" duration="2278000" />
+      <workItem from="1687287332508" duration="1756000" />
+      <workItem from="1687561420783" duration="45000" />
+      <workItem from="1687576130036" duration="1881000" />
+      <workItem from="1687630069642" duration="2103000" />
     </task>
     <servers />
   </component>

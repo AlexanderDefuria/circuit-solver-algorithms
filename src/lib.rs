@@ -1,11 +1,12 @@
-pub mod components;
+pub mod component;
 pub mod container;
 pub mod controller;
-pub mod elements;
+mod elements;
+mod helpers;
 pub mod interfaces;
-pub mod partial_container;
-pub mod simplification;
-mod test_support;
+mod partial_container;
+mod simplification;
+mod solvers;
 pub mod tools;
 mod util;
 pub mod validation;
