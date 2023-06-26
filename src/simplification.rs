@@ -1,7 +1,9 @@
 use crate::container::Container;
 use crate::validation::{Validation, ValidationResult};
 use std::fmt::{Debug, Formatter};
+use serde::{Deserialize, Serialize};
 
+#[derive(Serialize, Deserialize)]
 pub enum Method {
     None,
     Basic,
@@ -9,6 +11,7 @@ pub enum Method {
     Thevinin,
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct Simplification {
     method: Method,
     value: f64,

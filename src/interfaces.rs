@@ -1,3 +1,5 @@
+use std::rc::Rc;
+use petgraph::visit::Control;
 use crate::container::Container;
 use crate::elements::Element;
 use crate::validation::{StatusError, Validation};
@@ -7,19 +9,26 @@ use crate::component::Component::{Ground, Resistor, VoltageSrc};
 use crate::validation::StatusError::{Known, Multiple};
 use wasm_bindgen::JsValue;
 use wasm_bindgen_test::*;
+use crate::controller::Controller;
+use crate::operations::{Operation, OpMethod};
 
 
+#[derive(Serialize, Deserialize)]
+pub struct ContainerSetup {
+    pub elements: Vec<Element>,
+    pub operations: Vec<OpMethod>,
+}
 
 #[wasm_bindgen]
-pub fn load_wasm_container(x: JsValue) -> Result<String, StatusError> {
-    /// This JsValue is a ContainerInterface and also needs operations
-    let y: Vec<Element> = serde_wasm_bindgen::from_value(x).unwrap();
-    if y.len() == 0 {
+pub fn load_wasm_container(js: JsValue) -> Result<String, StatusError> {
+    // This JsValue is a ContainerInterface and also needs operations
+    let setup: ContainerSetup = serde_wasm_bindgen::from_value(js).unwrap();
+    if setup.elements.len() == 0 {
         return Ok(String::from("No elements"));
     }
 
-    let container: Container = y.into();
-    container.validate()?;
+    let controller: Controller = setup.into();
+    controller.container.validate()?;
 
     Ok(String::from("Loaded Successfully"))
 }
@@ -32,6 +41,23 @@ impl From<Vec<Element>> for Container {
         }
         container
     }
+}
+
+impl From<ContainerSetup> for Controller {
+    fn from(setup: ContainerSetup) -> Controller {
+        let mut container: Container = setup.elements.into();
+        let mut operations: Vec<Operation> = vec![];
+        for op in setup.operations {
+            operations.push(op.into());
+        }
+        let status = container.validate();
+        Controller {
+            container: Rc::from(container),
+            operations,
+            status,
+        }
+    }
+
 }
 
 pub fn simplify() {}

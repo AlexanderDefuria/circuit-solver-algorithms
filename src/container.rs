@@ -1,6 +1,6 @@
 use crate::component::Component::{Ground, VoltageSrc};
 use crate::elements::Element;
-use crate::simplification::Simplification;
+use crate::simplification::{Method, Simplification};
 use crate::tools::{Tool, ToolType};
 use crate::util::PrettyString;
 use crate::validation::StatusError::Known;
@@ -208,6 +208,14 @@ impl Container {
 
     pub fn get_ground(&self) -> &Rc<Element> {
         self.elements.get(self.ground).unwrap()
+    }
+
+    pub fn simplify(&mut self, method: &Method) -> &mut Self {
+        self
+    }
+
+    pub fn solve(&mut self, method: &ToolType) -> &mut Self {
+        self
     }
 }
 

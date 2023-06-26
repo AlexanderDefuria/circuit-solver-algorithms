@@ -1,12 +1,11 @@
-use crate::partial_container::PartialContainer;
 use crate::util::PrettyString;
 use serde::{Deserialize, Serialize};
+use crate::simplification::Simplification;
 
 /// Possible Component Types
 #[derive(PartialEq, Debug, Serialize, Deserialize)]
 pub enum Component {
-    #[serde(skip_serializing, skip_deserializing)]
-    Compound(PartialContainer),
+    Compound(Simplification),
     Ground,
     Resistor,
     VoltageSrc,
@@ -59,6 +58,8 @@ impl PrettyString for Component {
         }
     }
 }
+
+
 
 #[cfg(test)]
 mod tests {

@@ -1,3 +1,4 @@
+use std::rc::{Rc, Weak};
 use crate::container::Container;
 use crate::elements::Element;
 use crate::simplification::Method;
@@ -5,6 +6,7 @@ use crate::tools::ToolType;
 use crate::validation::{Status, StatusError, Validation, ValidationResult};
 use ndarray::Array2;
 use serde_json::Value::Array;
+use crate::operations::Operation;
 
 /// This will be the main interface for the user to interact with the program.
 ///
@@ -13,31 +15,43 @@ use serde_json::Value::Array;
 /// should be completed with a GUI, after the container is done V1. Most likely
 /// this will begin development when the solver is structurally complete or V0.1.
 pub struct Controller {
-    pub container: Container,
+    pub container: Rc<Container>,
     pub operations: Vec<Operation>,
     pub status: ValidationResult,
-}
-
-pub struct Operation {
-    pub tool: ToolType,
-    pub method: Method,
-    pub args: Vec<String>,
 }
 
 impl Controller {
     pub fn new() -> Controller {
         Controller {
-            container: Container::new(),
+            container: Rc::from(Container::new()),
             operations: vec![],
             status: Ok(Status::New),
         }
     }
 
-    pub fn add_operation(&mut self, operation: Operation) {
+    pub fn add_operation(&mut self, mut operation: Operation) {
+        if self.operations.len() == 0 {
+            operation.origin = Rc::downgrade(&self.container);
+        } else {
+            operation.origin = Rc::downgrade(self.operations.last().unwrap().result.as_ref().unwrap());
+        }
         self.operations.push(operation);
     }
 
     pub fn run(&mut self) -> Result<(), StatusError> {
+        for (i, operation) in self.operations.iter_mut().enumerate() {
+            if operation.completed() {
+                continue;
+            }
+            if !operation.has_origin() {
+                if i == 0 {
+                    operation.origin = Rc::downgrade(&self.container);
+                } else {
+                    operation.origin = Rc::downgrade(operation.result.as_ref().unwrap());
+                }
+            }
+            operation.run()?;
+        }
         Err(StatusError::Known("Not Implemented".parse().unwrap()))
     }
 
@@ -60,6 +74,10 @@ impl Controller {
         }
         Ok(controller)
     }
+
+    pub fn get_weak_container(&self) -> Weak<Container> {
+        Rc::downgrade(&self.container)
+    }
 }
 
 impl From<Vec<Element>> for Controller {
@@ -70,7 +88,7 @@ impl From<Vec<Element>> for Controller {
         }
         let status = container.validate();
         Controller {
-            container,
+            container: Rc::from(container),
             operations: vec![],
             status,
         }
