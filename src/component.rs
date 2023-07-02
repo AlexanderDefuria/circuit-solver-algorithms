@@ -1,6 +1,5 @@
 use crate::util::PrettyString;
 use serde::{Deserialize, Serialize};
-use crate::simplification::Simplification;
 
 /// Possible Component Types
 #[derive(PartialEq, Debug, Serialize, Deserialize)]
@@ -15,6 +14,15 @@ pub enum Component {
     Switch,
     Inductor,
     Capacitor,
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
+pub enum Simplification {
+    None,
+    Series,
+    Parallel,
+    Norton,
+    Thevinin,
 }
 
 impl Component {

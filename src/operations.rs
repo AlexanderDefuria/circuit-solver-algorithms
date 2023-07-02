@@ -1,8 +1,8 @@
 use std::ops::Deref;
 use std::rc::{Rc, Weak};
 use serde::{Deserialize, Serialize};
+use crate::component::Simplification;
 use crate::container::Container;
-use crate::simplification::Method;
 use crate::tools::ToolType;
 use crate::validation::{StatusError, Validation, ValidationResult};
 
@@ -14,7 +14,7 @@ pub struct Operation {
 
 #[derive(Serialize, Deserialize)]
 pub enum OpMethod {
-    Simplify(Method),
+    Simplify(Simplification),
     Tool(ToolType),
     Validation,
 }

@@ -1,7 +1,6 @@
 use std::rc::{Rc, Weak};
 use crate::container::Container;
 use crate::elements::Element;
-use crate::simplification::Method;
 use crate::tools::ToolType;
 use crate::validation::{Status, StatusError, Validation, ValidationResult};
 use ndarray::Array2;

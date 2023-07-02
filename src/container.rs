@@ -1,6 +1,5 @@
 use crate::component::Component::{Ground, VoltageSrc};
 use crate::elements::Element;
-use crate::simplification::{Method, Simplification};
 use crate::tools::{Tool, ToolType};
 use crate::util::PrettyString;
 use crate::validation::StatusError::Known;
@@ -14,6 +13,7 @@ use rustworkx_core::connectivity;
 use serde::Serialize;
 use std::fmt::{Debug, Formatter};
 use std::rc::{Rc, Weak};
+use crate::component::Simplification;
 
 /// Representation of a Schematic Container
 ///
@@ -210,7 +210,7 @@ impl Container {
         self.elements.get(self.ground).unwrap()
     }
 
-    pub fn simplify(&mut self, method: &Method) -> &mut Self {
+    pub fn simplify(&mut self, method: &Simplification) -> &mut Self {
         self
     }
 

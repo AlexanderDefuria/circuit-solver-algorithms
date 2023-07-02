@@ -1,4 +1,3 @@
-use crate::simplification::Method;
 use std::fmt::{Debug, Display, Formatter};
 
 pub(crate) trait PrettyString {
