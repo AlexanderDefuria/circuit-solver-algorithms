@@ -1,11 +1,11 @@
-use std::rc::{Rc, Weak};
 use crate::container::Container;
 use crate::elements::Element;
+use crate::operations::Operation;
 use crate::tools::ToolType;
 use crate::validation::{Status, StatusError, Validation, ValidationResult};
 use ndarray::Array2;
 use serde_json::Value::Array;
-use crate::operations::Operation;
+use std::rc::{Rc, Weak};
 
 /// This will be the main interface for the user to interact with the program.
 ///
@@ -32,7 +32,8 @@ impl Controller {
         if self.operations.len() == 0 {
             operation.origin = Rc::downgrade(&self.container);
         } else {
-            operation.origin = Rc::downgrade(self.operations.last().unwrap().result.as_ref().unwrap());
+            operation.origin =
+                Rc::downgrade(self.operations.last().unwrap().result.as_ref().unwrap());
         }
         self.operations.push(operation);
     }
@@ -112,7 +113,10 @@ mod tests {
     #[test]
     fn test_load() {
         let controller = Controller::load_from_file("tests/data/basic_container.json");
-        assert_eq!(create_basic_container().get_elements(), controller.container.get_elements());
+        assert_eq!(
+            create_basic_container().get_elements(),
+            controller.container.get_elements()
+        );
     }
 
     #[test]
@@ -122,11 +126,12 @@ mod tests {
         let contents = std::fs::read_to_string(&file).unwrap();
 
         let controller = Controller::load_from_json(&contents).unwrap();
-        assert_eq!(create_basic_container().get_elements(), controller.container.get_elements());
+        assert_eq!(
+            create_basic_container().get_elements(),
+            controller.container.get_elements()
+        );
     }
 
     #[test]
-    fn test_controller() {
-
-    }
+    fn test_controller() {}
 }

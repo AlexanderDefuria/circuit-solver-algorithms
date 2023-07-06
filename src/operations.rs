@@ -1,10 +1,10 @@
-use std::ops::Deref;
-use std::rc::{Rc, Weak};
-use serde::{Deserialize, Serialize};
 use crate::component::Simplification;
 use crate::container::Container;
 use crate::tools::ToolType;
 use crate::validation::{StatusError, Validation, ValidationResult};
+use serde::{Deserialize, Serialize};
+use std::ops::Deref;
+use std::rc::{Rc, Weak};
 
 pub struct Operation {
     pub origin: Weak<Container>,
@@ -38,12 +38,8 @@ impl Operation {
             OpMethod::Simplify(method) => {
                 result = self.origin.upgrade().unwrap().deref().clone();
             }
-            OpMethod::Tool(_) => {
-
-            }
-            OpMethod::Validation => {
-
-            }
+            OpMethod::Tool(_) => {}
+            OpMethod::Validation => {}
         }
         result.validate()?;
         self.result = Some(Rc::new(result));

@@ -1,17 +1,16 @@
-use std::rc::Rc;
-use petgraph::visit::Control;
-use crate::container::Container;
-use crate::elements::Element;
-use crate::validation::{StatusError, Validation};
-use serde::{Deserialize, Serialize};
-use wasm_bindgen::prelude::*;
 use crate::component::Component::{Ground, Resistor, VoltageSrc};
+use crate::container::Container;
+use crate::controller::Controller;
+use crate::elements::Element;
+use crate::operations::{OpMethod, Operation};
 use crate::validation::StatusError::{Known, Multiple};
+use crate::validation::{StatusError, Validation};
+use petgraph::visit::Control;
+use serde::{Deserialize, Serialize};
+use std::rc::Rc;
+use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_test::*;
-use crate::controller::Controller;
-use crate::operations::{Operation, OpMethod};
-
 
 #[derive(Serialize, Deserialize)]
 pub struct ContainerSetup {
@@ -57,14 +56,9 @@ impl From<ContainerSetup> for Controller {
             status,
         }
     }
-
 }
 
 pub fn simplify() {}
-pub fn serialize() {}
-pub fn deserialize() {}
-
-
 
 #[wasm_bindgen_test]
 fn test_container_wasm() {

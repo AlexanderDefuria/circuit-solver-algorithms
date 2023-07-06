@@ -67,8 +67,6 @@ impl PrettyString for Component {
     }
 }
 
-
-
 #[cfg(test)]
 mod tests {
     use super::*;

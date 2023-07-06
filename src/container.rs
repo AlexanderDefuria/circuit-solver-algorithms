@@ -1,4 +1,5 @@
 use crate::component::Component::{Ground, VoltageSrc};
+use crate::component::{Component, Simplification};
 use crate::elements::Element;
 use crate::tools::{Tool, ToolType};
 use crate::util::PrettyString;
@@ -13,7 +14,6 @@ use rustworkx_core::connectivity;
 use serde::Serialize;
 use std::fmt::{Debug, Formatter};
 use std::rc::{Rc, Weak};
-use crate::component::Simplification;
 
 /// Representation of a Schematic Container
 ///
