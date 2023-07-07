@@ -86,23 +86,33 @@ impl PrettyPrint for Element {
 
 impl Into<EquationRepr> for Element {
     fn into(self) -> EquationRepr {
-        EquationRepr::new(self.basic_string(), self.value)
+        EquationRepr::new_with_latex(
+            self.basic_string(),
+            format!("{}_{{{}}}", self.name, self.id),
+            self.value,
+        )
     }
 }
 
 impl Into<EquationRepr> for Rc<Element> {
     fn into(self) -> EquationRepr {
-        EquationRepr::new(self.basic_string(), self.value)
+        EquationRepr::new_with_latex(self.basic_string(),
+                          format!("{}_{{{}}}", self.name, self.id),
+                          self.value)
     }
 }
 
 impl EquationMember for Element {
+    fn equation_string(&self) -> String {
+        self.basic_string()
+    }
+
     fn value(&self) -> f64 {
         self.value
     }
 
-    fn equation_string(&self) -> String {
-        self.basic_string()
+    fn latex_string(&self) -> String {
+        format!("{}_{{{}}}", self.name, self.id)
     }
 }
 

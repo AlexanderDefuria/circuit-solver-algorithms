@@ -188,7 +188,7 @@ impl Display for ToolType {
 
 impl PrettyPrint for Tool {
     fn pretty_string(&self) -> String {
-        format!("{} id: {}", self.class, self.id)
+        format!("{}: {}", self.class, self.id)
     }
 
     fn basic_string(&self) -> String {

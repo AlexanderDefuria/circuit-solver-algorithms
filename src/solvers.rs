@@ -1,7 +1,7 @@
 use crate::component::Component::{CurrentSrc, Resistor, VoltageSrc};
 use crate::container::Container;
 use crate::elements::Element;
-use crate::math::{EquationRepr, MathOp};
+use crate::math::{matrix_to_latex, EquationRepr, MathOp};
 use crate::util::PrettyPrint;
 use ndarray::{s, ArrayBase, Ix2, OwnedRepr};
 use std::cell::RefCell;
@@ -13,7 +13,7 @@ use std::rc::{Rc, Weak};
 pub trait Solver {
     fn new(container: Rc<RefCell<Container>>) -> Self;
     fn solve(&self) -> Result<String, String>;
-    fn latex(&self) -> String;
+    fn latex(&self) -> Result<String, String>;
 }
 
 struct NodeSolver {
@@ -53,19 +53,28 @@ impl Solver for NodeSolver {
         // x contains our unknowns
         // z contains our knowns
         // A contains our coefficients
-
-        self.a_matrix.clone().swap_axes(0, 1);
-
         Ok(format!(
             "{:?} * {:?} = {:?}",
-            self.a_matrix, self.z_matrix, self.z_matrix
+            self.a_matrix.clone().swap_axes(1, 0),
+            self.z_matrix,
+            self.x_matrix
         )
         .parse()
         .unwrap())
     }
 
-    fn latex(&self) -> String {
-        todo!()
+    fn latex(&self) -> Result<String, String> {
+        let mut inverse_a_matrix: ndarray::Array2<MathOp> = self.a_matrix.clone();
+        inverse_a_matrix.swap_axes(1, 0);
+
+        // Wrap in matrix
+        // [x] = [A]^-1 * [z]
+        Ok(format!(
+            "{} = {}^{{-1}} * {}",
+            matrix_to_latex(self.x_matrix.clone()),
+            matrix_to_latex(inverse_a_matrix),
+            matrix_to_latex(self.z_matrix.clone())
+        ))
     }
 }
 
@@ -244,10 +253,10 @@ mod tests {
 
     #[test]
     fn test_node_solver() {
-        let mut c = create_basic_container();
+        let mut c = create_mna_container();
         c.create_nodes();
         let mut solver: NodeSolver = Solver::new(Rc::new(RefCell::new(c)));
-        println!("{:?}", solver.solve());
+        println!("{:?}", solver.latex());
     }
 
     #[test]
@@ -333,9 +342,9 @@ mod tests {
     #[test]
     fn test_x_matrix() {
         let expected = array![
-            ["Node id: 1"],
-            ["Node id: 2"],
-            ["Node id: 3"],
+            ["Node: 1"],
+            ["Node: 2"],
+            ["Node: 3"],
             ["SRC(V)4: 32 V"],
             ["SRC(V)5: 20 V"]
         ];

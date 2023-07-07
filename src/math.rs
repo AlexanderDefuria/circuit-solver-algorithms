@@ -1,3 +1,4 @@
+use ndarray::Array2;
 use std::fmt::{Debug, Formatter};
 use std::ops::Add;
 use std::rc::Rc;
@@ -8,11 +9,15 @@ pub trait EquationMember {
     fn is_zero(&self) -> bool {
         self.value().is_zero()
     }
+    fn latex_string(&self) -> String {
+        self.equation_string()
+    }
 }
 
 #[derive(Debug, Clone)]
 pub struct EquationRepr {
     string: String,
+    latex: Option<String>,
     value: f64,
 }
 
@@ -20,20 +25,37 @@ impl EquationMember for EquationRepr {
     fn equation_string(&self) -> String {
         self.string.clone()
     }
-
     fn value(&self) -> f64 {
         self.value
+    }
+    fn latex_string(&self) -> String {
+        match &self.latex {
+            Some(latex) => latex.clone(),
+            None => self.equation_string(),
+        }
     }
 }
 
 impl EquationRepr {
     pub fn new(string: String, value: f64) -> EquationRepr {
-        EquationRepr { string, value }
+        EquationRepr {
+            string,
+            latex: None,
+            value,
+        }
+    }
+
+    pub fn new_with_latex(string: String, latex: String, value: f64) -> EquationRepr {
+        EquationRepr {
+            string,
+            latex: Some(latex),
+            value,
+        }
     }
 }
 
 #[derive(Clone)]
-pub enum MathOp {
+pub(crate) enum MathOp {
     Multiply(Rc<dyn EquationMember>, Rc<dyn EquationMember>),
     Negate(Rc<dyn EquationMember>),
     Inverse(Rc<dyn EquationMember>),
@@ -73,7 +95,6 @@ impl EquationMember for f64 {
     fn equation_string(&self) -> String {
         self.to_string()
     }
-
     fn value(&self) -> f64 {
         *self
     }
@@ -131,12 +152,61 @@ impl EquationMember for MathOp {
             MathOp::Unknown(a) => a.value(),
         }
     }
+
+    fn latex_string(&self) -> String {
+        match self {
+            MathOp::Multiply(a, b) => {
+                format!("{} \\cdot {}", a.latex_string(), b.latex_string())
+            }
+            MathOp::Negate(a) => {
+                format!("-{}", a.latex_string())
+            }
+            MathOp::Inverse(a) => {
+                format!("\\frac{{1}}{{{}}}", a.latex_string())
+            }
+            MathOp::Sum(vec) => {
+                let mut string = String::new();
+                for (i, item) in vec.iter().enumerate() {
+                    string.push_str(&item.latex_string());
+                    if i != vec.len() - 1 {
+                        string.push_str(" + ");
+                    }
+                }
+                string
+            }
+            MathOp::Collect(a) => {
+                let mut string = String::new();
+                string.push_str("(");
+                string.push_str(&a.latex_string());
+                string.push_str(")");
+                string
+            }
+            MathOp::None(a) => a.latex_string(),
+            MathOp::Unknown(a) => a.latex_string()
+        }
+    }
 }
 
 impl Debug for MathOp {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.equation_string())
     }
+}
+
+pub(crate) fn matrix_to_latex(matrix: Array2<MathOp>) -> String {
+    let mut latex_a_matrix = String::new();
+    latex_a_matrix.push_str("\\begin{bmatrix}");
+    for row in matrix.genrows() {
+        for (i, math) in row.iter().enumerate() {
+            latex_a_matrix.push_str(&math.latex_string());
+            if i != row.len() - 1 {
+                latex_a_matrix.push_str(" & "); // Don't add & to last element
+            }
+        }
+        latex_a_matrix.push_str("\\\\"); // End of row
+    }
+    latex_a_matrix.push_str("\\end{bmatrix}");
+    latex_a_matrix
 }
 
 #[cfg(test)]

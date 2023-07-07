@@ -6,6 +6,9 @@ use std::fmt::{Debug, Display, Formatter};
 pub(crate) trait PrettyPrint {
     fn pretty_string(&self) -> String;
     fn basic_string(&self) -> String;
+    fn latex_string(&self) -> String {
+        self.pretty_string()
+    }
 }
 
 #[macro_export]
