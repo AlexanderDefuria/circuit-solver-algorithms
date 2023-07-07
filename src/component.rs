@@ -1,8 +1,8 @@
-use crate::util::PrettyString;
+use crate::util::PrettyPrint;
 use serde::{Deserialize, Serialize};
 
 /// Possible Component Types
-#[derive(PartialEq, Debug, Serialize, Deserialize)]
+#[derive(PartialEq, Debug, Serialize, Deserialize, Clone)]
 pub enum Component {
     Compound(Simplification),
     Ground,
@@ -16,7 +16,7 @@ pub enum Component {
     Capacitor,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub enum Simplification {
     None,
     Series,
@@ -26,16 +26,6 @@ pub enum Simplification {
 }
 
 impl Component {
-    pub(crate) fn basic_string(&self) -> String {
-        match self {
-            Component::Ground => "GND".to_string(),
-            Component::Resistor => "R".to_string(),
-            Component::VoltageSrc => "SRC(V)".to_string(),
-            Component::CurrentSrc => "SRC(C)".to_string(),
-            _ => "Unknown".to_string(),
-        }
-    }
-
     pub(crate) fn unit_string(&self) -> String {
         match self {
             Component::Ground => "V".to_string(),
@@ -55,13 +45,23 @@ impl Component {
     }
 }
 
-impl PrettyString for Component {
+impl PrettyPrint for Component {
     fn pretty_string(&self) -> String {
         match self {
             Component::Ground => "Ground".to_string(),
             Component::Resistor => "Resistor".to_string(),
             Component::VoltageSrc => "Voltage".to_string(),
             Component::CurrentSrc => "Current".to_string(),
+            _ => "Unknown".to_string(),
+        }
+    }
+
+    fn basic_string(&self) -> String {
+        match self {
+            Component::Ground => "GND".to_string(),
+            Component::Resistor => "R".to_string(),
+            Component::VoltageSrc => "SRC(V)".to_string(),
+            Component::CurrentSrc => "SRC(C)".to_string(),
             _ => "Unknown".to_string(),
         }
     }

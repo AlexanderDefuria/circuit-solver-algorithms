@@ -1,6 +1,7 @@
 use crate::component::Component::Ground;
 use crate::elements::Element;
 use crate::tools::ToolType::*;
+use crate::util::PrettyPrint;
 use crate::validation::Status::Valid;
 use crate::validation::StatusError::{Known, Multiple};
 use crate::validation::{
@@ -58,7 +59,7 @@ impl Tool {
     }
 
     /// Check if the tool contains an element
-    pub(crate) fn contains(&self, element: Weak<Element>) -> bool {
+    pub(crate) fn contains(&self, element: &Weak<Element>) -> bool {
         let element = element.upgrade().unwrap();
         self.members
             .iter()
@@ -106,7 +107,7 @@ impl Tool {
                 for second in nodes {
                     // Check for a connection between the nodes (if they share an element)
                     for element in &node.members {
-                        if second.upgrade().unwrap().contains(element.clone()) {
+                        if second.upgrade().unwrap().contains(element) {
                             let x = (node.id as u32, second.upgrade().unwrap().id as u32);
                             let y = (second.upgrade().unwrap().id as u32, node.id as u32);
                             if !edges.contains(&x) && !edges.contains(&y) && x.0 != x.1 {
@@ -185,11 +186,27 @@ impl Display for ToolType {
     }
 }
 
+impl PrettyPrint for Tool {
+    fn pretty_string(&self) -> String {
+        format!("{} id: {}", self.class, self.id)
+    }
+
+    fn basic_string(&self) -> String {
+        format!(
+            "{:?}",
+            self.members
+                .iter()
+                .map(|x| x.upgrade().unwrap().id)
+                .collect::<Vec<usize>>()
+        )
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::container::Container;
-    use crate::helpers::{create_basic_container, create_basic_super_mesh_container};
     use crate::tools::{Tool, ToolType};
+    use crate::util::{create_basic_container, create_basic_super_mesh_container};
     use crate::validation::StatusError::Known;
     use crate::validation::Validation;
     use petgraph::graph::UnGraph;

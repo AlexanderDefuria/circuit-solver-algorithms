@@ -70,18 +70,27 @@ fn test_container_wasm() {
 
 #[wasm_bindgen_test]
 fn test_load() {
-    let c: Vec<Element> = vec![];
+    let c = ContainerSetup {
+        elements: vec![],
+        operations: vec![],
+    };
     let x: JsValue = serde_wasm_bindgen::to_value(&c).unwrap();
     assert_eq!(load_wasm_container(x).unwrap(), "No elements");
 
-    let c: Vec<Element> = vec![Element::new(Ground, 0., vec![], vec![])];
+    let c = ContainerSetup {
+        elements: vec![Element::new(Ground, 0., vec![], vec![])],
+        operations: vec![],
+    };
     let x: JsValue = serde_wasm_bindgen::to_value(&c).unwrap();
     assert!(load_wasm_container(x).is_err());
 
-    let c: Vec<Element> = vec![
-        Element::new(Ground, 0., vec![1], vec![]),
-        Element::new(Ground, 0., vec![0], vec![]),
-    ];
+    let c = ContainerSetup {
+        elements: vec![
+            Element::new(Ground, 0., vec![1], vec![]),
+            Element::new(Ground, 0., vec![0], vec![]),
+        ],
+        operations: vec![],
+    };
     let x: JsValue = serde_wasm_bindgen::to_value(&c).unwrap();
     assert_eq!(
         load_wasm_container(x),
@@ -91,12 +100,15 @@ fn test_load() {
         ]))
     );
 
-    let c: Vec<Element> = vec![
-        Element::new(VoltageSrc, 1.0, vec![2, 3], vec![1]),
-        Element::new(Resistor, 1.0, vec![0], vec![2]),
-        Element::new(Resistor, 1.0, vec![1], vec![0, 3]),
-        Element::new(Ground, 0., vec![0, 2], vec![]),
-    ];
+    let c = ContainerSetup {
+        elements: vec![
+            Element::new(VoltageSrc, 1.0, vec![2, 3], vec![1]),
+            Element::new(Resistor, 1.0, vec![0], vec![2]),
+            Element::new(Resistor, 1.0, vec![1], vec![0, 3]),
+            Element::new(Ground, 0., vec![0, 2], vec![]),
+        ],
+        operations: vec![],
+    };
     let x: JsValue = serde_wasm_bindgen::to_value(&c).unwrap();
     assert_eq!(
         Ok("Loaded Successfully".to_string()),

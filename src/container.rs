@@ -2,7 +2,7 @@ use crate::component::Component::{Ground, VoltageSrc};
 use crate::component::{Component, Simplification};
 use crate::elements::Element;
 use crate::tools::{Tool, ToolType};
-use crate::util::PrettyString;
+use crate::util::PrettyPrint;
 use crate::validation::StatusError::Known;
 use crate::validation::{
     check_duplicates, get_all_internal_status_errors, Status, StatusError, Validation,
@@ -144,6 +144,17 @@ impl Container {
         self
     }
 
+    pub fn print_nodes(&self) {
+        println!("Nodes:");
+        for node in self.nodes() {
+            println!(
+                "  {} {}",
+                node.upgrade().unwrap().pretty_string(),
+                node.upgrade().unwrap().basic_string()
+            );
+        }
+    }
+
     pub fn create_super_nodes(&mut self) -> &mut Self {
         let mut super_nodes: Vec<Tool> = Vec::new();
         let mut valid_sources: Vec<Weak<Element>> = Vec::new();
@@ -217,6 +228,14 @@ impl Container {
     pub fn solve(&mut self, method: &ToolType) -> &mut Self {
         self
     }
+
+    pub fn get_voltage_sources(&self) -> Vec<Weak<Element>> {
+        self.elements
+            .iter()
+            .filter(|x| x.class == VoltageSrc)
+            .map(|x| Rc::downgrade(x))
+            .collect()
+    }
 }
 
 impl Validation for Container {
@@ -264,8 +283,8 @@ mod tests {
     use crate::component::Component::{Ground, Resistor};
     use crate::container::Container;
     use crate::elements::Element;
-    use crate::helpers::*;
     use crate::tools::ToolType::SuperNode;
+    use crate::util::*;
     use crate::validation::Status::Valid;
     use crate::validation::{StatusError, Validation};
     use regex::Regex;
@@ -357,6 +376,10 @@ mod tests {
                 assert_eq!(test_vectors[test][i], c.upgrade().unwrap().id);
             }
         }
+
+        let mut x = create_mna_container();
+        let c = x.create_nodes();
+        assert!(c.validate().is_ok());
     }
 
     #[test]

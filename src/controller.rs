@@ -108,7 +108,7 @@ fn nodal_analysis() {
 #[cfg(test)]
 mod tests {
     use crate::controller::Controller;
-    use crate::helpers::create_basic_container;
+    use crate::util::create_basic_container;
 
     #[test]
     fn test_load() {

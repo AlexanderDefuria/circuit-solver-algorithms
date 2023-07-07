@@ -1,6 +1,7 @@
 use crate::component::Component;
 use crate::component::Component::Ground;
-use crate::util::PrettyString;
+use crate::math::{EquationMember, EquationRepr};
+use crate::util::PrettyPrint;
 use crate::validation::Status::Valid;
 use crate::validation::StatusError::Known;
 use crate::validation::{Validation, ValidationResult};
@@ -9,7 +10,7 @@ use std::fmt::Display;
 use std::rc::Rc;
 
 /// Representation of a Schematic Element
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Element {
     #[serde(skip_deserializing)]
     pub(crate) name: String,
@@ -67,7 +68,7 @@ impl Element {
     }
 }
 
-impl PrettyString for Element {
+impl PrettyPrint for Element {
     fn pretty_string(&self) -> String {
         format!(
             "{}{}: {} {}",
@@ -76,6 +77,32 @@ impl PrettyString for Element {
             self.value,
             self.class.unit_string()
         )
+    }
+
+    fn basic_string(&self) -> String {
+        format!("{}{}", self.name, self.id)
+    }
+}
+
+impl Into<EquationRepr> for Element {
+    fn into(self) -> EquationRepr {
+        EquationRepr::new(self.basic_string(), self.value)
+    }
+}
+
+impl Into<EquationRepr> for Rc<Element> {
+    fn into(self) -> EquationRepr {
+        EquationRepr::new(self.basic_string(), self.value)
+    }
+}
+
+impl EquationMember for Element {
+    fn value(&self) -> f64 {
+        self.value
+    }
+
+    fn equation_string(&self) -> String {
+        self.basic_string()
     }
 }
 
