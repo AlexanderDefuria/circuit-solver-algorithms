@@ -35,7 +35,7 @@ impl Operation {
     pub fn run(&mut self) -> Result<&mut Self, StatusError> {
         let mut result: Container = Container::new();
         match &self.method {
-            OpMethod::Simplify(method) => {
+            OpMethod::Simplify(_method) => {
                 result = self.origin.upgrade().unwrap().deref().clone();
             }
             OpMethod::Tool(_) => {}

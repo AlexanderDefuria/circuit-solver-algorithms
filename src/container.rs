@@ -1,5 +1,5 @@
 use crate::component::Component::{Ground, VoltageSrc};
-use crate::component::{Component, Simplification};
+use crate::component::{Simplification};
 use crate::elements::Element;
 use crate::tools::{Tool, ToolType};
 use crate::util::PrettyPrint;
@@ -11,14 +11,15 @@ use crate::validation::{
 use petgraph::graph::UnGraph;
 use petgraph::prelude::NodeIndex;
 use rustworkx_core::connectivity;
-use serde::Serialize;
+
 use std::fmt::{Debug, Formatter};
 use std::rc::{Rc, Weak};
+use serde::{Serialize, Serializer};
 
 /// Representation of a Schematic Container
 ///
 /// Container is a collection of Elements and Tools we are using to solve the circuit
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct Container {
     elements: Vec<Rc<Element>>,
     tools: Vec<Rc<Tool>>,
@@ -221,11 +222,11 @@ impl Container {
         self.elements.get(self.ground).unwrap()
     }
 
-    pub fn simplify(&mut self, method: &Simplification) -> &mut Self {
+    pub fn simplify(&mut self, _method: &Simplification) -> &mut Self {
         self
     }
 
-    pub fn solve(&mut self, method: &ToolType) -> &mut Self {
+    pub fn solve(&mut self, _method: &ToolType) -> &mut Self {
         self
     }
 

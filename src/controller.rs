@@ -1,10 +1,10 @@
 use crate::container::Container;
 use crate::elements::Element;
 use crate::operations::Operation;
-use crate::tools::ToolType;
+
 use crate::validation::{Status, StatusError, Validation, ValidationResult};
 use ndarray::Array2;
-use serde_json::Value::Array;
+
 use std::rc::{Rc, Weak};
 
 /// This will be the main interface for the user to interact with the program.
@@ -68,7 +68,7 @@ impl Controller {
 
     pub fn load_from_json(json_str: &str) -> Result<Controller, StatusError> {
         let json: Vec<Element> = serde_json::from_str(&json_str).unwrap();
-        let mut controller: Controller = json.into();
+        let controller: Controller = json.into();
         if controller.status.is_err() {
             return Err(controller.status.unwrap_err());
         }
@@ -102,7 +102,7 @@ impl Validation for Controller {
 }
 
 fn nodal_analysis() {
-    let mut matrix = Array2::<f64>::zeros((3, 3)); // 3 by 3 Matrix
+    let _matrix = Array2::<f64>::zeros((3, 3)); // 3 by 3 Matrix
 }
 
 #[cfg(test)]

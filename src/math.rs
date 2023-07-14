@@ -212,7 +212,7 @@ pub(crate) fn matrix_to_latex(matrix: Array2<MathOp>) -> String {
 #[cfg(test)]
 mod tests {
     use crate::component::Component::Resistor;
-    use crate::math::{EquationMember, EquationRepr, MathOp};
+    use crate::math::{EquationMember, MathOp};
     use std::rc::Rc;
 
     #[test]

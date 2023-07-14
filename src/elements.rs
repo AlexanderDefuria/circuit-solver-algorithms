@@ -8,9 +8,10 @@ use crate::validation::{Validation, ValidationResult};
 use serde::{Deserialize, Serialize, Serializer};
 use std::fmt::Display;
 use std::rc::Rc;
+use serde::ser::SerializeStruct;
 
 /// Representation of a Schematic Element
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Element {
     #[serde(skip_deserializing)]
     pub(crate) name: String,
@@ -81,6 +82,10 @@ impl PrettyPrint for Element {
 
     fn basic_string(&self) -> String {
         format!("{}{}", self.name, self.id)
+    }
+
+    fn latex_string(&self) -> String {
+        EquationMember::latex_string(self)
     }
 }
 
@@ -177,6 +182,23 @@ impl Display for Element {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         self.validate().unwrap();
         write!(f, "{}", self.pretty_string())
+    }
+}
+
+impl Serialize for Element {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
+        let mut state = serializer.serialize_struct("Element", 9)?;
+        state.serialize_field("name", &self.name)?;
+        state.serialize_field("id", &self.id)?;
+        state.serialize_field("value", &self.value)?;
+        state.serialize_field("current", &self.current)?;
+        state.serialize_field("voltage_drop", &self.voltage_drop)?;
+        state.serialize_field("class", &self.class)?;
+        state.serialize_field("positive", &self.positive)?;
+        state.serialize_field("negative", &self.negative)?;
+        state.serialize_field("pretty_string", &self.pretty_string())?;
+        state.serialize_field("latex_string", &PrettyPrint::latex_string(self))?;
+        state.end()
     }
 }
 

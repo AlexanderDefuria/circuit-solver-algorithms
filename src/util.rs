@@ -1,7 +1,7 @@
 use crate::component::Component::{CurrentSrc, Ground, Resistor, VoltageSrc};
 use crate::container::Container;
 use crate::elements::Element;
-use std::fmt::{Debug, Display, Formatter};
+
 
 pub(crate) trait PrettyPrint {
     fn pretty_string(&self) -> String;
@@ -41,16 +41,16 @@ pub fn create_basic_supernode_container() -> Container {
     container
 }
 
-pub fn create_basic_super_mesh_container() -> Container {
+pub fn create_basic_supermesh_container() -> Container {
     let mut container = Container::new();
     container.add_element_core(Element::new(Ground, 0., vec![1, 2, 3, 4], vec![]));
     container.add_element_core(Element::new(VoltageSrc, 3., vec![5], vec![0, 2, 3, 4]));
     container.add_element_core(Element::new(CurrentSrc, 1.5, vec![0, 1, 3, 4], vec![5, 6]));
     container.add_element_core(Element::new(Resistor, 2., vec![6, 7], vec![0, 1, 2, 4]));
-    container.add_element_core(Element::new(CurrentSrc, 2., vec![0, 1, 2, 3], vec![7]));
+    container.add_element_core(Element::new(CurrentSrc, 2., vec![7], vec![0, 1, 2, 3]));
     container.add_element_core(Element::new(Resistor, 2., vec![1], vec![2, 6]));
     container.add_element_core(Element::new(Resistor, 4., vec![5, 2], vec![3, 7]));
-    container.add_element_core(Element::new(Resistor, 1., vec![3, 7], vec![4]));
+    container.add_element_core(Element::new(Resistor, 1., vec![3, 6], vec![4]));
     container
 }
 
@@ -69,9 +69,28 @@ pub fn create_mna_container() -> Container {
 mod tests {
     use crate::component::Component;
     use crate::elements::Element;
-    use crate::util::create_basic_container;
+    use crate::util::{create_basic_container, create_basic_supermesh_container, create_basic_supernode_container, create_mna_container};
     use assert_json_diff::assert_json_include;
     use serde_json::json;
+    use crate::validation::Validation;
+
+    #[test]
+    fn test_create_containers() {
+        let mut container = create_basic_container();
+        let mut supernode_container = create_basic_supernode_container();
+        let mut supermesh_container = create_basic_supermesh_container();
+        let mut mna_container = create_mna_container();
+
+        container.validate().expect("");
+        supernode_container.validate().expect("");
+        supermesh_container.validate().expect("");
+        mna_container.validate().expect("");
+
+        println!("create_basic_container() -> {:?}", container);
+        println!("create_basic_supernode_container() -> {:?}", supernode_container);
+        println!("create_basic_super_mesh_container() -> {:?}", supermesh_container);
+        println!("create_mna_container() -> {:?}", mna_container);
+    }
 
     #[test]
     fn test_serde() {
@@ -95,7 +114,5 @@ mod tests {
         };
         assert_eq!(element.name, "R1");
         assert_json_include!(actual: element, expected: json);
-
-        println!("{:?}", create_basic_container());
     }
 }

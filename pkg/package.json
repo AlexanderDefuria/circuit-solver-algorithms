@@ -1,6 +1,6 @@
 {
-  "name": "@alexanderdefuria/circuit-solver-algorithms",
-  "version": "0.1.0",
+  "name": "circuit-solver-algorithms",
+  "version": "0.1.1",
   "files": [
     "circuit_solver_algorithms_bg.wasm",
     "circuit_solver_algorithms.js",
@@ -8,9 +8,7 @@
   ],
   "module": "circuit_solver_algorithms.js",
   "types": "circuit_solver_algorithms.d.ts",
-  "sideEffects": false,
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/AlexanderDeFuria/circuit-solver-algorithms.git"
-  }
+  "sideEffects": [
+    "./snippets/*"
+  ]
 }

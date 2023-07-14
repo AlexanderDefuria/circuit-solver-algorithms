@@ -5,7 +5,7 @@ use crate::util::PrettyPrint;
 use crate::validation::Status::Valid;
 use crate::validation::StatusError::{Known, Multiple};
 use crate::validation::{
-    check_duplicates, check_weak_duplicates, StatusError, Validation, ValidationResult,
+    check_weak_duplicates, StatusError, Validation, ValidationResult,
 };
 use petgraph::graph::UnGraph;
 use serde::{Deserialize, Serialize};
@@ -25,7 +25,7 @@ pub enum ToolType {
 /// Tools are used to solve circuits
 ///
 /// Representation of a Tool (Node, Mesh, SuperNode, SuperMesh)
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct Tool {
     pub(crate) id: usize,
     pub(crate) class: ToolType,
@@ -206,7 +206,7 @@ impl PrettyPrint for Tool {
 mod tests {
     use crate::container::Container;
     use crate::tools::{Tool, ToolType};
-    use crate::util::{create_basic_container, create_basic_super_mesh_container};
+    use crate::util::{create_basic_container, create_basic_supermesh_container};
     use crate::validation::StatusError::Known;
     use crate::validation::Validation;
     use petgraph::graph::UnGraph;
@@ -238,9 +238,10 @@ mod tests {
         assert_eq!(graph.node_count(), 3);
         assert_eq!(graph.edge_count(), 3);
 
-        let mut super_node = create_basic_super_mesh_container();
+        let mut super_node = create_basic_supermesh_container();
         let graph: UnGraph<i32, ()> =
             Tool::nodes_to_graph(&super_node.create_nodes().nodes()).unwrap();
+        println!("{:?}", graph);
         assert_eq!(graph.node_count(), 5);
         assert_eq!(graph.edge_count(), 7);
     }

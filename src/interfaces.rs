@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use crate::component::Component::{Ground, Resistor, VoltageSrc};
 use crate::container::Container;
 use crate::controller::Controller;
@@ -5,17 +6,22 @@ use crate::elements::Element;
 use crate::operations::{OpMethod, Operation};
 use crate::validation::StatusError::{Known, Multiple};
 use crate::validation::{StatusError, Validation};
-use petgraph::visit::Control;
+
 use serde::{Deserialize, Serialize};
 use std::rc::Rc;
+use serde_json::json;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_test::*;
+use crate::solvers::{NodeSolver, Solver};
+use crate::util::{create_basic_container, create_mna_container};
 
 #[derive(Serialize, Deserialize)]
 pub struct ContainerSetup {
     pub elements: Vec<Element>,
     pub operations: Vec<OpMethod>,
+    // pub method: OpMethod,
+    // pub target: Option<usize>,
 }
 
 #[wasm_bindgen]
@@ -32,6 +38,43 @@ pub fn load_wasm_container(js: JsValue) -> Result<String, StatusError> {
     Ok(String::from("Loaded Successfully"))
 }
 
+#[wasm_bindgen]
+pub fn return_create_basic_container() -> String {
+    let c: Container = create_basic_container();
+    let x = ContainerSetup {
+        elements: c.get_elements().iter().map(|y| {
+            let x = y.clone();
+            Element::new(x.class.clone(), x.value, x.positive.clone(), x.negative.clone())
+        }).collect(),
+        operations: vec![],
+    };
+
+    serde_json::to_string(&x).unwrap()
+}
+
+#[wasm_bindgen]
+pub fn return_create_mna_container() -> String {
+    let c: Container = create_mna_container();
+    let x = ContainerSetup {
+        elements: c.get_elements().iter().map(|y| {
+            let x = y.clone();
+            Element::new(x.class.clone(), x.value, x.positive.clone(), x.negative.clone())
+        }).collect(),
+        operations: vec![],
+    };
+
+    serde_json::to_string(&x).unwrap()
+}
+
+#[wasm_bindgen]
+pub fn solve_mna_container() -> String {
+    let c: Container = create_mna_container();
+    let solver: NodeSolver = Solver::new(Rc::new(RefCell::new(c)));
+    solver.latex().unwrap()
+
+}
+
+
 impl From<Vec<Element>> for Container {
     fn from(wasm: Vec<Element>) -> Container {
         let mut container = Container::new();
@@ -44,7 +87,7 @@ impl From<Vec<Element>> for Container {
 
 impl From<ContainerSetup> for Controller {
     fn from(setup: ContainerSetup) -> Controller {
-        let mut container: Container = setup.elements.into();
+        let container: Container = setup.elements.into();
         let mut operations: Vec<Operation> = vec![];
         for op in setup.operations {
             operations.push(op.into());
@@ -115,3 +158,18 @@ fn test_load() {
         load_wasm_container(x)
     );
 }
+
+#[cfg(test)]
+mod tests {
+    use wasm_bindgen::JsValue;
+    use crate::container::Container;
+    use crate::interfaces::{load_wasm_container, return_create_basic_container};
+    use crate::util::create_basic_container;
+
+    #[test]
+    fn test() {
+        println!("{:?}", return_create_basic_container());
+        assert!(true);
+    }
+}
+

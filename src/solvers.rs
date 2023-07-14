@@ -1,11 +1,12 @@
 use crate::component::Component::{CurrentSrc, Resistor, VoltageSrc};
 use crate::container::Container;
-use crate::elements::Element;
+
 use crate::math::{matrix_to_latex, EquationRepr, MathOp};
 use crate::util::PrettyPrint;
 use ndarray::{s, ArrayBase, Ix2, OwnedRepr};
 use std::cell::RefCell;
-use std::rc::{Rc, Weak};
+use std::rc::{Rc};
+
 
 /// This will take a container and solve it using the given method.
 /// KCL and KVL will be used to solve the circuit.
@@ -16,7 +17,7 @@ pub trait Solver {
     fn latex(&self) -> Result<String, String>;
 }
 
-struct NodeSolver {
+pub struct NodeSolver {
     container: Rc<RefCell<Container>>,
     a_matrix: ndarray::Array2<MathOp>,
     x_matrix: ndarray::Array2<MathOp>,
@@ -24,7 +25,7 @@ struct NodeSolver {
 }
 
 impl Solver for NodeSolver {
-    fn new(mut container: Rc<RefCell<Container>>) -> NodeSolver {
+    fn new(container: Rc<RefCell<Container>>) -> NodeSolver {
         container.borrow_mut().create_nodes();
         let n = container.borrow().nodes().len(); // Node Count
         let m = container // Source Count
@@ -64,8 +65,8 @@ impl Solver for NodeSolver {
     }
 
     fn latex(&self) -> Result<String, String> {
-        let mut inverse_a_matrix: ndarray::Array2<MathOp> = self.a_matrix.clone();
-        inverse_a_matrix.swap_axes(1, 0);
+        let inverse_a_matrix: ndarray::Array2<MathOp> = self.a_matrix.clone();
+        // solve::inverse(&mut inverse_a_matrix).unwrap();
 
         // Wrap in matrix
         // [x] = [A]^-1 * [z]
@@ -98,7 +99,7 @@ fn form_a_matrix(container: Rc<RefCell<Container>>, n: usize, m: usize) -> ndarr
 fn form_g_matrix(container: Rc<RefCell<Container>>, n: usize) -> ndarray::Array2<MathOp> {
     let mut matrix: ArrayBase<OwnedRepr<MathOp>, Ix2> = ndarray::Array2::<MathOp>::zeros((n, n));
     let mut nodes = container.borrow().nodes().clone();
-    let elements = container.borrow().get_elements().clone();
+    let _elements = container.borrow().get_elements().clone();
 
     nodes.sort_by(|a, b| a.upgrade().unwrap().id.cmp(&b.upgrade().unwrap().id));
 
@@ -180,8 +181,8 @@ fn form_c_matrix(container: Rc<RefCell<Container>>, n: usize, m: usize) -> ndarr
     matrix
 }
 
-fn form_d_matrix(container: Rc<RefCell<Container>>, m: usize) -> ndarray::Array2<MathOp> {
-    let mut matrix: ArrayBase<OwnedRepr<MathOp>, Ix2> = ndarray::Array2::<MathOp>::zeros((m, m));
+fn form_d_matrix(_container: Rc<RefCell<Container>>, m: usize) -> ndarray::Array2<MathOp> {
+    let matrix: ArrayBase<OwnedRepr<MathOp>, Ix2> = ndarray::Array2::<MathOp>::zeros((m, m));
     matrix
 }
 
@@ -245,17 +246,17 @@ mod tests {
         form_b_matrix, form_c_matrix, form_d_matrix, form_g_matrix, NodeSolver, Solver,
     };
     use crate::util::{
-        create_basic_container, create_basic_supernode_container, create_mna_container,
+        create_mna_container,
     };
-    use ndarray::{array, Array2};
-    use std::cell::{Ref, RefCell};
+    use ndarray::{array};
+    use std::cell::{RefCell};
     use std::rc::Rc;
 
     #[test]
     fn test_node_solver() {
         let mut c = create_mna_container();
         c.create_nodes();
-        let mut solver: NodeSolver = Solver::new(Rc::new(RefCell::new(c)));
+        let solver: NodeSolver = Solver::new(Rc::new(RefCell::new(c)));
         println!("{:?}", solver.latex());
     }
 
@@ -330,7 +331,7 @@ mod tests {
 
         let mut c = create_mna_container();
         c.create_nodes();
-        let n = c.nodes().len();
+        let _n = c.nodes().len();
         let m = c.get_voltage_sources().len();
 
         assert_eq!(
