@@ -45,11 +45,6 @@ jobs:
         run: wasm-pack test --node
       - name: Build wasm release
         run: wasm-pack build --target web --release
-      - name: Copy wasm to public
-        uses: actions/upload-artifact@v2
-        with:
-          name: wasm
-          path: ./pkg/
       - run: cp ./package.json ./pkg/
       - uses: actions/setup-node@v3
         with:
@@ -57,9 +52,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
           # Defaults to the user or organization that owns the workflow file
           scope: '@alexanderdefuria'
-#      - run: npm publish
-#        env:
-#          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: ls && cd ./pkg && ls && npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   print_doc_coverage:
     name: Print documentation coverage
