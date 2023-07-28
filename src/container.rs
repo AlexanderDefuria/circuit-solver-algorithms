@@ -1,5 +1,5 @@
 use crate::component::Component::{Ground, VoltageSrc};
-use crate::component::{Simplification};
+use crate::component::Simplification;
 use crate::elements::Element;
 use crate::tools::{Tool, ToolType};
 use crate::util::PrettyPrint;
@@ -12,9 +12,9 @@ use petgraph::graph::UnGraph;
 use petgraph::prelude::NodeIndex;
 use rustworkx_core::connectivity;
 
+use serde::{Serialize, Serializer};
 use std::fmt::{Debug, Formatter};
 use std::rc::{Rc, Weak};
-use serde::{Serialize, Serializer};
 
 /// Representation of a Schematic Container
 ///
@@ -74,7 +74,7 @@ impl Container {
         self.tools.push(Rc::new(tool));
     }
 
-    fn get_element_by_id(&self, id: usize) -> &Rc<Element> {
+    pub(crate) fn get_element_by_id(&self, id: usize) -> &Rc<Element> {
         self.elements.get(id).unwrap()
     }
 
@@ -231,6 +231,18 @@ impl Container {
         self
     }
 
+    pub fn get_tools_for_element(&self, element_id: usize) -> Vec<Weak<Tool>> {
+        self.tools
+            .iter()
+            .filter(|x| {
+                x.members
+                    .iter()
+                    .any(|y| y.upgrade().unwrap().id == element_id)
+            })
+            .map(|x| Rc::downgrade(x))
+            .collect()
+    }
+
     pub fn get_voltage_sources(&self) -> Vec<Weak<Element>> {
         self.elements
             .iter()
@@ -288,10 +300,10 @@ mod tests {
     use crate::tools::ToolType::SuperNode;
     use crate::util::*;
     use crate::validation::Status::Valid;
+    use crate::validation::StatusError::Known;
     use crate::validation::{StatusError, Validation};
     use regex::Regex;
     use std::rc::Rc;
-    use crate::validation::StatusError::Known;
 
     #[test]
     fn test_debug() {
@@ -407,6 +419,13 @@ mod tests {
         for member in super_node.members.iter() {
             assert!(expected_ids.contains(&member.upgrade().unwrap().id));
         }
+    }
+
+    #[test]
+    fn test_mna_supermesh() {
+        let mut container = create_mna_container();
+        container.create_nodes().create_super_nodes();
+        assert_eq!(container.validate(), Ok(Valid));
     }
 
     #[test]

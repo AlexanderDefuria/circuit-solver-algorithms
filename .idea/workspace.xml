@@ -13,27 +13,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="52c330b2-a72e-46d5-bbef-071fc6e5ee26" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/circuit-solver-algorithms.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/jsLibraryMappings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pkg/circuit-solver-algorithms-0.1.0.tgz" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pkg/circuit-solver-algorithms-0.1.01.tgz" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pkg/circuit_solver_algorithms.d.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pkg/circuit_solver_algorithms.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pkg/circuit_solver_algorithms_bg.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pkg/circuit_solver_algorithms_bg.wasm" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pkg/circuit_solver_algorithms_bg.wasm.d.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pkg/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/container.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/container.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/elements.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/elements.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/interfaces.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/interfaces.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/math.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/math.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/solvers.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/tools.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/tools.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/util.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/util.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/data/basic_container.json" beforeDir="false" afterPath="$PROJECT_DIR$/tests/data/basic_container.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/validation.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/validation.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -120,6 +108,23 @@
     </key>
   </component>
   <component name="RunManager" selected="Cargo.Test">
+    <configuration name="Test solvers::tests::test_solve_steps" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="test --package circuit-solver-algorithms --lib solvers::tests::test_solve_steps -- --exact" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <option name="emulateTerminal" value="false" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="Test" type="CargoCommandRunConfiguration" factoryName="Cargo Command" nameIsGenerated="true">
       <option name="command" value="test" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
@@ -190,6 +195,7 @@
     </configuration>
     <list>
       <item itemvalue="Cargo.Test" />
+      <item itemvalue="Cargo.Test solvers::tests::test_solve_steps" />
       <item itemvalue="Cargo.Tests in 'tests'" />
       <item itemvalue="Jest.lib is an object (1)" />
       <item itemvalue="Jest.lib is an object" />
@@ -197,6 +203,7 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Cargo.Test solvers::tests::test_solve_steps" />
         <item itemvalue="npm.test" />
         <item itemvalue="Jest.lib is an object (1)" />
         <item itemvalue="Jest.lib is an object" />
@@ -273,7 +280,7 @@
       <workItem from="1689346931570" duration="13281000" />
       <workItem from="1690500059815" duration="338000" />
       <workItem from="1690506154335" duration="1712000" />
-      <workItem from="1690508125660" duration="5738000" />
+      <workItem from="1690508125660" duration="10798000" />
     </task>
     <servers />
   </component>

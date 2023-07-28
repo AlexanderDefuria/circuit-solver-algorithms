@@ -5,8 +5,7 @@ use crate::math::{matrix_to_latex, EquationRepr, MathOp};
 use crate::util::PrettyPrint;
 use ndarray::{s, ArrayBase, Ix2, OwnedRepr};
 use std::cell::RefCell;
-use std::rc::{Rc};
-
+use std::rc::Rc;
 
 /// This will take a container and solve it using the given method.
 /// KCL and KVL will be used to solve the circuit.
@@ -19,7 +18,7 @@ pub trait Solver {
 
 pub enum SolverType {
     Matrix,
-    Step
+    Step,
 }
 
 pub struct NodeSolver {
@@ -81,10 +80,13 @@ impl Solver for NodeSolver {
             if element.class == VoltageSrc {
                 let id = element.id;
 
-                step.push(format!("I_{{v_{id}}} = current from node ").parse().unwrap());
+                step.push(
+                    format!("I_{{v_{id}}} = current from node ")
+                        .parse()
+                        .unwrap(),
+                );
             }
         }
-
 
         Ok(steps)
     }
@@ -253,16 +255,14 @@ fn form_x_matrix(container: Rc<RefCell<Container>>, n: usize, m: usize) -> ndarr
 #[cfg(test)]
 mod tests {
     use crate::math::EquationMember;
+    use crate::solvers::SolverType::Matrix;
     use crate::solvers::{
         form_b_matrix, form_c_matrix, form_d_matrix, form_g_matrix, NodeSolver, Solver,
     };
-    use crate::util::{
-        create_mna_container,
-    };
-    use ndarray::{array};
-    use std::cell::{RefCell};
+    use crate::util::create_mna_container;
+    use ndarray::array;
+    use std::cell::RefCell;
     use std::rc::Rc;
-    use crate::solvers::SolverType::Matrix;
 
     #[test]
     fn test_node_solver() {

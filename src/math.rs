@@ -1,3 +1,4 @@
+use crate::validation::{Validation, ValidationResult};
 use ndarray::Array2;
 use std::fmt::{Debug, Formatter};
 use std::ops::Add;
@@ -59,6 +60,7 @@ pub(crate) enum MathOp {
     Multiply(Rc<dyn EquationMember>, Rc<dyn EquationMember>),
     Negate(Rc<dyn EquationMember>),
     Inverse(Rc<dyn EquationMember>),
+    Divide(Rc<dyn EquationMember>, Rc<dyn EquationMember>),
     Sum(Vec<MathOp>),
     Collect(Rc<dyn EquationMember>),
     None(Rc<dyn EquationMember>),
@@ -113,6 +115,9 @@ impl EquationMember for MathOp {
             MathOp::Inverse(a) => {
                 format!("1/{}", a.equation_string())
             }
+            MathOp::Divide(a, b) => {
+                format!("{}/{}", a.equation_string(), b.equation_string())
+            }
             MathOp::Sum(vec) => {
                 let mut string = String::new();
                 for (i, item) in vec.iter().enumerate() {
@@ -147,6 +152,7 @@ impl EquationMember for MathOp {
                 }
                 sum
             }
+            MathOp::Divide(a, b) => a.value() / b.value(),
             MathOp::Collect(vec) => vec.value(),
             MathOp::None(a) => a.value(),
             MathOp::Unknown(a) => a.value(),
@@ -174,6 +180,9 @@ impl EquationMember for MathOp {
                 }
                 string
             }
+            MathOp::Divide(a, b) => {
+                format!("\\frac{{{}}}{{{}}}", a.latex_string(), b.latex_string())
+            }
             MathOp::Collect(a) => {
                 let mut string = String::new();
                 string.push_str("(");
@@ -182,8 +191,14 @@ impl EquationMember for MathOp {
                 string
             }
             MathOp::None(a) => a.latex_string(),
-            MathOp::Unknown(a) => a.latex_string()
+            MathOp::Unknown(a) => a.latex_string(),
         }
+    }
+}
+
+impl Validation for MathOp {
+    fn validate(&self) -> ValidationResult {
+        todo!()
     }
 }
 

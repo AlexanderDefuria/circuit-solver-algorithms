@@ -5,10 +5,10 @@ use crate::util::PrettyPrint;
 use crate::validation::Status::Valid;
 use crate::validation::StatusError::Known;
 use crate::validation::{Validation, ValidationResult};
+use serde::ser::SerializeStruct;
 use serde::{Deserialize, Serialize, Serializer};
 use std::fmt::Display;
 use std::rc::Rc;
-use serde::ser::SerializeStruct;
 
 /// Representation of a Schematic Element
 #[derive(Debug, Deserialize, Clone)]
@@ -101,9 +101,11 @@ impl Into<EquationRepr> for Element {
 
 impl Into<EquationRepr> for Rc<Element> {
     fn into(self) -> EquationRepr {
-        EquationRepr::new_with_latex(self.basic_string(),
-                          format!("{}_{{{}}}", self.name, self.id),
-                          self.value)
+        EquationRepr::new_with_latex(
+            self.basic_string(),
+            format!("{}_{{{}}}", self.name, self.id),
+            self.value,
+        )
     }
 }
 
@@ -174,7 +176,7 @@ impl Validation for Element {
             )));
         }
 
-        if self.id == 0 && self.class != Ground{
+        if self.id == 0 && self.class != Ground {
             return Err(Known("Element cannot have id 0".to_string()));
         }
 
@@ -190,7 +192,10 @@ impl Display for Element {
 }
 
 impl Serialize for Element {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
         let mut state = serializer.serialize_struct("Element", 9)?;
         state.serialize_field("name", &self.name)?;
         state.serialize_field("id", &self.id)?;

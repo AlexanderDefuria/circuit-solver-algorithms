@@ -1,4 +1,3 @@
-use std::cell::RefCell;
 use crate::component::Component::{Ground, Resistor, VoltageSrc};
 use crate::container::Container;
 use crate::controller::Controller;
@@ -6,16 +5,17 @@ use crate::elements::Element;
 use crate::operations::{OpMethod, Operation};
 use crate::validation::StatusError::{Known, Multiple};
 use crate::validation::{StatusError, Validation};
+use std::cell::RefCell;
 
+use crate::solvers::SolverType::Matrix;
+use crate::solvers::{NodeSolver, Solver};
+use crate::util::{create_basic_container, create_mna_container};
 use serde::{Deserialize, Serialize};
-use std::rc::Rc;
 use serde_json::json;
+use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_test::*;
-use crate::solvers::{NodeSolver, Solver};
-use crate::solvers::SolverType::Matrix;
-use crate::util::{create_basic_container, create_mna_container};
 
 #[derive(Serialize, Deserialize)]
 pub struct ContainerSetup {
@@ -43,10 +43,19 @@ pub fn load_wasm_container(js: JsValue) -> Result<String, StatusError> {
 pub fn return_create_basic_container() -> String {
     let c: Container = create_basic_container();
     let x = ContainerSetup {
-        elements: c.get_elements().iter().map(|y| {
-            let x = y.clone();
-            Element::new(x.class.clone(), x.value, x.positive.clone(), x.negative.clone())
-        }).collect(),
+        elements: c
+            .get_elements()
+            .iter()
+            .map(|y| {
+                let x = y.clone();
+                Element::new(
+                    x.class.clone(),
+                    x.value,
+                    x.positive.clone(),
+                    x.negative.clone(),
+                )
+            })
+            .collect(),
         operations: vec![],
     };
 
@@ -57,10 +66,19 @@ pub fn return_create_basic_container() -> String {
 pub fn return_create_mna_container() -> String {
     let c: Container = create_mna_container();
     let x = ContainerSetup {
-        elements: c.get_elements().iter().map(|y| {
-            let x = y.clone();
-            Element::new(x.class.clone(), x.value, x.positive.clone(), x.negative.clone())
-        }).collect(),
+        elements: c
+            .get_elements()
+            .iter()
+            .map(|y| {
+                let x = y.clone();
+                Element::new(
+                    x.class.clone(),
+                    x.value,
+                    x.positive.clone(),
+                    x.negative.clone(),
+                )
+            })
+            .collect(),
         operations: vec![],
     };
 
@@ -78,7 +96,6 @@ pub fn solve_mna_container() -> String {
     let solver: NodeSolver = Solver::new(Rc::new(RefCell::new(c)), Matrix);
     solver.solve_matrix().unwrap()
 }
-
 
 impl From<Vec<Element>> for Container {
     fn from(wasm: Vec<Element>) -> Container {
@@ -166,10 +183,10 @@ fn test_load() {
 
 #[cfg(test)]
 mod tests {
-    use wasm_bindgen::JsValue;
     use crate::container::Container;
     use crate::interfaces::{load_wasm_container, return_create_basic_container};
     use crate::util::create_basic_container;
+    use wasm_bindgen::JsValue;
 
     #[test]
     fn test() {
@@ -177,4 +194,3 @@ mod tests {
         assert!(true);
     }
 }
-

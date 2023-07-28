@@ -2,7 +2,6 @@ use crate::component::Component::{CurrentSrc, Ground, Resistor, VoltageSrc};
 use crate::container::Container;
 use crate::elements::Element;
 
-
 pub(crate) trait PrettyPrint {
     fn pretty_string(&self) -> String;
     fn basic_string(&self) -> String;
@@ -69,10 +68,13 @@ pub fn create_mna_container() -> Container {
 mod tests {
     use crate::component::Component;
     use crate::elements::Element;
-    use crate::util::{create_basic_container, create_basic_supermesh_container, create_basic_supernode_container, create_mna_container};
+    use crate::util::{
+        create_basic_container, create_basic_supermesh_container, create_basic_supernode_container,
+        create_mna_container,
+    };
+    use crate::validation::Validation;
     use assert_json_diff::assert_json_include;
     use serde_json::json;
-    use crate::validation::Validation;
 
     #[test]
     fn test_create_containers() {
@@ -87,8 +89,14 @@ mod tests {
         mna_container.validate().expect("");
 
         println!("create_basic_container() -> {:?}", container);
-        println!("create_basic_supernode_container() -> {:?}", supernode_container);
-        println!("create_basic_super_mesh_container() -> {:?}", supermesh_container);
+        println!(
+            "create_basic_supernode_container() -> {:?}",
+            supernode_container
+        );
+        println!(
+            "create_basic_super_mesh_container() -> {:?}",
+            supermesh_container
+        );
         println!("create_mna_container() -> {:?}", mna_container);
     }
 

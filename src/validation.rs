@@ -1,8 +1,6 @@
 use std::fmt::{Debug, Display, Formatter};
 use std::rc::{Rc, Weak};
 
-
-
 use wasm_bindgen::JsValue;
 
 /// Possible Ok Statuses

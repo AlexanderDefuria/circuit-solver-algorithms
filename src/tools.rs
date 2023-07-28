@@ -1,12 +1,11 @@
 use crate::component::Component::Ground;
 use crate::elements::Element;
+use crate::math::EquationMember;
 use crate::tools::ToolType::*;
 use crate::util::PrettyPrint;
 use crate::validation::Status::Valid;
 use crate::validation::StatusError::{Known, Multiple};
-use crate::validation::{
-    check_weak_duplicates, StatusError, Validation, ValidationResult,
-};
+use crate::validation::{check_weak_duplicates, StatusError, Validation, ValidationResult};
 use petgraph::graph::UnGraph;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
@@ -30,6 +29,7 @@ pub struct Tool {
     pub(crate) id: usize,
     pub(crate) class: ToolType,
     pub(crate) members: Vec<Weak<Element>>,
+    pub(crate) value: f64,
 }
 
 impl Tool {
@@ -53,6 +53,7 @@ impl Tool {
             id: 0,
             class,
             members: vec![],
+            value: 0.0,
         };
         tool.members = elements;
         tool
@@ -137,6 +138,16 @@ impl PartialEq<Self> for Tool {
     }
 }
 
+impl EquationMember for Tool {
+    fn equation_string(&self) -> String {
+        format!("T_{{{}}}", self.id)
+    }
+
+    fn value(&self) -> f64 {
+        self.value
+    }
+}
+
 impl Validation for Tool {
     fn validate(&self) -> ValidationResult {
         // TODO
@@ -148,10 +159,11 @@ impl Validation for Tool {
             return Err(Known("Tool has no members".to_string()));
         }
 
-        if self.class == Node && self
-            .members
-            .iter()
-            .any(|x| x.upgrade().unwrap().class == Ground)
+        if self.class == Node
+            && self
+                .members
+                .iter()
+                .any(|x| x.upgrade().unwrap().class == Ground)
         {
             return Err(Known("Tool contains a ground element".to_string()));
         }
