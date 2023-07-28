@@ -14,6 +14,7 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_test::*;
 use crate::solvers::{NodeSolver, Solver};
+use crate::solvers::SolverType::Matrix;
 use crate::util::{create_basic_container, create_mna_container};
 
 #[derive(Serialize, Deserialize)]
@@ -67,11 +68,15 @@ pub fn return_create_mna_container() -> String {
 }
 
 #[wasm_bindgen]
+pub fn test_wasm() -> String {
+    "Hello from Rust!".to_string()
+}
+
+#[wasm_bindgen]
 pub fn solve_mna_container() -> String {
     let c: Container = create_mna_container();
-    let solver: NodeSolver = Solver::new(Rc::new(RefCell::new(c)));
-    solver.latex().unwrap()
-
+    let solver: NodeSolver = Solver::new(Rc::new(RefCell::new(c)), Matrix);
+    solver.solve_matrix().unwrap()
 }
 
 

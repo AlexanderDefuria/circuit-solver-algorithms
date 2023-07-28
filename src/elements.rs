@@ -45,7 +45,7 @@ impl Element {
         Element::new_full(class, value, positive, negative, 0)
     }
 
-    fn new_full(
+    pub(crate) fn new_full(
         class: Component,
         value: f64,
         positive: Vec<usize>,
@@ -174,6 +174,10 @@ impl Validation for Element {
             )));
         }
 
+        if self.id == 0 && self.class != Ground{
+            return Err(Known("Element cannot have id 0".to_string()));
+        }
+
         Ok(Valid)
     }
 }
@@ -231,10 +235,12 @@ mod tests {
 
     #[test]
     fn test_validate() {
-        let mut a = Element::new(Component::Resistor, 1.0, vec![1], vec![2]);
+        let mut a = Element::new(Component::Resistor, 1.0, vec![3], vec![2]);
+        assert_known_error!(a.validate(), "Element cannot have id 0");
+        a.id = 1;
         assert!(a.validate().is_ok());
         a.value = -0.5;
-        assert_known_error!(a.validate(), "Value cannot be zero or negative R0: -0.5 Ω");
+        assert_known_error!(a.validate(), "Value cannot be zero or negative R1: -0.5 Ω");
 
         let b = Element::new(Component::Resistor, 1.0, vec![1], vec![1]);
         assert_known_error!(b.validate(), "Element cannot be shorted R0: 1 Ω");

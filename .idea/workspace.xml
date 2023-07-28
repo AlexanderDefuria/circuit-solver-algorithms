@@ -13,8 +13,27 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="52c330b2-a72e-46d5-bbef-071fc6e5ee26" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/circuit-solver-algorithms.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/jsLibraryMappings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pkg/circuit-solver-algorithms-0.1.0.tgz" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pkg/circuit-solver-algorithms-0.1.01.tgz" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pkg/circuit_solver_algorithms.d.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pkg/circuit_solver_algorithms.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pkg/circuit_solver_algorithms_bg.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pkg/circuit_solver_algorithms_bg.wasm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pkg/circuit_solver_algorithms_bg.wasm.d.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pkg/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pkg/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/container.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/container.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/elements.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/elements.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/interfaces.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/interfaces.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/solvers.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tools.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/tools.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/util.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/util.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/data/basic_container.json" beforeDir="false" afterPath="$PROJECT_DIR$/tests/data/basic_container.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -27,8 +46,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="JavaScript File" />
         <option value="Rust File" />
+        <option value="JavaScript File" />
       </list>
     </option>
   </component>
@@ -44,6 +63,9 @@
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="CurrentFile" />
   </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0
+}</component>
   <component name="ProjectId" id="2Pveq8BZpbH4fOlMl7h1fBNpoWn" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -51,37 +73,41 @@
     <option name="showMembers" value="true" />
     <option name="showVisibilityIcons" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "cf.first.check.clang-format": "false",
-    "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "main",
-    "last.edited.regexp": "Sample Text",
-    "last_opened_file_path": "/home/alexander/Desktop/circuit-solver-algorithms",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "org.rust.cargo.project.model.PROJECT_DISCOVERY": "true",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
-    "structure.view.defaults.are.configured": "true",
-    "ts.external.directory.path": "/home/alexander/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/231.9161.40/plugins/javascript-impl/jsLanguageServicesImpl/external",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_MARK_IGNORED_FILES_AS_EXCLUDED&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;javascript.nodejs.core.library.configured.version&quot;: &quot;18.13.0&quot;,
+    &quot;javascript.nodejs.core.library.typings.version&quot;: &quot;18.13.0&quot;,
+    &quot;last.edited.regexp&quot;: &quot;Sample Text&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/alexander/Desktop/circuit-solver-algorithms/pkg&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs.jest.jest_package&quot;: &quot;/home/alexander/Desktop/circuit-solver-algorithms/tests/node_modules/jest&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;org.rust.cargo.project.model.PROJECT_DISCOVERY&quot;: &quot;true&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;structure.view.defaults.are.configured&quot;: &quot;true&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/home/alexander/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/232.8660.186/plugins/javascript-impl/jsLanguageServicesImpl/external&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File": [
-      "TEXT"
+  &quot;keyToStringList&quot;: {
+    &quot;com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File&quot;: [
+      &quot;TEXT&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/pkg" />
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/.github" />
       <recent name="$PROJECT_DIR$/.github/workflows" />
@@ -128,13 +154,52 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
+    <configuration name="lib is an object (1)" type="JavaScriptTestRunnerJest" temporary="true" nameIsGenerated="true">
+      <node-interpreter value="project" />
+      <jest-package value="$PROJECT_DIR$/tests/node_modules/jest" />
+      <working-dir value="$PROJECT_DIR$/tests" />
+      <envs />
+      <scope-kind value="TEST" />
+      <test-file value="$PROJECT_DIR$/tests/index.test.js" />
+      <test-names>
+        <test-name value="lib is an object" />
+      </test-names>
+      <method v="2" />
+    </configuration>
+    <configuration name="lib is an object" type="JavaScriptTestRunnerJest" temporary="true" nameIsGenerated="true">
+      <node-interpreter value="project" />
+      <jest-package value="$PROJECT_DIR$/tests/node_modules/jest" />
+      <working-dir value="$PROJECT_DIR$/tests" />
+      <envs />
+      <scope-kind value="TEST" />
+      <test-file value="$PROJECT_DIR$/tests/index.js" />
+      <test-names>
+        <test-name value="lib is an object" />
+      </test-names>
+      <method v="2" />
+    </configuration>
+    <configuration name="test" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/tests/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="test" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
     <list>
       <item itemvalue="Cargo.Test" />
       <item itemvalue="Cargo.Tests in 'tests'" />
+      <item itemvalue="Jest.lib is an object (1)" />
+      <item itemvalue="Jest.lib is an object" />
+      <item itemvalue="npm.test" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Cargo.Tests in 'tests'" />
+        <item itemvalue="npm.test" />
+        <item itemvalue="Jest.lib is an object (1)" />
+        <item itemvalue="Jest.lib is an object" />
       </list>
     </recent_temporary>
   </component>
@@ -206,6 +271,9 @@
       <workItem from="1688744348517" duration="5087000" />
       <workItem from="1689043066794" duration="1467000" />
       <workItem from="1689346931570" duration="13281000" />
+      <workItem from="1690500059815" duration="338000" />
+      <workItem from="1690506154335" duration="1712000" />
+      <workItem from="1690508125660" duration="5738000" />
     </task>
     <servers />
   </component>

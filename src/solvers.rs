@@ -12,12 +12,18 @@ use std::rc::{Rc};
 /// KCL and KVL will be used to solve the circuit.
 
 pub trait Solver {
-    fn new(container: Rc<RefCell<Container>>) -> Self;
-    fn solve(&self) -> Result<String, String>;
-    fn latex(&self) -> Result<String, String>;
+    fn new(container: Rc<RefCell<Container>>, solve_for: SolverType) -> Self;
+    fn solve_matrix(&self) -> Result<String, String>;
+    fn solve_steps(&self) -> Result<Vec<String>, String>;
+}
+
+pub enum SolverType {
+    Matrix,
+    Step
 }
 
 pub struct NodeSolver {
+    solve_for: SolverType,
     container: Rc<RefCell<Container>>,
     a_matrix: ndarray::Array2<MathOp>,
     x_matrix: ndarray::Array2<MathOp>,
@@ -25,7 +31,7 @@ pub struct NodeSolver {
 }
 
 impl Solver for NodeSolver {
-    fn new(container: Rc<RefCell<Container>>) -> NodeSolver {
+    fn new(container: Rc<RefCell<Container>>, solve_for: SolverType) -> NodeSolver {
         container.borrow_mut().create_nodes();
         let n = container.borrow().nodes().len(); // Node Count
         let m = container // Source Count
@@ -41,6 +47,7 @@ impl Solver for NodeSolver {
         // https://lpsa.swarthmore.edu/Systems/Electrical/mna/MNA3.html#B_matrix
 
         NodeSolver {
+            solve_for: SolverType::Matrix,
             container: container.clone(),
             a_matrix: form_a_matrix(container.clone(), n, m),
             x_matrix: form_x_matrix(container.clone(), n, m),
@@ -48,23 +55,8 @@ impl Solver for NodeSolver {
         }
     }
 
-    fn solve(&self) -> Result<String, String> {
-        // Ax = z
-        // x = A^-1 * z
-        // x contains our unknowns
-        // z contains our knowns
-        // A contains our coefficients
-        Ok(format!(
-            "{:?} * {:?} = {:?}",
-            self.a_matrix.clone().swap_axes(1, 0),
-            self.z_matrix,
-            self.x_matrix
-        )
-        .parse()
-        .unwrap())
-    }
-
-    fn latex(&self) -> Result<String, String> {
+    /// Returns a string that represents the matrix equation to solve the circuit.
+    fn solve_matrix(&self) -> Result<String, String> {
         let inverse_a_matrix: ndarray::Array2<MathOp> = self.a_matrix.clone();
         // solve::inverse(&mut inverse_a_matrix).unwrap();
 
@@ -76,6 +68,25 @@ impl Solver for NodeSolver {
             matrix_to_latex(inverse_a_matrix),
             matrix_to_latex(self.z_matrix.clone())
         ))
+    }
+
+    /// Returns a vector of strings that represent the steps to solve the circuit.
+    fn solve_steps(&self) -> Result<Vec<String>, String> {
+        let mut steps: Vec<String> = Vec::new();
+        steps.push("Steps to solve the circuit:".to_string());
+
+        let mut step: String = "Voltage Sources have 0 resistance.\n".to_string();
+        step.push("\nTherefore:\n".to_string().parse().unwrap());
+        for (i, element) in self.container.borrow().get_elements().iter().enumerate() {
+            if element.class == VoltageSrc {
+                let id = element.id;
+
+                step.push(format!("I_{{v_{id}}} = current from node ").parse().unwrap());
+            }
+        }
+
+
+        Ok(steps)
     }
 }
 
@@ -251,13 +262,14 @@ mod tests {
     use ndarray::{array};
     use std::cell::{RefCell};
     use std::rc::Rc;
+    use crate::solvers::SolverType::Matrix;
 
     #[test]
     fn test_node_solver() {
         let mut c = create_mna_container();
         c.create_nodes();
-        let solver: NodeSolver = Solver::new(Rc::new(RefCell::new(c)));
-        println!("{:?}", solver.latex());
+        let solver: NodeSolver = Solver::new(Rc::new(RefCell::new(c)), Matrix);
+        println!("{:?}", solver.solve_matrix());
     }
 
     #[test]
@@ -272,7 +284,7 @@ mod tests {
 
         let mut c = create_mna_container();
         c.create_nodes();
-        let solver: NodeSolver = Solver::new(Rc::new(RefCell::new(c)));
+        let solver: NodeSolver = Solver::new(Rc::new(RefCell::new(c)), Matrix);
 
         assert_eq!(solver.a_matrix.map(|x| x.equation_string()), expected);
     }
@@ -352,7 +364,7 @@ mod tests {
 
         let mut c = create_mna_container();
         c.create_nodes();
-        let solver: NodeSolver = Solver::new(Rc::new(RefCell::new(c)));
+        let solver: NodeSolver = Solver::new(Rc::new(RefCell::new(c)), Matrix);
 
         assert_eq!(solver.x_matrix.map(|x| x.equation_string()), expected);
     }
@@ -363,7 +375,7 @@ mod tests {
 
         let mut c = create_mna_container();
         c.create_nodes();
-        let solver: NodeSolver = Solver::new(Rc::new(RefCell::new(c)));
+        let solver: NodeSolver = Solver::new(Rc::new(RefCell::new(c)), Matrix);
 
         assert_eq!(solver.z_matrix.map(|x| x.equation_string()), expected);
     }

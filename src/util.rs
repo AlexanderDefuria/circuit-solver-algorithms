@@ -23,10 +23,10 @@ macro_rules! assert_known_error {
 
 pub fn create_basic_container() -> Container {
     let mut container = Container::new();
-    container.add_element_core(Element::new(VoltageSrc, 1.0, vec![2, 3], vec![1]));
-    container.add_element_core(Element::new(Resistor, 1.0, vec![0], vec![2]));
+    container.add_element_core(Element::new(Ground, 1.0, vec![3, 2], vec![]));
+    container.add_element_core(Element::new(Resistor, 1.0, vec![3], vec![2]));
     container.add_element_core(Element::new(Resistor, 1.0, vec![1], vec![0, 3]));
-    container.add_element_core(Element::new(Ground, 1.0, vec![0, 2], vec![]));
+    container.add_element_core(Element::new(VoltageSrc, 1.0, vec![2, 0], vec![1]));
     container
 }
 

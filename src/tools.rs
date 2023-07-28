@@ -148,7 +148,7 @@ impl Validation for Tool {
             return Err(Known("Tool has no members".to_string()));
         }
 
-        if self
+        if self.class == Node && self
             .members
             .iter()
             .any(|x| x.upgrade().unwrap().class == Ground)

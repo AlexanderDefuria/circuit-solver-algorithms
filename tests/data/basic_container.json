@@ -1,16 +1,17 @@
 [
-    {
-      "id": 0,
-      "value": 1.0,
-      "class": "VoltageSrc",
-      "positive": [2, 3],
-      "negative": [1]
-    },
+  {
+    "id": 0,
+    "value": 0.0,
+    "class": "Ground",
+    "positive": [3, 2],
+    "negative": []
+  },
+
     {
       "id": 1,
       "value": 1.0,
       "class": "Resistor",
-      "positive": [0],
+      "positive": [3],
       "negative": [2]
     },
     {
@@ -20,11 +21,11 @@
       "positive": [1],
       "negative": [0, 3]
     },
-    {
-      "id": 3,
-      "value": 0.0,
-      "class": "Ground",
-      "positive": [0, 2],
-      "negative": []
-    }
-  ]
+  {
+    "id": 3,
+    "value": 1.0,
+    "class": "VoltageSrc",
+    "positive": [2, 0],
+    "negative": [1]
+  }
+]

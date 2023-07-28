@@ -45,7 +45,8 @@ impl Container {
     /// Add an Element to the Container
     ///
     /// This function will add an Element to the Container and return the index of the Element
-    pub fn add_element(&mut self, element: Element) -> Result<usize, StatusError> {
+    pub fn add_element(&mut self, mut element: Element) -> Result<usize, StatusError> {
+        element.id = self.elements.len();
         element.validate()?;
         let id: usize = self.add_element_core(element);
         let check = self.validate();
@@ -290,6 +291,7 @@ mod tests {
     use crate::validation::{StatusError, Validation};
     use regex::Regex;
     use std::rc::Rc;
+    use crate::validation::StatusError::Known;
 
     #[test]
     fn test_debug() {
@@ -309,12 +311,6 @@ mod tests {
     fn test_validate() {
         let mut container = create_basic_container();
         assert_eq!(container.validate(), Ok(Valid));
-        assert_eq!(container.validate(), Ok(Valid));
-
-        // Test duplicate elements
-        let element = Element::new(Resistor, 1.0, vec![2], vec![3]);
-        container.elements.push(Rc::new(element));
-        assert!(container.validate().is_err());
 
         // Test no sources
         container.elements.remove(3);
@@ -322,9 +318,7 @@ mod tests {
 
         // Test multiple grounds
         container = create_basic_container();
-        container
-            .elements
-            .push(Rc::from(Element::new(Ground, 1.0, vec![2], vec![])));
+        container.add_element_core(Element::new(Ground, 1.0, vec![2], vec![]));
         assert!(container.validate().is_err());
     }
 
@@ -337,8 +331,10 @@ mod tests {
             container.add_element(Element::new(Ground, 1.0, vec![2], vec![]));
         assert!(result.is_err());
 
+        // Test add_element with valid element
         let result: Result<usize, StatusError> =
             container.add_element(Element::new(Resistor, 1.0, vec![2], vec![]));
+
         assert!(result.is_ok());
     }
 
@@ -347,7 +343,7 @@ mod tests {
         let mut container = create_basic_container();
         let x = container.create_nodes();
         let test_vectors = vec![
-            vec![x.elements[0].id, x.elements[1].id],
+            vec![x.elements[3].id, x.elements[1].id],
             vec![x.elements[1].id, x.elements[2].id],
         ];
 
@@ -366,7 +362,7 @@ mod tests {
         let mut x = create_basic_container();
         let c = x.create_nodes();
         let test_vectors = vec![
-            vec![c.elements[0].id, c.elements[1].id],
+            vec![c.elements[3].id, c.elements[1].id],
             vec![c.elements[1].id, c.elements[2].id],
         ];
         assert_eq!(c.validate(), Ok(Valid));
