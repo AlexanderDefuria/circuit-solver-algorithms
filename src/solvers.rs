@@ -5,7 +5,13 @@ use crate::math::{matrix_to_latex, EquationRepr, MathOp};
 use crate::util::PrettyPrint;
 use ndarray::{s, ArrayBase, Ix2, OwnedRepr};
 use std::cell::RefCell;
+<<<<<<< Updated upstream
 use std::rc::Rc;
+=======
+use std::rc::{Rc, Weak};
+use crate::component::Component;
+use crate::tools::{Tool, ToolType};
+>>>>>>> Stashed changes
 
 /// This will take a container and solve it using the given method.
 /// KCL and KVL will be used to solve the circuit.
@@ -74,19 +80,97 @@ impl Solver for NodeSolver {
         let mut steps: Vec<String> = Vec::new();
         steps.push("Steps to solve the circuit:".to_string());
 
-        let mut step: String = "Voltage Sources have 0 resistance.\n".to_string();
-        step.push("\nTherefore:\n".to_string().parse().unwrap());
+        // Step 1 Declare
+        let mut step: String = String::new();
+        step.push_str("Voltage Sources have 0 resistance.\n");
+        step.push_str("\nTherefore:\n");
         for (i, element) in self.container.borrow().get_elements().iter().enumerate() {
             if element.class == VoltageSrc {
+<<<<<<< Updated upstream
                 let id = element.id;
 
                 step.push(
                     format!("I_{{v_{id}}} = current from node ")
                         .parse()
                         .unwrap(),
+=======
+                let id: usize = element.id;
+                let nodes: Vec<Weak<Tool>> = self.container.borrow().get_tools_for_element(id);
+                let node1: usize = nodes[0].upgrade().unwrap().id;
+                let mut node2: usize = 0;
+                if !element.contains_ground() {
+                    node2 = nodes[1].upgrade().unwrap().id;
+                }
+                step.push_str(
+                    format!("I_{{v_{id}}} = current from node {node1} to node {node2}\n").as_str(),
+>>>>>>> Stashed changes
                 );
             }
         }
+        steps.append(&mut vec![step]);
+
+        // Step 2 Find Voltages
+        // Step 2.1 Declare intent
+        let mut step: String = String::new();
+        for (i, element) in self.container.borrow().get_elements().iter().enumerate() {
+            if element.class == VoltageSrc {
+                let id: usize = element.id;
+                let nodes: Vec<Weak<Tool>> = self.container.borrow().get_tools_for_element(id);
+                let node1: usize = nodes[0].upgrade().unwrap().id;
+                let mut node2: usize = 0;
+                if !element.contains_ground() {
+                    node2 = nodes[1].upgrade().unwrap().id;
+                }
+                step.push_str(
+                    format!("Find voltage between node {node1} and node {node2}\n").as_str(),
+                );
+            }
+        }
+        steps.append(&mut vec![step]);
+
+        // Step 2.2 Find voltages
+        let mut sub_steps: Vec<MathOp> = Vec::new();
+        // Step 2.2.1 Find all resistors going between nodes including ground
+        for (i, tool) in self.container.borrow().get_tools().iter().enumerate() {
+            for member in &tool.members {
+                match member.upgrade().unwrap().class {
+                    Resistor => {
+                        let id: usize = member.upgrade().unwrap().id;
+
+                        // if the resistor is connected to ground subtract 0 from the node
+                        // otherwise we need the voltage between the nodes
+                        let voltage_diff: MathOp;
+                        if self.container.borrow().get_element_by_id(id).contains_ground() {
+                            voltage_diff = MathOp::Collect(Rc::new(MathOp::Sum(vec![
+                                MathOp::None(tool.clone()),
+                                MathOp::Negate(Rc::new(MathOp::None(Rc::new(0.0)))),
+                            ])));
+                        } else {
+                            voltage_diff = MathOp::Collect(Rc::new(MathOp::Sum(vec![
+                                MathOp::None(tool.clone()),
+                                MathOp::Negate(Rc::new(MathOp::None(Rc::new(0.0)))),
+                            ])));
+                        }
+
+                        let current_i: MathOp = MathOp::Divide(
+                            Rc::new(voltage_diff),
+                            Rc::new(member.upgrade().unwrap().value),
+                        );
+
+                        sub_steps.push(current_i);
+
+                    }
+                    _ => continue,
+                }
+            }
+        }
+        steps.append(
+            &mut vec![
+                format!("Find current through each resistor:\n").to_string(),
+                format!("{:?}\n", MathOp::Sum(sub_steps)).to_string(),
+            ]
+        );
+
 
         Ok(steps)
     }
@@ -269,7 +353,7 @@ mod tests {
         let mut c = create_mna_container();
         c.create_nodes();
         let solver: NodeSolver = Solver::new(Rc::new(RefCell::new(c)), Matrix);
-        println!("{:?}", solver.solve_matrix());
+        // println!("{:?}", solver.solve_matrix());
     }
 
     #[test]
@@ -378,5 +462,13 @@ mod tests {
         let solver: NodeSolver = Solver::new(Rc::new(RefCell::new(c)), Matrix);
 
         assert_eq!(solver.z_matrix.map(|x| x.equation_string()), expected);
+    }
+
+    #[test]
+    fn test_solve_steps() {
+        let mut c = create_mna_container();
+        c.create_nodes();
+        let solver: NodeSolver = Solver::new(Rc::new(RefCell::new(c)), Matrix);
+        println!("{:?}", solver.solve_steps());
     }
 }
