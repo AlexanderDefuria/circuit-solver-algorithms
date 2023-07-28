@@ -64,7 +64,7 @@ impl Element {
         }
     }
 
-    pub(crate) fn contains_ground(&self) -> bool {
+    pub(crate) fn connected_to_ground(&self) -> bool {
         self.positive.contains(&0) || self.negative.contains(&0)
     }
 }

@@ -75,7 +75,17 @@ impl Container {
     }
 
     pub(crate) fn get_element_by_id(&self, id: usize) -> &Rc<Element> {
-        self.elements.get(id).unwrap()
+        match self.elements.get(id) {
+            Some(element) => element,
+            None => panic!("Element with id {} does not exist", id),
+        }
+    }
+
+    pub(crate) fn get_tool_by_id(&self, id: usize) -> &Rc<Tool> {
+        match self.tools.get(id) {
+            Some(tool) => tool,
+            None => panic!("Tool with id {} does not exist", id),
+        }
     }
 
     pub fn nodes(&self) -> Vec<Weak<Tool>> {
@@ -163,7 +173,7 @@ impl Container {
         for element in &self.elements {
             match element.class {
                 VoltageSrc => {
-                    if !element.contains_ground() {
+                    if !element.connected_to_ground() {
                         valid_sources.push(Rc::downgrade(element));
                     }
                 }
@@ -241,6 +251,34 @@ impl Container {
             })
             .map(|x| Rc::downgrade(x))
             .collect()
+    }
+
+    /// Get all the node pairs in the circuit.
+    ///
+    /// Returns a vector of tuples containing the node ids and the element
+    pub fn get_all_node_pairs(&self) -> Vec<(usize, usize, Rc<Element>)> {
+        let mut node_to_node_resistors: Vec<(usize, usize, Rc<Element>)> = Vec::new();
+
+        for element in self.get_elements() {
+            if node_to_node_resistors.iter().any(|x| x.2.id == element.id)
+                || element.class == Ground
+            {
+                continue;
+            }
+
+            let tools = self.get_tools_for_element(element.id);
+            if element.connected_to_ground() {
+                node_to_node_resistors.push((tools[0].upgrade().unwrap().id, 0, element.clone()));
+            } else {
+                node_to_node_resistors.push((
+                    tools[0].upgrade().unwrap().id,
+                    tools[1].upgrade().unwrap().id,
+                    element.clone(),
+                ));
+            }
+        }
+
+        node_to_node_resistors
     }
 
     pub fn get_voltage_sources(&self) -> Vec<Weak<Element>> {

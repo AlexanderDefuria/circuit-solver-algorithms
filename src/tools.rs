@@ -96,7 +96,7 @@ impl Tool {
                 if node
                     .members
                     .iter()
-                    .any(|x| x.upgrade().unwrap().contains_ground())
+                    .any(|x| x.upgrade().unwrap().connected_to_ground())
                 {
                     let x = (node.id as u32, 0);
 

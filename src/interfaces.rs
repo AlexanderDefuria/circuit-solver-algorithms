@@ -13,6 +13,8 @@ use crate::util::{create_basic_container, create_mna_container};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::rc::Rc;
+use ndarray::{Array, Array1, ArrayBase, Ix1, OwnedRepr};
+use petgraph::visit::Walker;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_test::*;
@@ -91,10 +93,11 @@ pub fn test_wasm() -> String {
 }
 
 #[wasm_bindgen]
-pub fn solve_mna_container() -> String {
+pub fn solve_mna_container() -> Vec<JsValue> {
     let c: Container = create_mna_container();
     let solver: NodeSolver = Solver::new(Rc::new(RefCell::new(c)), Matrix);
-    solver.solve_matrix().unwrap()
+    let x = solver.solve_steps().unwrap();
+    x.into_iter().map(JsValue::from).collect()
 }
 
 impl From<Vec<Element>> for Container {
