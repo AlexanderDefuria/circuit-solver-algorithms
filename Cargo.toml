@@ -6,8 +6,6 @@ edition = "2021"
 [lib]
 crate-type = ["cdylib", "rlib"]
 
-[build]
-profiler = true
 
 [dependencies]
 serde = { version = "1.0.163", features = ["derive", "rc"] }

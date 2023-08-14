@@ -13,15 +13,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="52c330b2-a72e-46d5-bbef-071fc6e5ee26" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/solvers/mod.rs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/solvers/node_matrix_solver.rs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/solvers/node_step_solver.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/container.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/container.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/controller.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/controller.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/elements.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/elements.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/interfaces.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/interfaces.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/math.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/solvers.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/solvers.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/solver.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/tools.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/tools.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/util.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/util.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -102,17 +106,51 @@
       <recent name="$PROJECT_DIR$/.github/workflows" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/solvers" />
       <recent name="$PROJECT_DIR$/src" />
       <recent name="$PROJECT_DIR$/src/math" />
       <recent name="$PROJECT_DIR$/src/math/" />
       <recent name="$PROJECT_DIR$/libs/math/src" />
-      <recent name="$PROJECT_DIR$/tests/data" />
     </key>
   </component>
   <component name="RunManager" selected="Cargo.Test">
-    <configuration name="Test math" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
-      <option name="command" value="test --package math --lib math" />
-      <option name="workingDirectory" value="file://$PROJECT_DIR$/libs/math" />
+    <configuration name="Build circuit-solver-algorithms" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="build --package circuit-solver-algorithms --lib" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <option name="emulateTerminal" value="false" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Expand circuit_solver_algorithms::solvers::solver" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="expand --lib --color=always --theme=Dracula --tests solvers::solver" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <option name="emulateTerminal" value="false" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test solvers::solver::tests::test_solve_steps" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="test --package circuit-solver-algorithms --lib solvers::solver::tests::test_solve_steps -- --exact" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
       <option name="emulateTerminal" value="false" />
       <option name="channel" value="DEFAULT" />
       <option name="requiredFeatures" value="true" />
@@ -161,30 +199,6 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
-    <configuration name="lib is an object (1)" type="JavaScriptTestRunnerJest" temporary="true" nameIsGenerated="true">
-      <node-interpreter value="project" />
-      <jest-package value="$PROJECT_DIR$/tests/node_modules/jest" />
-      <working-dir value="$PROJECT_DIR$/tests" />
-      <envs />
-      <scope-kind value="TEST" />
-      <test-file value="$PROJECT_DIR$/tests/index.test.js" />
-      <test-names>
-        <test-name value="lib is an object" />
-      </test-names>
-      <method v="2" />
-    </configuration>
-    <configuration name="lib is an object" type="JavaScriptTestRunnerJest" temporary="true" nameIsGenerated="true">
-      <node-interpreter value="project" />
-      <jest-package value="$PROJECT_DIR$/tests/node_modules/jest" />
-      <working-dir value="$PROJECT_DIR$/tests" />
-      <envs />
-      <scope-kind value="TEST" />
-      <test-file value="$PROJECT_DIR$/tests/index.js" />
-      <test-names>
-        <test-name value="lib is an object" />
-      </test-names>
-      <method v="2" />
-    </configuration>
     <configuration name="test" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
       <package-json value="$PROJECT_DIR$/tests/package.json" />
       <command value="run" />
@@ -197,19 +211,19 @@
     </configuration>
     <list>
       <item itemvalue="Cargo.Test" />
-      <item itemvalue="Cargo.Test math" />
+      <item itemvalue="Cargo.Build circuit-solver-algorithms" />
+      <item itemvalue="Cargo.Expand circuit_solver_algorithms::solvers::solver" />
+      <item itemvalue="Cargo.Test solvers::solver::tests::test_solve_steps" />
       <item itemvalue="Cargo.Test solvers::tests::test_solve_steps" />
-      <item itemvalue="Jest.lib is an object (1)" />
-      <item itemvalue="Jest.lib is an object" />
       <item itemvalue="npm.test" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Cargo.Test solvers::solver::tests::test_solve_steps" />
+        <item itemvalue="Cargo.Expand circuit_solver_algorithms::solvers::solver" />
         <item itemvalue="Cargo.Test solvers::tests::test_solve_steps" />
+        <item itemvalue="Cargo.Build circuit-solver-algorithms" />
         <item itemvalue="npm.test" />
-        <item itemvalue="Jest.lib is an object" />
-        <item itemvalue="Jest.lib is an object (1)" />
-        <item itemvalue="Cargo.Test math" />
       </list>
     </recent_temporary>
   </component>
@@ -299,7 +313,7 @@
       <workItem from="1691856752509" duration="1811000" />
       <workItem from="1692009519371" duration="607000" />
       <workItem from="1692011006639" duration="2414000" />
-      <workItem from="1692015051351" duration="1405000" />
+      <workItem from="1692015051351" duration="14236000" />
     </task>
     <servers />
   </component>
@@ -309,6 +323,22 @@
   <component name="UnknownFeatures">
     <option featureType="dependencySupport" implementationName="executable:docker" />
     <option featureType="dependencySupport" implementationName="executable:kubectl" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/solvers/solver.rs</url>
+          <line>178</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/solvers/solver.rs</url>
+          <line>140</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

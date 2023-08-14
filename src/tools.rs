@@ -1,11 +1,11 @@
 use crate::component::Component::Ground;
 use crate::elements::Element;
-use operations::prelude::EquationMember;
 use crate::tools::ToolType::*;
 use crate::util::PrettyPrint;
 use crate::validation::Status::Valid;
 use crate::validation::StatusError::{Known, Multiple};
 use crate::validation::{check_weak_duplicates, StatusError, Validation, ValidationResult};
+use operations::prelude::EquationMember;
 use petgraph::graph::UnGraph;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
@@ -145,6 +145,16 @@ impl EquationMember for Tool {
 
     fn value(&self) -> f64 {
         self.value
+    }
+
+    fn latex_string(&self) -> String {
+        match self.class {
+            Node => format!("N_{{{}}}", self.id),
+            Mesh => format!("M_{{{}}}", self.id),
+            SuperNode => format!("SN_{{{}}}", self.id),
+            SuperMesh => format!("SM_{{{}}}", self.id),
+            None => format!("T_{{{}}}", self.id),
+        }
     }
 }
 

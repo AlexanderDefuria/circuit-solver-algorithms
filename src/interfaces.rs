@@ -6,14 +6,11 @@ use crate::validation::StatusError::{Known, Multiple};
 use crate::validation::{StatusError, Validation};
 use std::cell::RefCell;
 
-use crate::solvers::SolverType::Matrix;
-use crate::solvers::{NodeSolver, Solver};
+use crate::solvers::node_matrix_solver::NodeSolver;
+use crate::solvers::solver::Solver;
 use crate::util::{create_basic_container, create_mna_container};
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use std::rc::Rc;
-use ndarray::{Array, Array1, ArrayBase, Ix1, OwnedRepr};
-use petgraph::visit::Walker;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_test::*;
@@ -89,8 +86,8 @@ pub fn test_wasm() -> String {
 #[wasm_bindgen]
 pub fn solve_mna_container() -> Vec<JsValue> {
     let c: Container = create_mna_container();
-    let solver: NodeSolver = Solver::new(Rc::new(RefCell::new(c)), Matrix);
-    let x = solver.solve_steps().unwrap();
+    let solver: NodeSolver = Solver::new(Rc::new(RefCell::new(c)));
+    let x = solver.solve().unwrap();
     x.into_iter().map(JsValue::from).collect()
 }
 
@@ -128,9 +125,7 @@ fn test_container_wasm() {
 
 #[wasm_bindgen_test]
 fn test_load() {
-    let c = ContainerSetup {
-        elements: vec![],
-    };
+    let c = ContainerSetup { elements: vec![] };
     let x: JsValue = serde_wasm_bindgen::to_value(&c).unwrap();
     assert_eq!(load_wasm_container(x).unwrap(), "No elements");
 
@@ -172,10 +167,7 @@ fn test_load() {
 
 #[cfg(test)]
 mod tests {
-    use crate::container::Container;
-    use crate::interfaces::{load_wasm_container, return_create_basic_container};
-    use crate::util::create_basic_container;
-    use wasm_bindgen::JsValue;
+    use crate::interfaces::return_create_basic_container;
 
     #[test]
     fn test() {

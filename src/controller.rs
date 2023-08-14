@@ -1,6 +1,5 @@
 use crate::container::Container;
 use crate::elements::Element;
-use operations::prelude::Operation;
 
 use crate::validation::{Status, StatusError, Validation, ValidationResult};
 use ndarray::Array2;

@@ -8,3 +8,4 @@ mod solvers;
 pub mod tools;
 mod util;
 pub mod validation;
+mod operations;

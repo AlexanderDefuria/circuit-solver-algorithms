@@ -1,14 +1,13 @@
 use crate::component::Component;
 use crate::component::Component::Ground;
-use operations::math::{EquationMember, EquationRepr};
 use crate::util::PrettyPrint;
 use crate::validation::Status::Valid;
 use crate::validation::StatusError::Known;
 use crate::validation::{Validation, ValidationResult};
+use operations::math::{EquationMember, EquationRepr};
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Serialize, Serializer};
 use std::fmt::Display;
-use std::rc::Rc;
 
 /// Representation of a Schematic Element
 #[derive(Debug, Deserialize, Clone)]
@@ -83,10 +82,6 @@ impl PrettyPrint for Element {
     fn basic_string(&self) -> String {
         format!("{}{}", self.name, self.id)
     }
-
-    fn latex_string(&self) -> String {
-        EquationMember::latex_string(self)
-    }
 }
 
 impl Into<EquationRepr> for Element {
@@ -98,7 +93,6 @@ impl Into<EquationRepr> for Element {
         )
     }
 }
-
 
 impl EquationMember for Element {
     fn equation_repr(&self) -> String {
@@ -197,7 +191,7 @@ impl Serialize for Element {
         state.serialize_field("positive", &self.positive)?;
         state.serialize_field("negative", &self.negative)?;
         state.serialize_field("pretty_string", &self.pretty_string())?;
-        state.serialize_field("latex_string", &PrettyPrint::latex_string(self))?;
+        state.serialize_field("latex_string", &self.latex_string())?;
         state.end()
     }
 }

@@ -12,7 +12,7 @@ use petgraph::graph::UnGraph;
 use petgraph::prelude::NodeIndex;
 use rustworkx_core::connectivity;
 
-use serde::{Serialize, Serializer};
+use serde::Serialize;
 use std::fmt::{Debug, Formatter};
 use std::rc::{Rc, Weak};
 
@@ -338,10 +338,8 @@ mod tests {
     use crate::tools::ToolType::SuperNode;
     use crate::util::*;
     use crate::validation::Status::Valid;
-    use crate::validation::StatusError::Known;
     use crate::validation::{StatusError, Validation};
     use regex::Regex;
-    use std::rc::Rc;
 
     #[test]
     fn test_debug() {

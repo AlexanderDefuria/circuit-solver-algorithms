@@ -5,9 +5,6 @@ use crate::elements::Element;
 pub(crate) trait PrettyPrint {
     fn pretty_string(&self) -> String;
     fn basic_string(&self) -> String;
-    fn latex_string(&self) -> String {
-        self.pretty_string()
-    }
 }
 
 #[macro_export]
@@ -78,10 +75,10 @@ mod tests {
 
     #[test]
     fn test_create_containers() {
-        let mut container = create_basic_container();
-        let mut supernode_container = create_basic_supernode_container();
-        let mut supermesh_container = create_basic_supermesh_container();
-        let mut mna_container = create_mna_container();
+        let container = create_basic_container();
+        let supernode_container = create_basic_supernode_container();
+        let supermesh_container = create_basic_supermesh_container();
+        let mna_container = create_mna_container();
 
         container.validate().expect("");
         supernode_container.validate().expect("");
