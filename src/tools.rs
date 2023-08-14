@@ -1,6 +1,6 @@
 use crate::component::Component::Ground;
 use crate::elements::Element;
-use crate::math::EquationMember;
+use operations::prelude::EquationMember;
 use crate::tools::ToolType::*;
 use crate::util::PrettyPrint;
 use crate::validation::Status::Valid;
@@ -139,7 +139,7 @@ impl PartialEq<Self> for Tool {
 }
 
 impl EquationMember for Tool {
-    fn equation_string(&self) -> String {
+    fn equation_repr(&self) -> String {
         format!("T_{{{}}}", self.id)
     }
 

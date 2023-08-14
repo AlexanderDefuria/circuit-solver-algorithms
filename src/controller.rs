@@ -1,6 +1,6 @@
 use crate::container::Container;
 use crate::elements::Element;
-use crate::operations::Operation;
+use operations::prelude::Operation;
 
 use crate::validation::{Status, StatusError, Validation, ValidationResult};
 use ndarray::Array2;
@@ -15,7 +15,6 @@ use std::rc::{Rc, Weak};
 /// this will begin development when the solver is structurally complete or V0.1.
 pub struct Controller {
     pub container: Rc<Container>,
-    pub operations: Vec<Operation>,
     pub status: ValidationResult,
 }
 
@@ -23,35 +22,34 @@ impl Controller {
     pub fn new() -> Controller {
         Controller {
             container: Rc::from(Container::new()),
-            operations: vec![],
             status: Ok(Status::New),
         }
     }
 
-    pub fn add_operation(&mut self, mut operation: Operation) {
-        if self.operations.len() == 0 {
-            operation.origin = Rc::downgrade(&self.container);
-        } else {
-            operation.origin =
-                Rc::downgrade(self.operations.last().unwrap().result.as_ref().unwrap());
-        }
-        self.operations.push(operation);
-    }
+    // pub fn add_operation(&mut self, mut operation: Operation) {
+    //     if self.operations.len() == 0 {
+    //         operation.origin = Rc::downgrade(&self.container);
+    //     } else {
+    //         operation.origin =
+    //             Rc::downgrade(self.operations.last().unwrap().result.as_ref().unwrap());
+    //     }
+    //     self.operations.push(operation);
+    // }
 
     pub fn run(&mut self) -> Result<(), StatusError> {
-        for (i, operation) in self.operations.iter_mut().enumerate() {
-            if operation.completed() {
-                continue;
-            }
-            if !operation.has_origin() {
-                if i == 0 {
-                    operation.origin = Rc::downgrade(&self.container);
-                } else {
-                    operation.origin = Rc::downgrade(operation.result.as_ref().unwrap());
-                }
-            }
-            operation.run()?;
-        }
+        // for (i, operation) in self.operations.iter_mut().enumerate() {
+        //     if operation.completed() {
+        //         continue;
+        //     }
+        //     if !operation.has_origin() {
+        //         if i == 0 {
+        //             operation.origin = Rc::downgrade(&self.container);
+        //         } else {
+        //             operation.origin = Rc::downgrade(operation.result.as_ref().unwrap());
+        //         }
+        //     }
+        //     operation.run()?;
+        // }
         Err(StatusError::Known("Not Implemented".parse().unwrap()))
     }
 
@@ -89,7 +87,6 @@ impl From<Vec<Element>> for Controller {
         let status = container.validate();
         Controller {
             container: Rc::from(container),
-            operations: vec![],
             status,
         }
     }

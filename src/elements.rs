@@ -1,6 +1,6 @@
 use crate::component::Component;
 use crate::component::Component::Ground;
-use crate::math::{EquationMember, EquationRepr};
+use operations::math::{EquationMember, EquationRepr};
 use crate::util::PrettyPrint;
 use crate::validation::Status::Valid;
 use crate::validation::StatusError::Known;
@@ -99,18 +99,9 @@ impl Into<EquationRepr> for Element {
     }
 }
 
-impl Into<EquationRepr> for Rc<Element> {
-    fn into(self) -> EquationRepr {
-        EquationRepr::new_with_latex(
-            self.basic_string(),
-            format!("{}_{{{}}}", self.name, self.id),
-            self.value,
-        )
-    }
-}
 
 impl EquationMember for Element {
-    fn equation_string(&self) -> String {
+    fn equation_repr(&self) -> String {
         self.basic_string()
     }
 

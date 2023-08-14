@@ -21,6 +21,7 @@ ndarray = "0.15.6"
 wasm-bindgen-test = "0.3.0"
 num-traits = "0.2.15"
 js-sys = "0.3.64"
+operations = { path = "../operations" }
 
 [dev-dependencies]
 serde-wasm-bindgen = "0.5.0"

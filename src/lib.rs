@@ -4,8 +4,6 @@ pub mod controller;
 mod elements;
 mod helpers;
 pub mod interfaces;
-mod math;
-pub mod operations;
 mod solvers;
 pub mod tools;
 mod util;

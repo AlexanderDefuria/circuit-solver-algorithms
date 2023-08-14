@@ -2,7 +2,6 @@ use crate::component::Component::{Ground, Resistor, VoltageSrc};
 use crate::container::Container;
 use crate::controller::Controller;
 use crate::elements::Element;
-use crate::operations::{OpMethod, Operation};
 use crate::validation::StatusError::{Known, Multiple};
 use crate::validation::{StatusError, Validation};
 use std::cell::RefCell;
@@ -22,9 +21,6 @@ use wasm_bindgen_test::*;
 #[derive(Serialize, Deserialize)]
 pub struct ContainerSetup {
     pub elements: Vec<Element>,
-    pub operations: Vec<OpMethod>,
-    // pub method: OpMethod,
-    // pub target: Option<usize>,
 }
 
 #[wasm_bindgen]
@@ -58,7 +54,6 @@ pub fn return_create_basic_container() -> String {
                 )
             })
             .collect(),
-        operations: vec![],
     };
 
     serde_json::to_string(&x).unwrap()
@@ -81,7 +76,6 @@ pub fn return_create_mna_container() -> String {
                 )
             })
             .collect(),
-        operations: vec![],
     };
 
     serde_json::to_string(&x).unwrap()
@@ -113,14 +107,10 @@ impl From<Vec<Element>> for Container {
 impl From<ContainerSetup> for Controller {
     fn from(setup: ContainerSetup) -> Controller {
         let container: Container = setup.elements.into();
-        let mut operations: Vec<Operation> = vec![];
-        for op in setup.operations {
-            operations.push(op.into());
-        }
         let status = container.validate();
         Controller {
             container: Rc::from(container),
-            operations,
+            // operations,
             status,
         }
     }
@@ -140,14 +130,12 @@ fn test_container_wasm() {
 fn test_load() {
     let c = ContainerSetup {
         elements: vec![],
-        operations: vec![],
     };
     let x: JsValue = serde_wasm_bindgen::to_value(&c).unwrap();
     assert_eq!(load_wasm_container(x).unwrap(), "No elements");
 
     let c = ContainerSetup {
         elements: vec![Element::new(Ground, 0., vec![], vec![])],
-        operations: vec![],
     };
     let x: JsValue = serde_wasm_bindgen::to_value(&c).unwrap();
     assert!(load_wasm_container(x).is_err());
@@ -157,7 +145,6 @@ fn test_load() {
             Element::new(Ground, 0., vec![1], vec![]),
             Element::new(Ground, 0., vec![0], vec![]),
         ],
-        operations: vec![],
     };
     let x: JsValue = serde_wasm_bindgen::to_value(&c).unwrap();
     assert_eq!(
@@ -175,7 +162,6 @@ fn test_load() {
             Element::new(Resistor, 1.0, vec![1], vec![0, 3]),
             Element::new(Ground, 0., vec![0, 2], vec![]),
         ],
-        operations: vec![],
     };
     let x: JsValue = serde_wasm_bindgen::to_value(&c).unwrap();
     assert_eq!(
