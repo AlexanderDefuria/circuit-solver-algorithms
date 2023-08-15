@@ -13,19 +13,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="52c330b2-a72e-46d5-bbef-071fc6e5ee26" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/solvers/mod.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/solvers/node_matrix_solver.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/solvers/node_step_solver.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/container.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/container.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/controller.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/controller.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/elements.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/elements.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/interfaces.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/interfaces.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/solvers.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/solver.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/solvers/node_matrix_solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/node_matrix_solver.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/solvers/node_step_solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/node_step_solver.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/solvers/solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/solver.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/tools.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/tools.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/util.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/util.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -313,7 +307,7 @@
       <workItem from="1691856752509" duration="1811000" />
       <workItem from="1692009519371" duration="607000" />
       <workItem from="1692011006639" duration="2414000" />
-      <workItem from="1692015051351" duration="14236000" />
+      <workItem from="1692015051351" duration="36047000" />
     </task>
     <servers />
   </component>

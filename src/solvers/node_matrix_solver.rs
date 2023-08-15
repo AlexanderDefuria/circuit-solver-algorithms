@@ -4,7 +4,7 @@ use crate::solvers::solver::{Solver, Step};
 use crate::util::PrettyPrint;
 use ndarray::{s, ArrayBase, Ix2, OwnedRepr};
 use operations::math::{matrix_to_latex, EquationRepr};
-use operations::prelude::{Divide, Negate, Operation, Sum, Text, Value};
+use operations::prelude::{Divide, Negate, Operation, Sum, Text, Value, Variable};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -47,17 +47,17 @@ impl Solver for NodeSolver {
 
         steps.push(Step {
             label: "A Matrix".to_string(),
-            sub_steps: Some(vec![Value(Rc::new(self.a_matrix.clone()))]),
+            sub_steps: Some(vec![Variable(Rc::new(self.a_matrix.clone()))]),
         });
 
         steps.push(Step {
             label: "Z Matrix".to_string(),
-            sub_steps: Some(vec![Value(Rc::new(self.z_matrix.clone()))]),
+            sub_steps: Some(vec![Variable(Rc::new(self.z_matrix.clone()))]),
         });
 
         steps.push(Step {
             label: "X Matrix".to_string(),
-            sub_steps: Some(vec![Value(Rc::new(self.x_matrix.clone()))]),
+            sub_steps: Some(vec![Variable(Rc::new(self.x_matrix.clone()))]),
         });
 
         steps.push(Step {
@@ -129,8 +129,8 @@ fn form_g_matrix(container: Rc<RefCell<Container>>, n: usize) -> ndarray::Array2
             .into_iter()
             .map(|x| {
                 Divide(
-                    Some(Box::new(Value(Rc::new(1.0)))),
-                    Some(Box::new(Value(Rc::new(x)))),
+                    Some(Box::new(Value(1.0))),
+                    Some(Box::new(Variable(Rc::new(x)))),
                 )
             })
             .collect();
@@ -158,8 +158,8 @@ fn form_g_matrix(container: Rc<RefCell<Container>>, n: usize) -> ndarray::Array2
                     }
                     if element.id == element2.id {
                         set.push(Negate(Some(Box::new(Divide(
-                            Some(Box::new(Value(Rc::new(1.0)))),
-                            Some(Box::from(Value(element.clone()))),
+                            Some(Box::new(Value(1.0))),
+                            Some(Box::from(Variable(element.clone()))),
                         )))));
                     }
                 }
@@ -187,9 +187,9 @@ fn form_b_matrix(
                     .positive
                     .contains(&tool.upgrade().unwrap().members[0].upgrade().unwrap().id)
                 {
-                    matrix[[n - i - 1, j]] = Value(Rc::new(-1.0));
+                    matrix[[n - i - 1, j]] = Value(-1.0);
                 } else {
-                    matrix[[n - i - 1, j]] = Value(Rc::new(1.0));
+                    matrix[[n - i - 1, j]] = Value(1.0);
                 }
             }
         }
@@ -230,7 +230,7 @@ fn form_z_matrix(
             if element.class != CurrentSrc {
                 continue;
             }
-            set.push(Value(Rc::new(element.value)));
+            set.push(Value(element.value));
         }
         if set.len() == 0 {
             continue;
@@ -241,7 +241,7 @@ fn form_z_matrix(
     // E Matrix
     // The value of the voltage source.
     for (i, source) in container.borrow().get_voltage_sources().iter().enumerate() {
-        matrix[[n + i, 0]] = Value(Rc::new(source.upgrade().unwrap().value));
+        matrix[[n + i, 0]] = Value(source.upgrade().unwrap().value);
     }
 
     matrix
@@ -257,7 +257,7 @@ fn form_x_matrix(
 
     // V Matrix
     for (i, tool) in container.borrow().nodes().iter().enumerate() {
-        matrix[[i, 0]] = Value(Rc::new(EquationRepr::new(
+        matrix[[i, 0]] = Variable(Rc::new(EquationRepr::new(
             format!("{}", tool.upgrade().unwrap().pretty_string()),
             0.0,
         )));
@@ -265,7 +265,7 @@ fn form_x_matrix(
 
     // J Matrix
     for (i, source) in container.borrow().get_voltage_sources().iter().enumerate() {
-        matrix[[n + i, 0]] = Value(Rc::new(EquationRepr::new(
+        matrix[[n + i, 0]] = Variable(Rc::new(EquationRepr::new(
             format!("{}", source.upgrade().unwrap().pretty_string()),
             0.0,
         )));

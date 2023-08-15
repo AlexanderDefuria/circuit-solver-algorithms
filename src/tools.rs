@@ -53,7 +53,7 @@ impl Tool {
             id: 0,
             class,
             members: vec![],
-            value: 0.0,
+            value: f64::NAN,
         };
         tool.members = elements;
         tool
@@ -160,7 +160,6 @@ impl EquationMember for Tool {
 
 impl Validation for Tool {
     fn validate(&self) -> ValidationResult {
-        // TODO
         if self.class == None {
             return Err(Known("Tool has no class".to_string()));
         }

@@ -1,3 +1,4 @@
+use std::f64::NAN;
 use crate::component::Component;
 use crate::component::Component::Ground;
 use crate::util::PrettyPrint;
@@ -104,8 +105,13 @@ impl EquationMember for Element {
     }
 
     fn latex_string(&self) -> String {
-        format!("{}_{{{}}}", self.name, self.id)
+        match self.class {
+            Component::VoltageSrc => format!("V_{{\\texttt{{src}}{}}}", self.id),
+            Component::CurrentSrc => format!("I_{{\\texttt{{src}}{}}}", self.id),
+            _ => format!("{}_{{{}}}", self.name, self.id),
+        }
     }
+
 }
 
 /// Implement PartialEq for Element

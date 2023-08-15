@@ -18,6 +18,15 @@ pub struct Step {
     pub sub_steps: Option<Vec<Operation>>,
 }
 
+impl Step {
+    pub fn new(label: &str) -> Self {
+        Step {
+            label: label.to_string(),
+            sub_steps: None,
+        }
+    }
+}
+
 impl Display for Step {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut s = format!("{}\n", self.label);
