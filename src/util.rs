@@ -64,37 +64,37 @@ pub fn create_mna_container() -> Container {
 #[cfg(test)]
 mod tests {
     use crate::component::Component;
+    use crate::container::Container;
     use crate::elements::Element;
-    use crate::util::{
-        create_basic_container, create_basic_supermesh_container, create_basic_supernode_container,
-        create_mna_container,
-    };
+    use crate::util::*;
     use crate::validation::Validation;
     use assert_json_diff::assert_json_include;
     use serde_json::json;
+    use crate::validation::Status::Valid;
 
     #[test]
     fn test_create_containers() {
-        let container = create_basic_container();
-        let supernode_container = create_basic_supernode_container();
-        let supermesh_container = create_basic_supermesh_container();
-        let mna_container = create_mna_container();
+        fn test_container(container: &mut Container, element_count: usize, node_count: usize) {
+            assert_eq!(container.nodes().len(), node_count);
+            assert_eq!(container.get_elements().len(), element_count);
+        }
 
-        container.validate().expect("");
-        supernode_container.validate().expect("");
-        supermesh_container.validate().expect("");
-        mna_container.validate().expect("");
+        let mut containers: Vec<Container> = vec![
+            create_basic_container(),
+            create_basic_supernode_container(),
+            create_basic_supermesh_container(),
+            create_mna_container(),
+        ];
 
-        println!("create_basic_container() -> {:?}", container);
-        println!(
-            "create_basic_supernode_container() -> {:?}",
-            supernode_container
-        );
-        println!(
-            "create_basic_super_mesh_container() -> {:?}",
-            supermesh_container
-        );
-        println!("create_mna_container() -> {:?}", mna_container);
+        containers.iter_mut().for_each(|container| {
+            assert_eq!(container.validate(), Ok(Valid));
+            container.create_nodes();
+            container.create_super_nodes();
+            container.create_meshes();
+            container.create_super_mesh();
+            assert_eq!(container.validate(), Ok(Valid));
+        });
+
     }
 
     #[test]

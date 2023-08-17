@@ -290,7 +290,7 @@ mod tests {
     fn test_node_solver() {
         let mut c = create_mna_container();
         c.create_nodes();
-        let solver: NodeSolver = Solver::new(Rc::new(RefCell::new(c)));
+        let _solver: NodeSolver = Solver::new(Rc::new(RefCell::new(c)));
     }
 
     #[test]

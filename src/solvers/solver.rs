@@ -3,6 +3,7 @@ use operations::prelude::*;
 use std::cell::RefCell;
 use std::fmt::Display;
 use std::rc::Rc;
+use serde::{Deserialize, Serialize};
 use wasm_bindgen::JsValue;
 
 /// This will take a container and solve it using the given method.
@@ -11,6 +12,17 @@ use wasm_bindgen::JsValue;
 pub trait Solver {
     fn new(container: Rc<RefCell<Container>>) -> Self;
     fn solve(&self) -> Result<Vec<Step>, String>;
+}
+
+pub enum SolverTool {
+    Node,
+    Mesh
+}
+
+#[derive(Serialize, Deserialize)]
+pub enum SolverMethod {
+    Step,
+    Matrix
 }
 
 pub struct Step {

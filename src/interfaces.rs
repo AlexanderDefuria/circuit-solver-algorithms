@@ -24,9 +24,6 @@ pub struct ContainerSetup {
 pub fn load_wasm_container(js: JsValue) -> Result<String, StatusError> {
     // This JsValue is a ContainerInterface and also needs operations
     let setup: ContainerSetup = serde_wasm_bindgen::from_value(js).unwrap();
-    if setup.elements.len() == 0 {
-        return Ok(String::from("No elements"));
-    }
 
     let controller: Controller = setup.into();
     controller.container.validate()?;

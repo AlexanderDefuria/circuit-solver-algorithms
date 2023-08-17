@@ -5,6 +5,7 @@ use crate::validation::{StatusError, Validation, ValidationResult};
 use serde::{Deserialize, Serialize};
 use std::ops::Deref;
 use std::rc::{Rc, Weak};
+use crate::solvers::solver::SolverMethod;
 
 pub struct Operation {
     pub origin: Weak<Container>,
@@ -16,6 +17,7 @@ pub struct Operation {
 pub enum OpMethod {
     Simplify(Simplification),
     Tool(ToolType),
+    Solver(SolverMethod),
     Validation,
 }
 
@@ -38,8 +40,7 @@ impl Operation {
             OpMethod::Simplify(_method) => {
                 result = self.origin.upgrade().unwrap().deref().clone();
             }
-            OpMethod::Tool(_) => {}
-            OpMethod::Validation => {}
+            _ => {}
         }
         result.validate()?;
         self.result = Some(Rc::new(result));

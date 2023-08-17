@@ -229,16 +229,26 @@ impl Container {
         &self.tools
     }
 
+    /// Returns a vector of all the tools of a given type
+    /// Note Weak RCs are returned
+    pub fn get_tools_by_type(&self, tool_type: ToolType) -> Vec<Weak<Tool>> {
+        self.tools
+            .iter()
+            .filter(|x| x.class == tool_type)
+            .map(|x| Rc::downgrade(x))
+            .collect()
+    }
+
     pub fn get_ground(&self) -> &Rc<Element> {
         self.elements.get(self.ground).unwrap()
     }
 
     pub fn simplify(&mut self, _method: &Simplification) -> &mut Self {
-        self
+        todo!()
     }
 
     pub fn solve(&mut self, _method: &ToolType) -> &mut Self {
-        self
+        todo!()
     }
 
     pub fn get_tools_for_element(&self, element_id: usize) -> Vec<Weak<Tool>> {

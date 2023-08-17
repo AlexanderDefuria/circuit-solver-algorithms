@@ -1,4 +1,3 @@
-use std::f64::NAN;
 use crate::component::Component;
 use crate::component::Component::Ground;
 use crate::util::PrettyPrint;
@@ -111,7 +110,6 @@ impl EquationMember for Element {
             _ => format!("{}_{{{}}}", self.name, self.id),
         }
     }
-
 }
 
 /// Implement PartialEq for Element

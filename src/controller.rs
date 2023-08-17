@@ -2,7 +2,6 @@ use crate::container::Container;
 use crate::elements::Element;
 
 use crate::validation::{Status, StatusError, Validation, ValidationResult};
-use ndarray::Array2;
 
 use std::rc::{Rc, Weak};
 
@@ -95,10 +94,6 @@ impl Validation for Controller {
     fn validate(&self) -> ValidationResult {
         self.status.clone()
     }
-}
-
-fn nodal_analysis() {
-    let _matrix = Array2::<f64>::zeros((3, 3)); // 3 by 3 Matrix
 }
 
 #[cfg(test)]
