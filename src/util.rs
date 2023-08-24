@@ -91,7 +91,7 @@ mod tests {
             container.create_nodes();
             container.create_super_nodes();
             container.create_meshes();
-            container.create_super_mesh();
+            container.create_super_meshes();
             assert_eq!(container.validate(), Ok(Valid));
         });
 

@@ -219,7 +219,7 @@ impl Container {
         self
     }
 
-    pub fn create_super_mesh(&mut self) {}
+    pub fn create_super_meshes(&mut self) {}
 
     pub fn get_elements(&self) -> &Vec<Rc<Element>> {
         &self.elements

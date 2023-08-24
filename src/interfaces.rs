@@ -7,19 +7,22 @@ use crate::validation::{StatusError, Validation};
 use std::cell::RefCell;
 
 use crate::solvers::node_matrix_solver::NodeSolver;
-use crate::solvers::solver::Solver;
+use crate::solvers::solver::{Solver, Step};
 use crate::util::{create_basic_container, create_mna_container};
 use serde::{Deserialize, Serialize};
 use std::rc::Rc;
+use js_sys::Array;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_test::*;
+use crate::solvers::node_step_solver::NodeStepSolver;
 
 #[derive(Serialize, Deserialize)]
 pub struct ContainerSetup {
     pub elements: Vec<Element>,
 }
 
+/// This can be used as a test to see if the container is being loaded in properly.
 #[wasm_bindgen]
 pub fn load_wasm_container(js: JsValue) -> Result<String, StatusError> {
     // This JsValue is a ContainerInterface and also needs operations
@@ -31,49 +34,57 @@ pub fn load_wasm_container(js: JsValue) -> Result<String, StatusError> {
     Ok(String::from("Loaded Successfully"))
 }
 
-#[wasm_bindgen]
-pub fn return_create_basic_container() -> String {
-    let c: Container = create_basic_container();
-    let x = ContainerSetup {
-        elements: c
-            .get_elements()
-            .iter()
-            .map(|y| {
-                let x = y.clone();
-                Element::new(
-                    x.class.clone(),
-                    x.value,
-                    x.positive.clone(),
-                    x.negative.clone(),
-                )
-            })
-            .collect(),
-    };
-
-    serde_json::to_string(&x).unwrap()
+pub fn solve(matrix: bool, nodal: bool, container_js: JsValue) -> Result<String, StatusError> {
+    let setup: ContainerSetup = serde_wasm_bindgen::from_value(container_js).unwrap();
+    let mut c: Container = Container::from(setup);
+    c.validate()?;
+    match nodal {
+        true => {
+            c.create_nodes();
+            c.create_super_nodes();
+            if matrix {
+                let solver: NodeSolver = Solver::new(Rc::new(RefCell::new(c)));
+                let steps = solver.solve().unwrap();
+                return Ok(serde_json::to_string(&steps).unwrap());
+            } else {
+                let solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(c)));
+                let steps = solver.solve().unwrap();
+                return Ok(serde_json::to_string(&steps).unwrap());
+            }
+        }
+        false => {
+            c.create_meshes();
+            c.create_super_meshes();
+            if matrix {
+                return Err(Known("Matrix Solver not implemented for meshes".to_string()));
+            } else {
+                return Err(Known("Step Solver not implemented for meshes".to_string()));
+            }
+        }
+    }
 }
 
 #[wasm_bindgen]
-pub fn return_create_mna_container() -> String {
-    let c: Container = create_mna_container();
-    let x = ContainerSetup {
-        elements: c
-            .get_elements()
-            .iter()
-            .map(|y| {
-                let x = y.clone();
-                Element::new(
-                    x.class.clone(),
-                    x.value,
-                    x.positive.clone(),
-                    x.negative.clone(),
-                )
-            })
-            .collect(),
-    };
-
-    serde_json::to_string(&x).unwrap()
+pub fn return_solved_step_example() -> String {
+    let mut c: Container = create_mna_container();
+    c.create_nodes();
+    c.create_super_nodes();
+    let solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(c)));
+    let steps = solver.solve().unwrap();
+    serde_json::to_string(&steps).unwrap()
 }
+
+#[wasm_bindgen]
+pub fn return_solved_matrix_example() -> String {
+    let mut c: Container = create_mna_container();
+    c.create_nodes();
+    c.create_super_nodes();
+    let solver: NodeSolver = Solver::new(Rc::new(RefCell::new(c)));
+    let steps = solver.solve().unwrap();
+    serde_json::to_string(&steps).unwrap()
+
+}
+
 
 #[wasm_bindgen]
 pub fn test_wasm() -> String {
@@ -107,6 +118,16 @@ impl From<ContainerSetup> for Controller {
             // operations,
             status,
         }
+    }
+}
+
+impl From<ContainerSetup> for Container {
+    fn from(setup: ContainerSetup) -> Container {
+        let mut container = Container::new();
+        for element in setup.elements {
+            container.add_element_core(element);
+        }
+        container
     }
 }
 
@@ -162,13 +183,3 @@ fn test_load() {
     );
 }
 
-#[cfg(test)]
-mod tests {
-    use crate::interfaces::return_create_basic_container;
-
-    #[test]
-    fn test() {
-        println!("{:?}", return_create_basic_container());
-        assert!(true);
-    }
-}

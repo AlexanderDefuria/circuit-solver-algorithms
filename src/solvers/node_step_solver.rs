@@ -40,7 +40,7 @@ impl Solver for NodeStepSolver {
         steps.push(Step::new("Steps to solve the circuit:"));
         steps.push(declare_variables(&node_pairs));
 
-        // Step 2 Find Voltages
+        // Step 2 Setup Voltages
         steps.push(breakdown_resistor_equations(
             &node_pairs,
             &self.container.borrow(),
@@ -49,6 +49,10 @@ impl Solver for NodeStepSolver {
             &node_pairs,
             &self.container.borrow(),
         ));
+
+        // Step 3 Solve Voltages
+        steps.push(Step::new("Solve for voltages:"));
+
 
         Ok(steps)
     }

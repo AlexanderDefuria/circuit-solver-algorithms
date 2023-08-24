@@ -3,7 +3,8 @@ use operations::prelude::*;
 use std::cell::RefCell;
 use std::fmt::Display;
 use std::rc::Rc;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, Serializer};
+use serde::ser::SerializeStruct;
 use wasm_bindgen::JsValue;
 
 /// This will take a container and solve it using the given method.
@@ -30,6 +31,7 @@ pub struct Step {
     pub sub_steps: Option<Vec<Operation>>,
 }
 
+
 impl Step {
     pub fn new(label: &str) -> Self {
         Step {
@@ -38,6 +40,21 @@ impl Step {
         }
     }
 }
+
+impl Serialize for Step {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("Step", 1)?;
+        state.serialize_field("label", &self.label)?;
+        state.serialize_field("sub_steps", &self.sub_steps.clone().unwrap().into_iter().map(
+            |x| x.latex_string()
+        ).collect::<Vec<String>>())?;
+        state.end()
+    }
+}
+
 
 impl Display for Step {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

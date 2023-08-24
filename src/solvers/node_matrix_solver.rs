@@ -3,9 +3,10 @@ use crate::container::Container;
 use crate::solvers::solver::{Solver, Step};
 use crate::util::PrettyPrint;
 use ndarray::{s, ArrayBase, Ix2, OwnedRepr};
-use operations::math::{matrix_to_latex, EquationRepr};
+use operations::math::{matrix_to_latex, EquationRepr, EquationMember};
 use operations::prelude::{Divide, Negate, Operation, Sum, Text, Value, Variable};
 use std::cell::RefCell;
+use rulinalg::matrix::Matrix;
 use std::rc::Rc;
 
 pub struct NodeSolver {
@@ -40,10 +41,6 @@ impl Solver for NodeSolver {
     /// Returns a string that represents the matrix equation to solve the circuit.
     fn solve(&self) -> Result<Vec<Step>, String> {
         let mut steps: Vec<Step> = Vec::new();
-        let inverse_a_matrix: ndarray::Array2<Operation> = self.a_matrix.clone();
-        // solve::inverse(&mut inverse_a_matrix).unwrap();
-        // Wrap in matrix
-        // [x] = [A]^-1 * [z]
 
         steps.push(Step {
             label: "A Matrix".to_string(),
@@ -75,9 +72,16 @@ impl Solver for NodeSolver {
             sub_steps: Some(vec![Text(format!(
                 "{} = {}^{{-1}} * {}",
                 matrix_to_latex(self.x_matrix.clone()),
-                matrix_to_latex(inverse_a_matrix),
+                matrix_to_latex(self.a_matrix.clone()),
                 matrix_to_latex(self.z_matrix.clone())
             ))]),
+        });
+
+        // let v: Matrix<f64> = self.a_matrix.clone().map(|x| x.value()).int;
+
+        steps.push(Step {
+            label: "NEED TO MOVE TO RULINALG TO COMPUTE INVERSE AND SOLVE ".to_string(),
+            sub_steps: None
         });
 
         Ok(steps)

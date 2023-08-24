@@ -13,15 +13,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="52c330b2-a72e-46d5-bbef-071fc6e5ee26" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/solvers/mesh_matrix_solver.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/solvers/mesh_step_solver.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/container.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/container.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/controller.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/controller.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/elements.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/elements.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/interfaces.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/interfaces.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/operations.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/operations.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/solvers/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/mod.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/solvers/node_matrix_solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/node_matrix_solver.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/solvers/node_step_solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/node_step_solver.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/solvers/solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/solver.rs" afterDir="false" />
@@ -78,7 +74,7 @@
     &quot;javascript.nodejs.core.library.configured.version&quot;: &quot;18.13.0&quot;,
     &quot;javascript.nodejs.core.library.typings.version&quot;: &quot;18.13.0&quot;,
     &quot;last.edited.regexp&quot;: &quot;Sample Text&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/alexander/Desktop/operations&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/alexander/Desktop/circuit-solver-algorithms/pkg&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -323,7 +319,10 @@
       <workItem from="1692015051351" duration="37226000" />
       <workItem from="1692139354894" duration="910000" />
       <workItem from="1692212680423" duration="2940000" />
-      <workItem from="1692246431809" duration="1703000" />
+      <workItem from="1692246431809" duration="4651000" />
+      <workItem from="1692365595860" duration="4345000" />
+      <workItem from="1692658159573" duration="318000" />
+      <workItem from="1692658656727" duration="4353000" />
     </task>
     <servers />
   </component>
