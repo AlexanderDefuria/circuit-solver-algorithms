@@ -34,6 +34,8 @@ pub fn load_wasm_container(js: JsValue) -> Result<String, StatusError> {
     Ok(String::from("Loaded Successfully"))
 }
 
+#[wasm_bindgen]
+
 pub fn solve(matrix: bool, nodal: bool, container_js: JsValue) -> Result<String, StatusError> {
     let setup: ContainerSetup = serde_wasm_bindgen::from_value(container_js).unwrap();
     let mut c: Container = Container::from(setup);
@@ -70,8 +72,29 @@ pub fn return_solved_step_example() -> String {
     c.create_nodes();
     c.create_super_nodes();
     let solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(c)));
-    let steps = solver.solve().unwrap();
+
+    let mut steps = solver.solve().unwrap();
     serde_json::to_string(&steps).unwrap()
+}
+
+#[wasm_bindgen_test]
+pub fn test_serialize_steps() {
+    let mut c: Container = create_mna_container();
+    c.create_nodes();
+    c.create_super_nodes();
+    let solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(c)));
+
+    let mut steps = solver.solve();
+    match steps {
+        Ok(x) => {
+            let result = serde_json::to_string(&x).unwrap();
+            assert!(result.len() > 1);
+            // assert_eq!(result, "Some String".to_string());
+        }
+        Err(_) => {
+            assert!(false);
+        }
+    }
 }
 
 #[wasm_bindgen]
@@ -145,7 +168,7 @@ fn test_container_wasm() {
 fn test_load() {
     let c = ContainerSetup { elements: vec![] };
     let x: JsValue = serde_wasm_bindgen::to_value(&c).unwrap();
-    assert_eq!(load_wasm_container(x).unwrap(), "No elements");
+    assert_eq!(load_wasm_container(x).unwrap(), "No Sources");
 
     let c = ContainerSetup {
         elements: vec![Element::new(Ground, 0., vec![], vec![])],

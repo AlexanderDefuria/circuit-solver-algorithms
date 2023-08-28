@@ -39,6 +39,14 @@ impl Step {
             sub_steps: None,
         }
     }
+
+    pub fn get_label(&self) -> String {
+        self.label.clone()
+    }
+
+    pub fn get_steps(&self) -> Option<Vec<Operation>> {
+        self.sub_steps.clone()
+    }
 }
 
 impl Serialize for Step {
@@ -46,9 +54,10 @@ impl Serialize for Step {
         where
             S: Serializer,
     {
-        let mut state = serializer.serialize_struct("Step", 1)?;
-        state.serialize_field("label", &self.label)?;
-        state.serialize_field("sub_steps", &self.sub_steps.clone().unwrap().into_iter().map(
+        let mut state = serializer.serialize_struct("Step", 2)?;
+        state.serialize_field("label", &self.get_label())?;
+        let steps = self.get_steps().unwrap_or_else(|| vec![]);
+        state.serialize_field("sub_steps", &steps.into_iter().map(
             |x| x.latex_string()
         ).collect::<Vec<String>>())?;
         state.end()

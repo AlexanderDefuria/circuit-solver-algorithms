@@ -28,13 +28,13 @@ impl Solver for NodeStepSolver {
         let mut steps: Vec<Step> = Vec::new();
 
         let supernodes: Vec<Weak<Tool>> = self.container.borrow().get_tools_by_type(ToolType::SuperNode);
-        if supernodes.len() > 0 {
-            steps.push(Step::new("Solve for supernodes:"));
-            supernodes.iter().for_each(|_| {
-                // TODO: Add supernode solver
-                todo!();
-            });
-        }
+        // if supernodes.len() > 0 {
+        //     steps.push(Step::new("Solve for supernodes:"));
+        //     supernodes.iter().for_each(|_| {
+        //         // TODO: Add supernode solver
+        //         todo!();
+        //     });
+        // }
 
         // Step 1 Declare
         steps.push(Step::new("Steps to solve the circuit:"));

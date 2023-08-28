@@ -13,15 +13,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="52c330b2-a72e-46d5-bbef-071fc6e5ee26" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/publish.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/container.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/container.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/interfaces.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/interfaces.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/solvers/node_matrix_solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/node_matrix_solver.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/solvers/node_step_solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/node_step_solver.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/solvers/solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/solver.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/util.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/util.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -74,7 +72,7 @@
     &quot;javascript.nodejs.core.library.configured.version&quot;: &quot;18.13.0&quot;,
     &quot;javascript.nodejs.core.library.typings.version&quot;: &quot;18.13.0&quot;,
     &quot;last.edited.regexp&quot;: &quot;Sample Text&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/alexander/Desktop/circuit-solver-algorithms/pkg&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/alexander/Desktop/circuit-solver-algorithms&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -85,7 +83,7 @@
     &quot;org.rust.disableDetachedFileInspection/home/alexander/Desktop/circuit-solver-algorithms/src/math/math.rs&quot;: &quot;true&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
     &quot;structure.view.defaults.are.configured&quot;: &quot;true&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;/home/alexander/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/232.8660.186/plugins/javascript-impl/jsLanguageServicesImpl/external&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/home/alexander/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/232.9559.58/plugins/javascript-impl/jsLanguageServicesImpl/external&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
   &quot;keyToStringList&quot;: {
@@ -109,7 +107,7 @@
       <recent name="$PROJECT_DIR$/libs/math/src" />
     </key>
   </component>
-  <component name="RunManager" selected="Cargo.Test">
+  <component name="RunManager" selected="wasm-pack.Test">
     <configuration name="Build circuit-solver-algorithms" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="command" value="build --package circuit-solver-algorithms --lib" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
@@ -212,6 +210,22 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
+    <configuration name="Build" type="WasmPackCommandRunConfiguration" factoryName="wasm-pack" nameIsGenerated="true">
+      <option name="command" value="build --target web" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <option name="emulateTerminal" value="false" />
+      <method v="2">
+        <option name="WASM_PACK.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test" type="WasmPackCommandRunConfiguration" factoryName="wasm-pack">
+      <option name="command" value="test --node" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <option name="emulateTerminal" value="false" />
+      <method v="2">
+        <option name="WASM_PACK.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
     <list>
       <item itemvalue="Cargo.Test" />
       <item itemvalue="Cargo.Expand circuit_solver_algorithms::solvers::mesh_matrix_solver" />
@@ -219,6 +233,8 @@
       <item itemvalue="Cargo.Expand circuit_solver_algorithms::solvers::solver" />
       <item itemvalue="Cargo.Test solvers::solver::tests::test_solve_steps" />
       <item itemvalue="Cargo.Test solvers::tests::test_solve_steps" />
+      <item itemvalue="wasm-pack.Build" />
+      <item itemvalue="wasm-pack.Test" />
     </list>
     <recent_temporary>
       <list>
@@ -323,6 +339,8 @@
       <workItem from="1692365595860" duration="4345000" />
       <workItem from="1692658159573" duration="318000" />
       <workItem from="1692658656727" duration="4353000" />
+      <workItem from="1692917195942" duration="5885000" />
+      <workItem from="1693186639493" duration="1590000" />
     </task>
     <servers />
   </component>
