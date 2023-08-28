@@ -1,11 +1,11 @@
 use crate::component::Simplification;
 use crate::container::Container;
+use crate::solvers::solver::SolverMethod;
 use crate::tools::ToolType;
 use crate::validation::{StatusError, Validation, ValidationResult};
 use serde::{Deserialize, Serialize};
 use std::ops::Deref;
 use std::rc::{Rc, Weak};
-use crate::solvers::solver::SolverMethod;
 
 pub struct Operation {
     pub origin: Weak<Container>,

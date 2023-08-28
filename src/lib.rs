@@ -2,7 +2,6 @@ pub mod component;
 pub mod container;
 pub mod controller;
 mod elements;
-mod helpers;
 pub mod interfaces;
 mod operations;
 mod solvers;

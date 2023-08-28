@@ -67,10 +67,10 @@ mod tests {
     use crate::container::Container;
     use crate::elements::Element;
     use crate::util::*;
+    use crate::validation::Status::Valid;
     use crate::validation::Validation;
     use assert_json_diff::assert_json_include;
     use serde_json::json;
-    use crate::validation::Status::Valid;
 
     #[test]
     fn test_create_containers() {
@@ -94,7 +94,6 @@ mod tests {
             container.create_super_meshes();
             assert_eq!(container.validate(), Ok(Valid));
         });
-
     }
 
     #[test]

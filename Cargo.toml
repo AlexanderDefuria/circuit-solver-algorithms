@@ -16,7 +16,7 @@ petgraph = "0.6.3"
 rustworkx-core = "0.13.0"
 getrandom = { version = "0.2", features = ["js"] }
 ndarray = "0.15.6"
-rulinalg = "0.4.2"
+nalgebra = "0.32.3"
 wasm-bindgen-test = "0.3.0"
 num-traits = "0.2.15"
 js-sys = "0.3.64"

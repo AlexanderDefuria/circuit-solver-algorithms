@@ -3,13 +3,13 @@ use crate::component::Component::{Resistor, VoltageSrc};
 use crate::container::Container;
 use crate::elements::Element;
 use crate::solvers::solver::{Solver, Step};
+use crate::tools::{Tool, ToolType};
 use operations::mappings::expand;
 use operations::math::EquationMember;
 use operations::operations::Operation;
 use operations::prelude::{Divide, Equal, Negate, Sum, Text, Value, Variable};
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
-use crate::tools::{Tool, ToolType};
 
 pub struct NodeStepSolver {
     container: Rc<RefCell<Container>>,
@@ -27,7 +27,10 @@ impl Solver for NodeStepSolver {
 
         let mut steps: Vec<Step> = Vec::new();
 
-        let supernodes: Vec<Weak<Tool>> = self.container.borrow().get_tools_by_type(ToolType::SuperNode);
+        let supernodes: Vec<Weak<Tool>> = self
+            .container
+            .borrow()
+            .get_tools_by_type(ToolType::SuperNode);
         // if supernodes.len() > 0 {
         //     steps.push(Step::new("Solve for supernodes:"));
         //     supernodes.iter().for_each(|_| {
@@ -52,7 +55,6 @@ impl Solver for NodeStepSolver {
 
         // Step 3 Solve Voltages
         steps.push(Step::new("Solve for voltages:"));
-
 
         Ok(steps)
     }

@@ -6,16 +6,16 @@ use crate::validation::StatusError::{Known, Multiple};
 use crate::validation::{StatusError, Validation};
 use std::cell::RefCell;
 
-use crate::solvers::node_matrix_solver::NodeSolver;
+use crate::solvers::node_matrix_solver::NodeMatrixSolver;
+use crate::solvers::node_step_solver::NodeStepSolver;
 use crate::solvers::solver::{Solver, Step};
 use crate::util::{create_basic_container, create_mna_container};
+use js_sys::Array;
 use serde::{Deserialize, Serialize};
 use std::rc::Rc;
-use js_sys::Array;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_test::*;
-use crate::solvers::node_step_solver::NodeStepSolver;
 
 #[derive(Serialize, Deserialize)]
 pub struct ContainerSetup {
@@ -45,7 +45,7 @@ pub fn solve(matrix: bool, nodal: bool, container_js: JsValue) -> Result<String,
             c.create_nodes();
             c.create_super_nodes();
             if matrix {
-                let solver: NodeSolver = Solver::new(Rc::new(RefCell::new(c)));
+                let solver: NodeMatrixSolver = Solver::new(Rc::new(RefCell::new(c)));
                 let steps = solver.solve().unwrap();
                 return Ok(serde_json::to_string(&steps).unwrap());
             } else {
@@ -58,7 +58,9 @@ pub fn solve(matrix: bool, nodal: bool, container_js: JsValue) -> Result<String,
             c.create_meshes();
             c.create_super_meshes();
             if matrix {
-                return Err(Known("Matrix Solver not implemented for meshes".to_string()));
+                return Err(Known(
+                    "Matrix Solver not implemented for meshes".to_string(),
+                ));
             } else {
                 return Err(Known("Step Solver not implemented for meshes".to_string()));
             }
@@ -102,12 +104,10 @@ pub fn return_solved_matrix_example() -> String {
     let mut c: Container = create_mna_container();
     c.create_nodes();
     c.create_super_nodes();
-    let solver: NodeSolver = Solver::new(Rc::new(RefCell::new(c)));
+    let solver: NodeMatrixSolver = Solver::new(Rc::new(RefCell::new(c)));
     let steps = solver.solve().unwrap();
     serde_json::to_string(&steps).unwrap()
-
 }
-
 
 #[wasm_bindgen]
 pub fn test_wasm() -> String {
@@ -117,7 +117,7 @@ pub fn test_wasm() -> String {
 #[wasm_bindgen]
 pub fn solve_mna_container() -> Vec<JsValue> {
     let c: Container = create_mna_container();
-    let solver: NodeSolver = Solver::new(Rc::new(RefCell::new(c)));
+    let solver: NodeMatrixSolver = Solver::new(Rc::new(RefCell::new(c)));
     let x = solver.solve().unwrap();
     x.into_iter().map(JsValue::from).collect()
 }
@@ -205,4 +205,3 @@ fn test_load() {
         load_wasm_container(x)
     );
 }
-
