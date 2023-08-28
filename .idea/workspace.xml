@@ -12,19 +12,7 @@
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="52c330b2-a72e-46d5-bbef-071fc6e5ee26" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/publish.sh" beforeDir="false" afterPath="$PROJECT_DIR$/publish.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/helpers.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/interfaces.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/interfaces.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/operations.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/operations.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/solvers/node_matrix_solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/node_matrix_solver.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/solvers/node_step_solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/node_step_solver.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/solvers/solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/solver.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/util.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/util.rs" afterDir="false" />
-    </list>
+    <list default="true" id="52c330b2-a72e-46d5-bbef-071fc6e5ee26" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -111,7 +99,7 @@
       <recent name="$PROJECT_DIR$/libs/math/src" />
     </key>
   </component>
-  <component name="RunManager" selected="Cargo.Test">
+  <component name="RunManager" selected="wasm-pack.Publish">
     <configuration name="Build circuit-solver-algorithms" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="command" value="build --package circuit-solver-algorithms --lib" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
@@ -372,7 +360,7 @@
       <workItem from="1692658656727" duration="4353000" />
       <workItem from="1692917195942" duration="5885000" />
       <workItem from="1693186639493" duration="1812000" />
-      <workItem from="1693237873873" duration="14897000" />
+      <workItem from="1693237873873" duration="14976000" />
     </task>
     <servers />
   </component>

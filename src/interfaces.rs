@@ -168,7 +168,7 @@ fn test_container_wasm() {
 fn test_load() {
     let c = ContainerSetup { elements: vec![] };
     let x: JsValue = serde_wasm_bindgen::to_value(&c).unwrap();
-    assert_eq!(load_wasm_container(x).unwrap(), "No Sources");
+    assert_eq!(load_wasm_container(x), Err(Multiple(vec![Known("No Sources".parse().unwrap()), Known("Multiple Grounds".parse().unwrap())])));
 
     let c = ContainerSetup {
         elements: vec![Element::new(Ground, 0., vec![], vec![])],
@@ -193,15 +193,15 @@ fn test_load() {
 
     let c = ContainerSetup {
         elements: vec![
-            Element::new(VoltageSrc, 1.0, vec![2, 3], vec![1]),
-            Element::new(Resistor, 1.0, vec![0], vec![2]),
-            Element::new(Resistor, 1.0, vec![1], vec![0, 3]),
-            Element::new(Ground, 0., vec![0, 2], vec![]),
+            Element::new(Ground, 0., vec![1, 3], vec![]),
+            Element::new(VoltageSrc, 1.0, vec![3, 0], vec![2]),
+            Element::new(Resistor, 1.0, vec![1], vec![3]),
+            Element::new(Resistor, 1.0, vec![2], vec![1, 0]),
         ],
     };
     let x: JsValue = serde_wasm_bindgen::to_value(&c).unwrap();
     assert_eq!(
-        Ok("Loaded Successfully".to_string()),
-        load_wasm_container(x)
+        load_wasm_container(x),
+        Ok("Loaded Successfully".to_string())
     );
 }
