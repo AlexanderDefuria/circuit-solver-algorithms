@@ -63,7 +63,6 @@ pub fn create_mna_container() -> Container {
 
 #[cfg(test)]
 mod tests {
-    use crate::component::Component;
     use crate::container::Container;
     use crate::elements::Element;
     use crate::util::*;
@@ -112,11 +111,21 @@ mod tests {
             value: 1.0,
             current: 0.0,
             voltage_drop: 0.0,
-            class: Component::Resistor,
+            class: Resistor,
             positive: vec![2],
             negative: vec![3],
         };
         assert_eq!(element.name, "R1");
         assert_json_include!(actual: element, expected: json);
+    }
+
+    #[test]
+    fn temporary_serialization() {
+        for mut container in vec![create_basic_container(), create_mna_container(), create_basic_supermesh_container(), create_basic_supernode_container()] {
+            container.create_nodes();
+            container.create_super_nodes();
+
+            println!("{}", json!(container).to_string());
+        }
     }
 }

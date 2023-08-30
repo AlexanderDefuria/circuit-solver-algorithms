@@ -3,7 +3,6 @@ use crate::container::Container;
 use crate::solvers::solver::{Solver, Step};
 use crate::util::PrettyPrint;
 use nalgebra::{DMatrix, DVector};
-use ndarray::{s, Array1, Array2, ArrayBase, Ix2, OwnedRepr};
 use operations::math::{EquationMember, EquationRepr};
 use operations::prelude::{Divide, Negate, Operation, Sum, Text, Value, Variable};
 use std::cell::RefCell;
@@ -254,7 +253,7 @@ fn form_x_vector(container: Rc<RefCell<Container>>) -> DVector<Operation> {
     let mut x_vec: Vec<Operation> = Vec::new();
 
     // V Matrix
-    for (i, tool) in container.borrow().nodes().iter().enumerate() {
+    for tool in container.borrow().nodes() {
         x_vec.push(Variable(Rc::new(EquationRepr::new(
             format!("{}", tool.upgrade().unwrap().pretty_string()),
             0.0,
@@ -262,7 +261,7 @@ fn form_x_vector(container: Rc<RefCell<Container>>) -> DVector<Operation> {
     }
 
     // J Matrix
-    for (i, source) in container.borrow().get_voltage_sources().iter().enumerate() {
+    for source in container.borrow().get_voltage_sources() {
         x_vec.push(Variable(Rc::new(EquationRepr::new(
             format!("{}", source.upgrade().unwrap().pretty_string()),
             0.0,
@@ -274,9 +273,7 @@ fn form_x_vector(container: Rc<RefCell<Container>>) -> DVector<Operation> {
 
 #[cfg(test)]
 mod tests {
-    use crate::solvers::node_matrix_solver::{
-        form_b_matrix, form_c_matrix, form_d_matrix, form_g_matrix, NodeMatrixSolver,
-    };
+    use crate::solvers::node_matrix_solver::NodeMatrixSolver;
     use crate::solvers::solver::Solver;
     use crate::util::create_mna_container;
     use ndarray::array;

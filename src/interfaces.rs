@@ -1,6 +1,5 @@
 use crate::component::Component::{Ground, Resistor, VoltageSrc};
 use crate::container::Container;
-use crate::controller::Controller;
 use crate::elements::Element;
 use crate::validation::StatusError::{Known, Multiple};
 use crate::validation::{StatusError, Validation};
@@ -8,9 +7,8 @@ use std::cell::RefCell;
 
 use crate::solvers::node_matrix_solver::NodeMatrixSolver;
 use crate::solvers::node_step_solver::NodeStepSolver;
-use crate::solvers::solver::{Solver, Step};
-use crate::util::{create_basic_container, create_mna_container};
-use js_sys::Array;
+use crate::solvers::solver::Solver;
+use crate::util::create_mna_container;
 use serde::{Deserialize, Serialize};
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
@@ -28,8 +26,7 @@ pub fn load_wasm_container(js: JsValue) -> Result<String, StatusError> {
     // This JsValue is a ContainerInterface and also needs operations
     let setup: ContainerSetup = serde_wasm_bindgen::from_value(js).unwrap();
 
-    let controller: Controller = setup.into();
-    controller.container.validate()?;
+    let container = Container::from(setup);
 
     Ok(String::from("Loaded Successfully"))
 }
@@ -75,7 +72,7 @@ pub fn return_solved_step_example() -> String {
     c.create_super_nodes();
     let solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(c)));
 
-    let mut steps = solver.solve().unwrap();
+    let steps = solver.solve().unwrap();
     serde_json::to_string(&steps).unwrap()
 }
 
@@ -86,7 +83,7 @@ pub fn test_serialize_steps() {
     c.create_super_nodes();
     let solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(c)));
 
-    let mut steps = solver.solve();
+    let steps = solver.solve();
     match steps {
         Ok(x) => {
             let result = serde_json::to_string(&x).unwrap();
@@ -132,17 +129,6 @@ impl From<Vec<Element>> for Container {
     }
 }
 
-impl From<ContainerSetup> for Controller {
-    fn from(setup: ContainerSetup) -> Controller {
-        let container: Container = setup.elements.into();
-        let status = container.validate();
-        Controller {
-            container: Rc::from(container),
-            // operations,
-            status,
-        }
-    }
-}
 
 impl From<ContainerSetup> for Container {
     fn from(setup: ContainerSetup) -> Container {
