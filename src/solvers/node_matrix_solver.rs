@@ -56,9 +56,30 @@ impl Solver for NodeMatrixSolver {
             sub_steps: Some(vec![Variable(Rc::new(self.x_matrix.clone()))]),
         });
 
+        let inverse: DMatrix<f64> = DMatrix::from_iterator(
+            self.a_matrix.nrows(),
+            self.a_matrix.ncols(),
+            self.a_matrix.iter().map(|x| x.value()),
+        )
+        .try_inverse()
+        .unwrap();
+
+        let z_vector: DVector<f64> = self
+            .z_matrix
+            .iter()
+            .map(|x| x.value())
+            .collect::<Vec<f64>>()
+            .into();
+
+        let mut result = inverse.clone() * z_vector;
+
+        result
+            .iter_mut()
+            .for_each(|x| *x = (*x * 100.).round() / 100.);
+
         steps.push(Step {
             label: "Inverse A Matrix".to_string(),
-            sub_steps: Some(vec![Text("TODO".to_string())]),
+            sub_steps: None,
         });
 
         steps.push(Step {
@@ -70,25 +91,6 @@ impl Solver for NodeMatrixSolver {
                 self.z_matrix.equation_repr()
             ))]),
         });
-
-        // let value_matrix = self.a_matrix.iter().map(|x| x.value()).collect::<Vec<f64>>();
-        let inverse: DMatrix<f64> = DMatrix::from_iterator(
-            self.a_matrix.nrows(),
-            self.a_matrix.ncols(),
-            self.a_matrix.iter().map(|x| x.value()),
-        )
-        .try_inverse().unwrap();
-
-        let z_vector: DVector<f64> = self
-            .z_matrix
-            .iter()
-            .map(|x| x.value())
-            .collect::<Vec<f64>>()
-            .into();
-
-        let mut result = inverse * z_vector;
-
-        result.iter_mut().for_each(|x| *x = (*x * 100.).round() / 100.);
 
         steps.push(Step {
             label: "In theory we are solved.".to_string(),
@@ -111,10 +113,10 @@ fn form_a_matrix(container: Rc<RefCell<Container>>, n: usize, m: usize) -> DMatr
     let c: DMatrix<Operation> = form_c_matrix(container.clone(), n, m);
     let d: DMatrix<Operation> = form_d_matrix(container.clone(), m);
 
-    a_matrix.view_mut((0,0), (n, n)).copy_from(&g);
-    a_matrix.view_mut((0,n), (n, m)).copy_from(&b);
-    a_matrix.view_mut((n,0), (m, n)).copy_from(&c);
-    a_matrix.view_mut((n,n), (m, m)).copy_from(&d);
+    a_matrix.view_mut((0, 0), (n, n)).copy_from(&g);
+    a_matrix.view_mut((0, n), (n, m)).copy_from(&b);
+    a_matrix.view_mut((n, 0), (m, n)).copy_from(&c);
+    a_matrix.view_mut((n, n), (m, m)).copy_from(&d);
 
     a_matrix
 }
@@ -273,10 +275,11 @@ fn form_x_vector(container: Rc<RefCell<Container>>) -> DVector<Operation> {
 
 #[cfg(test)]
 mod tests {
-    use crate::solvers::node_matrix_solver::NodeMatrixSolver;
+    use crate::solvers::node_matrix_solver::{
+        form_b_matrix, form_c_matrix, form_d_matrix, form_g_matrix, NodeMatrixSolver,
+    };
     use crate::solvers::solver::Solver;
     use crate::util::create_mna_container;
-    use ndarray::array;
     use operations::prelude::*;
     use std::cell::RefCell;
     use std::rc::Rc;
@@ -290,12 +293,12 @@ mod tests {
 
     #[test]
     fn test_a_matrix() {
-        let expected = array![
-            ["1/R1", "", "", "-1", "0"],
-            ["", "1/R2 + 1/R3", "-1/R2", "1", "0"],
-            ["", "-1/R2", "1/R2", "0", "1"],
-            ["-1", "1", "0", "0", "0"],
-            ["0", "0", "1", "0", "0"]
+        let expected = vec![
+            vec!["1/R1", "", "", "-1", "0"],
+            vec!["", "1/R2 + 1/R3", "-1/R2", "1", "0"],
+            vec!["", "-1/R2", "1/R2", "0", "1"],
+            vec!["-1", "1", "0", "0", "0"],
+            vec!["0", "0", "1", "0", "0"],
         ];
 
         let mut c = create_mna_container();
@@ -312,70 +315,83 @@ mod tests {
             )
             .value()
         );
-        // assert_eq!(solver.a_matrix.map(|x| x.equation_repr()), expected);
+        for i in 0..5 {
+            for j in 0..5 {
+                assert_eq!(expected[i][j], solver.a_matrix[(i, j)].equation_repr());
+            }
+        }
     }
 
     #[test]
     fn test_g_matrix() {
-        let expected = array![
-            ["1/R1", "", ""],
-            ["", "1/R2 + 1/R3", "-1/R2"],
-            ["", "-1/R2", "1/R2"]
+        let expected = vec![
+            vec!["1/R1", "", ""],
+            vec!["", "1/R2 + 1/R3", "-1/R2"],
+            vec!["", "-1/R2", "1/R2"],
         ];
 
         let mut c = create_mna_container();
         c.create_nodes();
         let n = c.nodes().len();
+        let matrix = form_g_matrix(Rc::new(RefCell::new(c)), n);
 
-        // assert_eq!(
-        //     form_g_matrix(Rc::new(RefCell::new(c)), n).map(|x| x.equation_repr()),
-        //     expected
-        // );
+        for i in 0..n {
+            for j in 0..n {
+                assert_eq!(expected[i][j], matrix[(i, j)].equation_repr());
+            }
+        }
     }
 
     #[test]
     fn test_b_matrix() {
-        let expected = array![["-1", "0"], ["1", "0"], ["0", "1"]];
+        let expected = vec![vec!["-1", "0"], vec!["1", "0"], vec!["0", "1"]];
 
         let mut c = create_mna_container();
         c.create_nodes();
         let n = c.nodes().len();
         let m = c.get_voltage_sources().len();
+        let matrix = form_b_matrix(Rc::new(RefCell::new(c)), n, m);
 
-        // assert_eq!(
-        //     form_b_matrix(Rc::new(RefCell::new(c)), n, m).map(|x| x.equation_repr()),
-        //     expected
-        // );
+        for i in 0..n {
+            for j in 0..m {
+                assert_eq!(expected[i][j], matrix[(i, j)].equation_repr());
+            }
+        }
     }
 
     #[test]
     fn test_c_matrix() {
-        let expected = array![["-1", "1", "0"], ["0", "0", "1"]];
+        let expected = vec![vec!["-1", "1", "0"], vec!["0", "0", "1"]];
 
         let mut c = create_mna_container();
         c.create_nodes();
         let n = c.nodes().len();
         let m = c.get_voltage_sources().len();
 
-        // assert_eq!(
-        //     form_c_matrix(Rc::new(RefCell::new(c)), n, m).map(|x| x.equation_repr()),
-        //     expected
-        // );
+        let c_matrix = form_c_matrix(Rc::new(RefCell::new(c)), n, m);
+
+        for i in 0..m {
+            for j in 0..n {
+                assert_eq!(expected[i][j], c_matrix[(i, j)].equation_repr());
+            }
+        }
     }
 
     #[test]
     fn test_d_matrix() {
-        let expected = array![["0", "0"], ["0", "0"]];
+        let expected = vec![vec!["0", "0"], vec!["0", "0"]];
 
         let mut c = create_mna_container();
         c.create_nodes();
-        let _n = c.nodes().len();
         let m = c.get_voltage_sources().len();
 
-        // assert_eq!(
-        //     form_d_matrix(Rc::new(RefCell::new(c)), m).map(|x| x.equation_repr()),
-        //     expected
-        // );
+        let d_matrix = form_d_matrix(Rc::new(RefCell::new(c)), m);
+
+        for i in 0..m {
+            for j in 0..m {
+                assert_eq!(expected[i][j], d_matrix[(i, j)].equation_repr());
+            }
+        }
     }
 
     #[test]

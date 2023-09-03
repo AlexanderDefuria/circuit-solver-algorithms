@@ -13,13 +13,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="52c330b2-a72e-46d5-bbef-071fc6e5ee26" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/tests/data/validatable_containers.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.github/create_four_mesh_container.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/container.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/container.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/elements.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/elements.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/interfaces.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/interfaces.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/solvers/mesh_matrix_solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/mesh_matrix_solver.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/solvers/node_matrix_solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/node_matrix_solver.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/solvers/solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/solver.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tools.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/tools.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/util.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/util.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/data/basic_container.json" beforeDir="false" afterPath="$PROJECT_DIR$/tests/data/basic_container.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/tests.rs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/tests.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -370,7 +374,8 @@
       <workItem from="1692917195942" duration="5885000" />
       <workItem from="1693186639493" duration="1812000" />
       <workItem from="1693237873873" duration="16596000" />
-      <workItem from="1693360329275" duration="968000" />
+      <workItem from="1693360329275" duration="16352000" />
+      <workItem from="1693769479612" duration="633000" />
     </task>
     <servers />
   </component>
@@ -380,6 +385,17 @@
   <component name="UnknownFeatures">
     <option featureType="dependencySupport" implementationName="executable:docker" />
     <option featureType="dependencySupport" implementationName="executable:kubectl" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/solvers/solver.rs</url>
+          <line>117</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

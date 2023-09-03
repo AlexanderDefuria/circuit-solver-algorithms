@@ -129,7 +129,6 @@ impl From<Vec<Element>> for Container {
     }
 }
 
-
 impl From<ContainerSetup> for Container {
     fn from(setup: ContainerSetup) -> Container {
         let mut container = Container::new();
@@ -154,7 +153,13 @@ fn test_container_wasm() {
 fn test_load() {
     let c = ContainerSetup { elements: vec![] };
     let x: JsValue = serde_wasm_bindgen::to_value(&c).unwrap();
-    assert_eq!(load_wasm_container(x), Err(Multiple(vec![Known("No Sources".parse().unwrap()), Known("Multiple Grounds".parse().unwrap())])));
+    assert_eq!(
+        load_wasm_container(x),
+        Err(Multiple(vec![
+            Known("No Sources".parse().unwrap()),
+            Known("Multiple Grounds".parse().unwrap())
+        ]))
+    );
 
     let c = ContainerSetup {
         elements: vec![Element::new(Ground, 0., vec![], vec![])],

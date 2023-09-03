@@ -12,10 +12,10 @@ use petgraph::graph::UnGraph;
 use petgraph::prelude::NodeIndex;
 use rustworkx_core::connectivity;
 
+use crate::interfaces::ContainerSetup;
 use serde::Serialize;
 use std::fmt::{Debug, Formatter};
 use std::rc::{Rc, Weak};
-use crate::interfaces::ContainerSetup;
 
 /// Representation of a Schematic Container
 ///
@@ -340,7 +340,6 @@ impl Validation for Container {
         }
     }
 }
-
 
 #[cfg(test)]
 mod tests {

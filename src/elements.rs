@@ -144,12 +144,14 @@ impl Validation for Element {
                     )));
                 }
 
+                // TODO: This should be a simplification not a validation?
                 for x in self.positive.iter() {
                     if self.negative.contains(x) {
-                        return Err(Known(format!(
-                            "Element cannot be shorted {}",
-                            self.pretty_string()
-                        )));
+                        // return Err(Known(format!(
+                        //     "Element {} cannot be shorted to id {}",
+                        //     self.pretty_string(),
+                        //     x
+                        // )));
                     }
                 }
             }
@@ -236,8 +238,10 @@ mod tests {
         a.value = -0.5;
         assert_known_error!(a.validate(), "Value cannot be zero or negative R1: -0.5 Ω");
 
-        let b = Element::new(Component::Resistor, 1.0, vec![1], vec![1]);
-        assert_known_error!(b.validate(), "Element cannot be shorted R0: 1 Ω");
+        // TODO This was a result of removing the short validation. Should this be a validation?
+        // let mut b = Element::new(Component::Resistor, 1.0, vec![1], vec![1]);
+        // b.id = 1;
+        // assert_known_error!(b.validate(), "Element R1: 1 Ω cannot be shorted to id 1");
 
         let mut c = Element::new(Component::Resistor, 1.0, vec![1], vec![2]);
         c.id = 1;

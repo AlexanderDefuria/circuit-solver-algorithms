@@ -61,6 +61,21 @@ pub fn create_mna_container() -> Container {
     container
 }
 
+pub fn create_four_mesh_container() -> Container {
+    // GND(0) at -V1, R1, R2, R3
+    let mut container = Container::new();
+    container.add_element_core(Element::new(Ground, 0., vec![6], vec![]));
+    container.add_element_core(Element::new(Resistor, 1., vec![2], vec![2, 0]));
+    container.add_element_core(Element::new(Resistor, 2., vec![1], vec![1, 3, 0]));
+    container.add_element_core(Element::new(Resistor, 3., vec![1, 2, 0], vec![5]));
+    container.add_element_core(Element::new(Resistor, 5., vec![], vec![1, 5]));
+    container.add_element_core(Element::new(Resistor, 7., vec![3], vec![4]));
+    container.add_element_core(Element::new(VoltageSrc, 1., vec![1, 4, 5], vec![1, 2, 3]));
+    container.add_element_core(Element::new(VoltageSrc, 2., vec![4], vec![3, 5]));
+    container
+
+}
+
 #[cfg(test)]
 mod tests {
     use crate::container::Container;
@@ -83,14 +98,21 @@ mod tests {
             create_basic_supernode_container(),
             create_basic_supermesh_container(),
             create_mna_container(),
+            create_four_mesh_container()
         ];
 
+        let mut id: usize = 0;
         containers.iter_mut().for_each(|container| {
+            println!("Container {:?}:", id);
+            id += 1;
+
             assert_eq!(container.validate(), Ok(Valid));
             container.create_nodes();
             container.create_super_nodes();
             container.create_meshes();
             container.create_super_meshes();
+            println!("{:?}", container.get_elements());
+
             assert_eq!(container.validate(), Ok(Valid));
         });
     }
@@ -119,13 +141,18 @@ mod tests {
         assert_json_include!(actual: element, expected: json);
     }
 
-    #[test]
-    fn temporary_serialization() {
-        for mut container in vec![create_basic_container(), create_mna_container(), create_basic_supermesh_container(), create_basic_supernode_container()] {
-            container.create_nodes();
-            container.create_super_nodes();
-
-            println!("{}", json!(container).to_string());
-        }
-    }
+    // #[test]
+    // fn temporary_serialization() {
+    //     for mut container in vec![
+    //         create_basic_container(),
+    //         create_mna_container(),
+    //         create_basic_supermesh_container(),
+    //         create_basic_supernode_container(),
+    //     ] {
+    //         container.create_nodes();
+    //         container.create_super_nodes();
+    //
+    //         println!("{}", json!(container).to_string());
+    //     }
+    // }
 }

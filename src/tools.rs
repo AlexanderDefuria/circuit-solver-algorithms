@@ -127,6 +127,13 @@ impl Tool {
         let edges: Vec<(u32, u32)> = Tool::node_edges(nodes)?;
         Ok(UnGraph::<i32, ()>::from_edges(edges.as_slice()))
     }
+
+    pub fn members(&self) -> Vec<usize> {
+        self.members
+            .iter()
+            .map(|x| x.upgrade().unwrap().id)
+            .collect()
+    }
 }
 
 /// Implement PartialEq for Tool
