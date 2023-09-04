@@ -2,7 +2,7 @@ use crate::component::Component;
 use crate::component::Component::{Resistor, VoltageSrc};
 use crate::container::Container;
 use crate::elements::Element;
-use crate::solvers::solver::{Solver, Step};
+use crate::solvers::solver::{Solver, Step, SubStep};
 use crate::tools::{Tool, ToolType};
 use operations::mappings::expand;
 use operations::math::EquationMember;
@@ -65,19 +65,22 @@ fn extract_coefficients(operation: Operation) -> Vec<f64> {
 }
 
 fn declare_variables(node_pairs: &Vec<(usize, usize, Rc<Element>)>) -> Step {
-    let mut sub_steps: Vec<Operation> = Vec::new();
+    let mut sub_steps: Vec<SubStep> = Vec::new();
     let voltage_pairs: Vec<&(usize, usize, Rc<Element>)> = get_node_pairs(node_pairs, VoltageSrc);
     voltage_pairs.iter().for_each(|(node1, node2, _)| {
         let ls: Operation = Text(format!("{{V_{{{}, {}}}}}", node1, node2));
-        let rs: Operation = Text(format!(
-            "voltage and current from node {} to node {}",
-            node1, node2
-        ));
-        sub_steps.push(Equal(Some(Box::new(ls)), Some(Box::new(rs))));
+
+        sub_steps.push(SubStep {
+            description: Some(
+                format!("voltage and current from node {} to node {}", node1, node2).to_string(),
+            ),
+            operations: vec![],
+        });
     });
     Step {
-        label: "Voltage Sources have 0 resistance.".to_string(),
-        sub_steps: Some(sub_steps),
+        description: Some("Find voltage and current between nodes.".to_string()),
+        sub_steps,
+        result: None,
     }
 }
 
@@ -85,7 +88,7 @@ fn breakdown_voltage_src_equations(
     node_pairs: &Vec<(usize, usize, Rc<Element>)>,
     container: &Container,
 ) -> Step {
-    let mut eq_steps: Vec<Operation> = Vec::new();
+    let mut eq_steps: Vec<SubStep> = Vec::new();
     // Step 2.1.2 Find all voltage sources going between nodes including ground
     let voltage_src_node_pairs: Vec<&(usize, usize, Rc<Element>)> =
         get_node_pairs(node_pairs, VoltageSrc);
@@ -107,15 +110,19 @@ fn breakdown_voltage_src_equations(
 
             tool2 = Negate(Some(Box::new(tool2)));
 
-            eq_steps.push(Equal(
-                Some(Box::new(Variable(element.clone()))),
-                Some(Box::new(Sum(vec![tool1, tool2]))),
-            ))
+            eq_steps.push(SubStep {
+                description: None,
+                operations: vec![Equal(
+                    Some(Box::new(Variable(element.clone()))),
+                    Some(Box::new(Sum(vec![tool1, tool2]))),
+                )],
+            })
         });
 
     Step {
-        label: "Find voltage across each voltage source:".to_string(),
-        sub_steps: Some(eq_steps),
+        description: Some("Find voltage across each voltage source".to_string()),
+        sub_steps: eq_steps,
+        result: None,
     }
 }
 
@@ -187,8 +194,18 @@ fn breakdown_resistor_equations(
     let resistor_values: Operation = Equal(Some(Box::new(Value(0.0))), Some(Box::new(sum.clone())));
 
     Step {
-        label: "Find current through each resistor:".to_string(),
-        sub_steps: Some(vec![init_eq, expanded, resistor_values, Sum(coefficients)]),
+        description: Some("Find current through each resistor:".to_string()),
+        sub_steps: vec![
+            SubStep {
+                description: Some("Initial equation:".to_string()),
+                operations: vec![init_eq, expanded],
+            },
+            SubStep {
+                description: Some("Solve for coefficients:".to_string()),
+                operations: vec![resistor_values, Sum(coefficients)],
+            },
+        ],
+        result: None,
     }
 }
 

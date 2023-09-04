@@ -31,6 +31,7 @@ pub trait Validation {
     fn clean(&mut self) -> &Self {
         self
     }
+    fn id(&self) -> usize;
 }
 
 impl Display for Status {
@@ -81,16 +82,16 @@ pub(crate) fn check_weak_duplicates<T: Validation + PartialEq + Display>(
 /// Check for duplicates in a list
 ///
 /// Returns a Vec of StatusError::KnownIssue. If the vec is empty, there are no duplicates.
-pub(crate) fn check_duplicates<T: Validation + PartialEq + Display>(
+pub(crate) fn check_duplicates<T: Validation + PartialEq + Display >(
     list: &Vec<Rc<T>>,
 ) -> Vec<StatusError> {
     let mut errors: Vec<StatusError> = Vec::new();
-    let mut seen: Vec<&Rc<T>> = Vec::new();
+    let mut seen: Vec<usize> = Vec::new();
     for x in list {
-        if seen.contains(&x) {
+        if seen.contains(&x.id()) {
             errors.push(StatusError::Known(format!("Duplicate: {}", x)));
         }
-        seen.push(x);
+        seen.push(x.id());
     }
     errors
 }

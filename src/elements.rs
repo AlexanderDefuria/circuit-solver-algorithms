@@ -173,6 +173,10 @@ impl Validation for Element {
 
         Ok(Valid)
     }
+
+    fn id(&self) -> usize {
+        self.id
+    }
 }
 
 impl Display for Element {

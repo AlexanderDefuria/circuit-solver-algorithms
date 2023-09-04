@@ -25,9 +25,8 @@ pub struct ContainerSetup {
 pub fn load_wasm_container(js: JsValue) -> Result<String, StatusError> {
     // This JsValue is a ContainerInterface and also needs operations
     let setup: ContainerSetup = serde_wasm_bindgen::from_value(js).unwrap();
-
     let container = Container::from(setup);
-
+    container.validate()?;
     Ok(String::from("Loaded Successfully"))
 }
 

@@ -1,6 +1,6 @@
 use crate::component::Component::{CurrentSrc, Resistor, VoltageSrc};
 use crate::container::Container;
-use crate::solvers::solver::{Solver, Step};
+use crate::solvers::solver::{Solver, Step, SubStep};
 use crate::util::PrettyPrint;
 use nalgebra::{DMatrix, DVector};
 use operations::math::{EquationMember, EquationRepr};
@@ -41,28 +41,13 @@ impl Solver for NodeMatrixSolver {
     fn solve(&self) -> Result<Vec<Step>, String> {
         let mut steps: Vec<Step> = Vec::new();
 
-        steps.push(Step {
-            label: "A Matrix".to_string(),
-            sub_steps: Some(vec![Variable(Rc::new(self.a_matrix.clone()))]),
-        });
-
-        steps.push(Step {
-            label: "Z Matrix".to_string(),
-            sub_steps: Some(vec![Variable(Rc::new(self.z_matrix.clone()))]),
-        });
-
-        steps.push(Step {
-            label: "X Matrix".to_string(),
-            sub_steps: Some(vec![Variable(Rc::new(self.x_matrix.clone()))]),
-        });
-
         let inverse: DMatrix<f64> = DMatrix::from_iterator(
             self.a_matrix.nrows(),
             self.a_matrix.ncols(),
             self.a_matrix.iter().map(|x| x.value()),
         )
-        .try_inverse()
-        .unwrap();
+            .try_inverse()
+            .unwrap();
 
         let z_vector: DVector<f64> = self
             .z_matrix
@@ -77,28 +62,43 @@ impl Solver for NodeMatrixSolver {
             .iter_mut()
             .for_each(|x| *x = (*x * 100.).round() / 100.);
 
-        steps.push(Step {
-            label: "Inverse A Matrix".to_string(),
-            sub_steps: None,
-        });
 
         steps.push(Step {
-            label: "Final Equation".to_string(),
-            sub_steps: Some(vec![Text(format!(
-                "{} = {}^{{-1}} * {}",
-                self.x_matrix.equation_repr(),
-                self.a_matrix.equation_repr(),
-                self.z_matrix.equation_repr()
-            ))]),
-        });
-
-        steps.push(Step {
-            label: "In theory we are solved.".to_string(),
-            sub_steps: Some(vec![Text(format!(
-                "{} = {}",
-                self.x_matrix.equation_repr(),
-                result.equation_repr()
-            ))]),
+            description: Some("Form matrices".to_string()),
+            sub_steps: vec![
+                SubStep {
+                    description: Some("A Matrix".to_string()),
+                    operations: vec![Variable(Rc::new(self.a_matrix.clone()))],
+                },
+                SubStep {
+                    description: Some("Z Matrix".to_string()),
+                    operations: vec![Variable(Rc::new(self.z_matrix.clone()))],
+                },
+                SubStep {
+                    description: Some("X Matrix".to_string()),
+                    operations: vec![Variable(Rc::new(self.x_matrix.clone()))],
+                },
+                SubStep {
+                    description: Some("Inverse A Matrix".to_string()),
+                    operations: vec![Variable(Rc::new(inverse.clone()))],
+                },
+                SubStep {
+                    description: Some("Final Equation".to_string()),
+                    operations: vec![Text(format!(
+                        "{} = {}^{{-1}} * {}",
+                        self.x_matrix.equation_repr(),
+                        self.a_matrix.equation_repr(),
+                        self.z_matrix.equation_repr()
+                    ))],
+                }
+            ],
+            result: Some(
+                Text(format!(
+                    "{} = {}",
+                    self.x_matrix.equation_repr(),
+                    result.equation_repr()
+                ))
+            ),
         });
 
         Ok(steps)

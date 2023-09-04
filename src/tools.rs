@@ -184,12 +184,20 @@ impl Validation for Tool {
             return Err(Known("Tool contains a ground element".to_string()));
         }
 
-        let duplicates = check_weak_duplicates(&self.members);
+        let mut duplicates = check_weak_duplicates(&self.members);
         if duplicates.len() > 0 {
+            duplicates.append(&mut vec![Known(format!(
+                "Tool {} has duplicate members",
+                self.id
+            ))]);
             return Err(Multiple(duplicates));
         }
 
         Ok(Valid)
+    }
+
+    fn id(&self) -> usize {
+        self.id
     }
 }
 

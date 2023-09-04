@@ -19,12 +19,12 @@ impl Solver for MeshMatrixSolver {
 
 #[cfg(test)]
 mod test {
-    use std::rc::{Rc, Weak};
     use crate::container::Container;
     use crate::elements::Element;
     use crate::tools::Tool;
     use crate::tools::ToolType::{Mesh, SuperMesh};
     use crate::util::create_basic_supermesh_container;
+    use std::rc::{Rc, Weak};
 
     #[test]
     fn test_get_meshes() {
@@ -36,22 +36,29 @@ mod test {
         let meshes: Vec<Weak<Tool>> = container.get_tools_by_type(Mesh);
         assert_eq!(meshes.len(), 3);
 
-        let mesh_members: Vec<Vec<usize>> = meshes.iter().map(|x| x.upgrade().unwrap().members()).collect();
-        let expected_members: Vec<Vec<usize>> = vec![
-            vec![1, 2, 5],
-            vec![2, 3, 6],
-            vec![3, 4, 7],
-        ];
+        let mesh_members: Vec<Vec<usize>> = meshes
+            .iter()
+            .map(|x| x.upgrade().unwrap().members())
+            .collect();
+        let expected_members: Vec<Vec<usize>> = vec![vec![1, 2, 5], vec![2, 3, 6], vec![3, 4, 7]];
 
-        println!("{:?}", meshes.iter().map(|x| x.upgrade().unwrap().members.iter().map(
-            |y| y.upgrade().unwrap()
-        ).collect::<Vec<Rc<Element>>>(
-        )).collect::<Vec<Vec<Rc<Element>>>>());
+        println!(
+            "{:?}",
+            meshes
+                .iter()
+                .map(|x| x
+                    .upgrade()
+                    .unwrap()
+                    .members
+                    .iter()
+                    .map(|y| y.upgrade().unwrap())
+                    .collect::<Vec<Rc<Element>>>())
+                .collect::<Vec<Vec<Rc<Element>>>>()
+        );
 
         for i in 0..meshes.len() {
             println!("{:?}", mesh_members[i]);
             assert_eq!(mesh_members[i], expected_members[i]);
         }
     }
-
 }

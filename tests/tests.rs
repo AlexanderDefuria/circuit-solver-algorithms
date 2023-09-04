@@ -1,16 +1,27 @@
+use std::cell::RefCell;
+use std::rc::Rc;
 use circuit_solver_algorithms::container::Container;
 use circuit_solver_algorithms::interfaces::ContainerSetup;
-use std::fs::File;
-use wasm_bindgen::JsValue;
 use wasm_bindgen_test::wasm_bindgen_test;
+use circuit_solver_algorithms::solvers::node_step_solver::NodeStepSolver;
+use circuit_solver_algorithms::solvers::solver::{Solver, Step};
+use circuit_solver_algorithms::validation::Status::Valid;
+use circuit_solver_algorithms::validation::Validation;
 
 #[wasm_bindgen_test]
 fn test_validateable_containers() {
-    // let file = File::open("tests/containers.json").unwrap();
-    // let json: Vec<ContainerSetup> = serde_json::from_reader(file).expect("JSON was not well-formatted");
-    //
-    // for value in json {
-    //     let js_json: JsValue = serde_wasm_bindgen::to_value(&value).unwrap();
-    //
-    // }
+    let raw_json: &str = include_str!("./data/basic_container.json");
+    let setup: ContainerSetup = serde_json::from_str(raw_json).unwrap();
+    let mut container: Container = setup.into();
+    assert_eq!(container.validate().unwrap(), Valid);
+
+    container.create_nodes();
+    container.create_super_nodes();
+    let solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(container)));
+    let steps: Vec<Step> = solver.solve().unwrap();
+    let steps_string: String = serde_json::to_string(&steps).unwrap();
+    let mut expected: &str = include_str!("./data/basic_container_result.json");
+    assert_eq!(expected.replace("\n", ""), steps_string, "Steps should be empty")
+
 }
+

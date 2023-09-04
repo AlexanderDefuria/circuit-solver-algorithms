@@ -73,7 +73,6 @@ pub fn create_four_mesh_container() -> Container {
     container.add_element_core(Element::new(VoltageSrc, 1., vec![1, 4, 5], vec![1, 2, 3]));
     container.add_element_core(Element::new(VoltageSrc, 2., vec![4], vec![3, 5]));
     container
-
 }
 
 #[cfg(test)]
@@ -98,7 +97,7 @@ mod tests {
             create_basic_supernode_container(),
             create_basic_supermesh_container(),
             create_mna_container(),
-            create_four_mesh_container()
+            create_four_mesh_container(),
         ];
 
         let mut id: usize = 0;

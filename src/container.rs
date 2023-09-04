@@ -339,6 +339,10 @@ impl Validation for Container {
             _ => Err(StatusError::Multiple(errors)),
         }
     }
+
+    fn id(&self) -> usize {
+        panic!("Container does not have an id")
+    }
 }
 
 #[cfg(test)]
