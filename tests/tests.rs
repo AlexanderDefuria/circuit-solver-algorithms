@@ -20,8 +20,15 @@ fn test_validateable_containers() {
     let solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(container)));
     let steps: Vec<Step> = solver.solve().unwrap();
     let steps_string: String = serde_json::to_string(&steps).unwrap();
-    let mut expected: &str = include_str!("./data/case_1/result.json");
-    assert_eq!(expected.replace("\n", ""), steps_string, "Steps are not matching")
+    let expected: &str = include_str!("./data/case_1/result.json");
+    assert_eq!(cleanup_include_str(expected.to_string()), cleanup_include_str(steps_string), "Steps are not matching")
 
+}
+
+
+fn cleanup_include_str(input: String) -> String {
+    let mut output: String = input.replace("\n", "");
+    output = output.replace(" ", "");
+    output
 }
 

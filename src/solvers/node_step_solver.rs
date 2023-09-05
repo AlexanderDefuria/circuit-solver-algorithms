@@ -1,5 +1,5 @@
 use crate::component::Component;
-use crate::component::Component::{Resistor, VoltageSrc};
+use crate::component::Component::{CurrentSrc, Resistor, VoltageSrc};
 use crate::container::Container;
 use crate::elements::Element;
 use crate::solvers::solver::{Solver, Step, SubStep};
@@ -9,7 +9,9 @@ use operations::math::EquationMember;
 use operations::operations::Operation;
 use operations::prelude::{Divide, Equal, Negate, Sum, Text, Value, Variable};
 use std::cell::RefCell;
+use std::ops::Deref;
 use std::rc::{Rc, Weak};
+use crate::solvers::node_matrix_solver::form_b_matrix;
 
 pub struct NodeStepSolver {
     container: Rc<RefCell<Container>>,
@@ -60,9 +62,6 @@ impl Solver for NodeStepSolver {
     }
 }
 
-fn extract_coefficients(operation: Operation) -> Vec<f64> {
-    todo!()
-}
 
 fn declare_variables(node_pairs: &Vec<(usize, usize, Rc<Element>)>) -> Step {
     let mut sub_steps: Vec<SubStep> = Vec::new();
@@ -134,6 +133,8 @@ fn breakdown_resistor_equations(
     // Step 2.1.1 Find all resistors going between nodes including ground
     let resistor_node_pairs: Vec<&(usize, usize, Rc<Element>)> =
         get_node_pairs(node_pairs, Resistor);
+
+    // Form the basic equation for each resistor
     resistor_node_pairs
         .iter()
         .for_each(|(node1, node2, element)| {
@@ -157,15 +158,17 @@ fn breakdown_resistor_equations(
             )))));
         });
 
+    // Create nicely readable equation
     summation_steps = summation_steps
         .iter()
         .map(|x| x.simplify().unwrap_or_else(|| x.clone()))
         .collect();
-
     let init_eq = Equal(
         Some(Box::new(Value(0.0))),
         Some(Box::new(Sum(summation_steps.clone()))),
     );
+
+    // Expand equation
     summation_steps = summation_steps
         .iter()
         .map(|x| expand(x.clone()).unwrap_or_else(|_| x.clone()))
@@ -175,21 +178,33 @@ fn breakdown_resistor_equations(
     sum = sum.simplify().unwrap_or_else(|| sum.clone());
     let expanded = Equal(Some(Box::new(Value(0.0))), Some(Box::new(sum.clone())));
 
+    // Include known values to exract coefficients
     sum.apply_variables();
-    let mut coefficients: Vec<Operation> = Vec::new();
-    if let Sum(mut list) = sum.clone() {
-        coefficients = list
-            .iter_mut()
-            .map(|x| x.get_coefficient())
-            .map(|x| {
-                if let Some(coeff) = x {
-                    Value(coeff)
-                } else {
-                    Value(0.0)
+
+    // Group coefficients by variable (Tool)
+    let mut collected: Vec<(Operation, f64)> = sum.get_variables().iter().map(|x| (x.clone(), 0.0)).collect();
+    if let Sum(list) = sum.clone() {
+        for i in list {
+            for (var, coeff) in &mut collected {
+                if i.contains_variable(var.deref().clone()) {
+                    *coeff += i.get_coefficient().unwrap_or(0.0);
                 }
-            })
-            .collect();
+            }
+        }
     }
+    let coefficients: Vec<Operation> = collected.iter().map(|(_, coeff)| Value(*coeff)).collect();
+
+    // TODO Form matrix from coefficients
+    let n = container.nodes().len(); // Node Count
+    let m = container // Source Count
+        .get_elements()
+        .iter()
+        .fold(0, |acc: usize, x| match x.class {
+            VoltageSrc | CurrentSrc => acc + 1,
+            _ => acc,
+        });
+    let b_matrix = form_b_matrix(Rc::new(RefCell::new(container.clone())), n, m);
+
 
     let resistor_values: Operation = Equal(Some(Box::new(Value(0.0))), Some(Box::new(sum.clone())));
 
@@ -201,7 +216,7 @@ fn breakdown_resistor_equations(
                 operations: vec![init_eq, expanded],
             },
             SubStep {
-                description: Some("Solve for coefficients:".to_string()),
+                description: Some("Find our coefficients:".to_string()),
                 operations: vec![resistor_values, Sum(coefficients)],
             },
         ],

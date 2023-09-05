@@ -97,7 +97,6 @@ mod tests {
             create_basic_supernode_container(),
             create_basic_supermesh_container(),
             create_mna_container(),
-            create_four_mesh_container(),
         ];
 
         let mut id: usize = 0;

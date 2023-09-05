@@ -185,7 +185,7 @@ fn form_g_matrix(container: Rc<RefCell<Container>>, n: usize) -> DMatrix<Operati
     matrix
 }
 
-fn form_b_matrix(container: Rc<RefCell<Container>>, n: usize, m: usize) -> DMatrix<Operation> {
+pub(crate) fn form_b_matrix(container: Rc<RefCell<Container>>, n: usize, m: usize) -> DMatrix<Operation> {
     let mut matrix: DMatrix<Operation> = DMatrix::zeros(n, m);
 
     for (i, tool) in container.borrow().nodes().iter().enumerate() {

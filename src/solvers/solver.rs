@@ -81,11 +81,10 @@ impl Serialize for Step {
 impl Serialize for SubStep {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
         let mut state = serializer.serialize_struct("SubStep", 2)?;
-        state.serialize_field("description", &self.description())?;
-        let steps = self.get_steps();
+        state.serialize_field("stepInstruction", &self.description())?;
         state.serialize_field(
-            "sub_steps",
-            &steps
+            "operations",
+            &self.get_steps()
                 .into_iter()
                 .map(|x| x.latex_string())
                 .collect::<Vec<String>>(),
@@ -145,66 +144,4 @@ mod tests {
             println!("{}", i);
         }
     }
-//
-//     #[test]
-//     fn test_solve_matrix() {
-//         let mut c: Container = create_mna_container();
-//         let expected_steps: Vec<StepResult> = vec![
-//             StepResult {
-//                 label: "A Matrix".to_string(),
-//                 sub_steps: Some(vec![String::from("\\begin{bmatrix}1/R1 &  &  & -1 & 0 & \\\\ & 1/R2 + 1/R3 & -1/R2 & 1 & 0 & \\\\ & -1/R2 & 1/R2 & 0 & 1 & \\\\-1 & 1 & 0 & 0 & 0 & \\\\0 & 0 & 1 & 0 & 0 & \\\\\\end{bmatrix}")]),
-//             },
-//             StepResult {
-//                 label: "Z Matrix".to_string(),
-//                 sub_steps: Some(vec![String::from("\\begin{bmatrix}0 \\\\0 \\\\0 \\\\32 \\\\20 \\\\\\end{bmatrix}")]),
-//             },
-//             StepResult {
-//                 label: "X Matrix".to_string(),
-//                 sub_steps: Some(vec![String::from("\\begin{bmatrix}Node: 1 \\\\Node: 2 \\\\Node: 3 \\\\SRC(V)4: 32 V \\\\SRC(V)5: 20 V \\\\\\end{bmatrix}")]),
-//             },
-//             StepResult {
-//                 label: "Inverse A Matrix".to_string(),
-//                 sub_steps: None,
-//             },
-//             StepResult {
-//                 label: "Final Equation".to_string(),
-//                 sub_steps: Some(vec![String::from("\\begin{bmatrix}Node: 1\\\\Node: 2\\\\Node: 3\\\\SRC(V)4: 32 V\\\\SRC(V)5: 20 V\\\\\\end{bmatrix} = \\begin{bmatrix}1/R1 &  &  & -1 & 0 & \\\\ & 1/R2 + 1/R3 & -1/R2 & 1 & 0 & \\\\ & -1/R2 & 1/R2 & 0 & 1 & \\\\-1 & 1 & 0 & 0 & 0 & \\\\0 & 0 & 1 & 0 & 0 & \\\\\\end{bmatrix}^{-1} * \\begin{bmatrix}0\\\\0\\\\0\\\\32\\\\20\\\\\\end{bmatrix}")]),
-//             },
-//             StepResult {
-//                 label: "In theory we are solved.".to_string(),
-//                 sub_steps: Some(vec![String::from("\\begin{bmatrix}Node: 1\\\\Node: 2\\\\Node: 3\\\\SRC(V)4: 32 V\\\\SRC(V)5: 20 V\\\\\\end{bmatrix} = \\begin{bmatrix}-8\\\\24\\\\20\\\\-4\\\\1\\\\\\end{bmatrix}")]),
-//             },
-//         ];
-//
-//         c.create_nodes();
-//         c.create_super_nodes();
-//
-//         let solver: NodeMatrixSolver = Solver::new(Rc::new(RefCell::new(c)));
-//         let steps = solver.solve().unwrap();
-//         assert_eq!(steps.len(), expected_steps.len());
-//
-//         for (i, (step, expected)) in steps.iter().zip(expected_steps.iter()).enumerate() {
-//             assert_eq!(step.description(), Some(expected.description.clone()));
-//             if let Some(sub_steps) = &expected.sub_steps {
-//                 println!("Step #{}:", i);
-//                 for (j, (sub_step, expected_sub_step)) in step
-//                     .get_steps()
-//                     .unwrap()
-//                     .iter()
-//                     .zip(sub_steps.iter())
-//                     .enumerate()
-//                 {
-//                     println!(
-//                         "   {} \n = {}\n",
-//                         sub_step.equation_repr(),
-//                         *expected_sub_step
-//                     );
-//                     assert_eq!(
-//                         sub_step.equation_repr().replace(" ", ""),
-//                         *expected_sub_step.replace(" ", "")
-//                     );
-//                 }
-//             }
-//         }
-//     }
 }

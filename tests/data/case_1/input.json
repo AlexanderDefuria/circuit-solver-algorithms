@@ -16,7 +16,8 @@
       "value": 2.0,
       "class": "Resistor",
       "positive": [
-        4, 5
+        4,
+        5
       ],
       "negative": [
         0
@@ -27,7 +28,9 @@
       "value": 6.0,
       "class": "Resistor",
       "positive": [
-        3,4,5
+        3,
+        4,
+        5
       ],
       "negative": [
         0
@@ -39,75 +42,41 @@
       "class": "VoltageSrc",
       "positive": [
         2,
-        4,5
+        4,
+        5
       ],
       "negative": [
         0
       ]
     },
-    {
-      "elements": [
-        {
-          "id": 0,
-          "value": 0.0,
-          "class": "Ground",
-          "positive": [
-            3,
-            2
-          ],
-          "negative": []
-        },
-        {
-          "id": 1,
-          "value": 1.0,
-          "class": "Resistor",
-          "positive": [
-            3
-          ],
-          "negative": [
-            2
-          ]
-        },
-        {
-          "id": 2,
-          "value": 1.0,
-          "class": "Resistor",
-          "positive": [
-            1
-          ],
-          "negative": [
-            0,
-            3
-          ]
-        },
-        {
-          "id": 3,
-          "value": 1.0,
-          "class": "VoltageSrc",
-          "positive": [
-            2,
-            0
-          ],
-          "negative": [
-            1
-          ]
-        },
+
         {
           "id": 4,
           "value": 4.0,
           "class": "Resistor",
-          "positive": [1, 5],
-          "negative": [2, 3, 5]
+          "positive": [
+            1,
+            5
+          ],
+          "negative": [
+            2,
+            3,
+            5
+          ]
         },
         {
           "id": 5,
           "value": 5.0,
           "class": "CurrentSrc",
-          "positive": [1, 4],
-          "negative": [2, 3, 4]
-        }
+          "positive": [
+            1,
+            4
+          ],
+          "negative": [
+            2,
+            3,
+            4
       ]
     }
   ]
-
 }

@@ -13,9 +13,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="52c330b2-a72e-46d5-bbef-071fc6e5ee26" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/tests/data/case_1/input.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/data/case_1/result.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/solvers/mesh_matrix_solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/mesh_matrix_solver.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/solvers/node_matrix_solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/node_matrix_solver.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/solvers/node_step_solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/node_step_solver.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/solvers/solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/solver.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/util.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/util.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/data/case_1/input.json" beforeDir="false" afterPath="$PROJECT_DIR$/tests/data/case_1/input.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/tests.rs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/tests.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -86,6 +91,7 @@
   },
   "keyToStringList": {
     "com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File": [
+      "JSON",
       "TEXT",
       "Rust"
     ]
@@ -106,7 +112,24 @@
       <recent name="$PROJECT_DIR$/libs/math/src" />
     </key>
   </component>
-  <component name="RunManager" selected="wasm-pack.Test">
+  <component name="RunManager" selected="Cargo.Test solvers::solver::tests::test_solve_steps">
+    <configuration name="Test solvers::solver::tests::test_solve_steps" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="test --package circuit-solver-algorithms --lib solvers::solver::tests::test_solve_steps -- --exact" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <option name="emulateTerminal" value="false" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="Test test_validateable_containers" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="command" value="test --package circuit-solver-algorithms --test tests test_validateable_containers -- --exact" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
@@ -201,6 +224,7 @@
     </configuration>
     <list>
       <item itemvalue="Cargo.Test" />
+      <item itemvalue="Cargo.Test solvers::solver::tests::test_solve_steps" />
       <item itemvalue="Cargo.Test test_validateable_containers" />
       <item itemvalue="Cargo.Test util::tests::test_create_containers" />
       <item itemvalue="Shell Script.publish" />
@@ -210,6 +234,7 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Cargo.Test solvers::solver::tests::test_solve_steps" />
         <item itemvalue="Cargo.Test test_validateable_containers" />
         <item itemvalue="Cargo.Test util::tests::test_create_containers" />
       </list>
@@ -314,7 +339,7 @@
       <workItem from="1693360329275" duration="16352000" />
       <workItem from="1693769479612" duration="4584000" />
       <workItem from="1693793940802" duration="1628000" />
-      <workItem from="1693853696647" duration="5967000" />
+      <workItem from="1693853696647" duration="18768000" />
     </task>
     <servers />
   </component>
@@ -328,11 +353,6 @@
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/solvers/solver.rs</url>
-          <line>154</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/validation.rs</url>
           <line>91</line>
