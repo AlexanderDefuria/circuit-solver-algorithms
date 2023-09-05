@@ -17,6 +17,7 @@ macro_rules! assert_known_error {
     };
 }
 
+#[allow(dead_code)]
 pub fn create_basic_container() -> Container {
     let mut container = Container::new();
     container.add_element_core(Element::new(Ground, 1.0, vec![3, 2], vec![]));
@@ -26,6 +27,7 @@ pub fn create_basic_container() -> Container {
     container
 }
 
+#[allow(dead_code)]
 pub fn create_basic_supernode_container() -> Container {
     let mut container = Container::new();
     container.add_element_core(Element::new(Ground, 10., vec![5, 3], vec![]));
@@ -37,6 +39,7 @@ pub fn create_basic_supernode_container() -> Container {
     container
 }
 
+#[allow(dead_code)]
 pub fn create_basic_supermesh_container() -> Container {
     let mut container = Container::new();
     container.add_element_core(Element::new(Ground, 0., vec![1, 2, 3, 4], vec![]));
@@ -50,6 +53,7 @@ pub fn create_basic_supermesh_container() -> Container {
     container
 }
 
+#[allow(dead_code)]
 pub fn create_mna_container() -> Container {
     let mut container = Container::new();
     container.add_element_core(Element::new(Ground, 0., vec![1, 3, 5], vec![]));
@@ -61,6 +65,7 @@ pub fn create_mna_container() -> Container {
     container
 }
 
+#[allow(dead_code)]
 pub fn create_four_mesh_container() -> Container {
     // GND(0) at -V1, R1, R2, R3
     let mut container = Container::new();
@@ -87,10 +92,6 @@ mod tests {
 
     #[test]
     fn test_create_containers() {
-        fn test_container(container: &mut Container, element_count: usize, node_count: usize) {
-            assert_eq!(container.nodes().len(), node_count);
-            assert_eq!(container.get_elements().len(), element_count);
-        }
 
         let mut containers: Vec<Container> = vec![
             create_basic_container(),

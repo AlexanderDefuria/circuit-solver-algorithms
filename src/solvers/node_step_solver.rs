@@ -1,18 +1,15 @@
-use crate::component::Component;
-use crate::component::Component::{CurrentSrc, Resistor, VoltageSrc};
+use crate::component::Component::{ Resistor, VoltageSrc};
 use crate::container::Container;
 use crate::elements::Element;
-use crate::solvers::node_matrix_solver::{form_b_matrix, form_c_matrix};
 use crate::solvers::solver::{Solver, Step, SubStep};
-use crate::tools::{Tool, ToolType};
-use nalgebra::{DMatrix, DVector, RowVector, Vector};
+use nalgebra::{DMatrix, DVector};
 use operations::mappings::expand;
 use operations::math::EquationMember;
 use operations::operations::Operation;
 use operations::prelude::{Divide, Equal, Negate, Sum, Text, Value, Variable};
 use std::cell::RefCell;
 use std::ops::Deref;
-use std::rc::{Rc, Weak};
+use std::rc::Rc;
 
 pub struct NodeStepSolver {
     container: Rc<RefCell<Container>>,
@@ -97,7 +94,7 @@ impl NodeStepSolver {
         self.node_pairs
             .iter()
             .filter(|(_, _, element)| element.class == VoltageSrc)
-            .for_each(|(node1, node2, src)| {
+            .for_each(|(node1, node2, _)| {
                 sub_steps.push(SubStep {
                     description: Some(
                         format!("voltage and current from node {} to node {}", node1, node2)
@@ -292,14 +289,4 @@ impl NodeStepSolver {
             result: None,
         }
     }
-}
-
-fn get_node_pairs(
-    node_pairs: &Vec<(usize, usize, Rc<Element>)>,
-    filter: Component,
-) -> Vec<&(usize, usize, Rc<Element>)> {
-    node_pairs
-        .iter()
-        .filter(|(_, _, element)| element.class == filter)
-        .collect::<Vec<&(usize, usize, Rc<Element>)>>()
 }

@@ -9,7 +9,6 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 pub struct NodeMatrixSolver {
-    container: Rc<RefCell<Container>>,
     a_matrix: DMatrix<Operation>,
     x_matrix: DVector<Operation>,
     z_matrix: DVector<Operation>,
@@ -30,7 +29,6 @@ impl Solver for NodeMatrixSolver {
 
         // https://lpsa.swarthmore.edu/Systems/Electrical/mna/MNA3.html#B_matrix
         NodeMatrixSolver {
-            container: container.clone(),
             a_matrix: form_a_matrix(container.clone(), n, m),
             x_matrix: form_x_vector(container.clone()),
             z_matrix: form_z_vector(container.clone()),

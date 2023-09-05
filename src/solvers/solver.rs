@@ -1,9 +1,8 @@
 use crate::container::Container;
 use operations::prelude::*;
 use serde::ser::SerializeStruct;
-use serde::{Deserialize, Serialize, Serializer};
+use serde::{Serialize, Serializer};
 use std::cell::RefCell;
-use std::error::Error;
 use std::fmt::Display;
 use std::rc::Rc;
 use wasm_bindgen::JsValue;
@@ -119,20 +118,11 @@ impl From<Step> for JsValue {
 
 #[cfg(test)]
 mod tests {
-    use crate::container::Container;
-    use crate::solvers::node_matrix_solver::NodeMatrixSolver;
     use crate::solvers::node_step_solver::NodeStepSolver;
-    use crate::solvers::solver::{Solver, Step};
+    use crate::solvers::solver::Solver;
     use crate::util::create_mna_container;
-    use operations::math::EquationMember;
     use std::cell::RefCell;
     use std::rc::Rc;
-
-    /// This should mirror the Step struct in src/solvers/solver.rs
-    struct StepResult {
-        label: String,
-        sub_steps: Option<Vec<String>>,
-    }
 
     #[test]
     fn test_solve_steps() {

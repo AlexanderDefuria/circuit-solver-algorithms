@@ -14,11 +14,13 @@
   <component name="ChangeListManager">
     <list default="true" id="52c330b2-a72e-46d5-bbef-071fc6e5ee26" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/container.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/container.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/solvers/mesh_matrix_solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/mesh_matrix_solver.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/solvers/mesh_step_solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/mesh_step_solver.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/solvers/node_matrix_solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/node_matrix_solver.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/solvers/node_step_solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/node_step_solver.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/solvers/solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/solver.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/validation.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/validation.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/tests.rs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/tests.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/util.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/util.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -109,7 +111,7 @@
       <recent name="$PROJECT_DIR$/libs/math/src" />
     </key>
   </component>
-  <component name="RunManager" selected="Cargo.Test solvers::solver::tests::test_solve_steps">
+  <component name="RunManager" selected="Cargo.Test">
     <configuration name="Test solvers::solver::tests::test_solve_steps" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="command" value="test --package circuit-solver-algorithms --lib solvers::solver::tests::test_solve_steps -- --exact" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
@@ -337,7 +339,7 @@
       <workItem from="1693769479612" duration="4584000" />
       <workItem from="1693793940802" duration="1628000" />
       <workItem from="1693853696647" duration="18768000" />
-      <workItem from="1693926024296" duration="14950000" />
+      <workItem from="1693926024296" duration="15527000" />
     </task>
     <servers />
   </component>
