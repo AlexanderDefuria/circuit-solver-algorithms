@@ -92,6 +92,10 @@ mod tests {
 
     #[test]
     fn test_create_containers() {
+        println!(
+            "MNA Container: {:?}",
+            serde_json::to_string(&create_mna_container()).unwrap()
+        );
 
         let mut containers: Vec<Container> = vec![
             create_basic_container(),

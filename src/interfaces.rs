@@ -8,6 +8,7 @@ use std::cell::RefCell;
 use crate::solvers::node_matrix_solver::NodeMatrixSolver;
 use crate::solvers::node_step_solver::NodeStepSolver;
 use crate::solvers::solver::Solver;
+use crate::tools::Tool;
 use crate::util::create_mna_container;
 use serde::{Deserialize, Serialize};
 use std::rc::Rc;
@@ -28,6 +29,22 @@ pub fn load_wasm_container(js: JsValue) -> Result<String, StatusError> {
     let container = Container::from(setup);
     container.validate()?;
     Ok(String::from("Loaded Successfully"))
+}
+
+#[wasm_bindgen]
+pub fn get_tools(container_js: JsValue) -> Result<String, StatusError> {
+    let setup: ContainerSetup = serde_wasm_bindgen::from_value(container_js).unwrap();
+    let mut c: Container = Container::from(setup);
+    c.validate()?;
+    c.create_nodes();
+    c.create_super_nodes();
+    let nodes: Vec<Vec<usize>> = c
+        .nodes()
+        .iter()
+        .map(|x| x.upgrade().unwrap().members())
+        .collect();
+
+    Ok(serde_json::to_string(&nodes).unwrap())
 }
 
 #[wasm_bindgen]

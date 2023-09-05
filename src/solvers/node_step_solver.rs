@@ -1,4 +1,4 @@
-use crate::component::Component::{ Resistor, VoltageSrc};
+use crate::component::Component::{Resistor, VoltageSrc};
 use crate::container::Container;
 use crate::elements::Element;
 use crate::solvers::solver::{Solver, Step, SubStep};
@@ -208,7 +208,6 @@ impl NodeStepSolver {
 
         let result_matrix = inverse.clone() * source_voltages.clone();
 
-
         let resistor_values: Operation =
             Equal(Some(Box::new(Value(0.0))), Some(Box::new(sum.clone())));
 
@@ -237,7 +236,12 @@ impl NodeStepSolver {
                             matrix.equation_repr(),
                             inverse.equation_repr()
                         )),
-                        Text(format!("{}^-1 * {} = {}", matrix.equation_repr(), source_voltages.equation_repr(), result_matrix.equation_repr())),
+                        Text(format!(
+                            "{}^-1 * {} = {}",
+                            matrix.equation_repr(),
+                            source_voltages.equation_repr(),
+                            result_matrix.equation_repr()
+                        )),
                     ],
                 },
             ],
