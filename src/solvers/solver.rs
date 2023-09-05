@@ -70,25 +70,25 @@ impl Serialize for Step {
     {
         let mut state = serializer.serialize_struct("Step", 2)?;
         state.serialize_field("description", &self.description())?;
-        state.serialize_field(
-            "sub_steps",
-            &self.get_steps(),
-        )?;
+        state.serialize_field("sub_steps", &self.get_steps())?;
         state.end()
     }
 }
 
 impl Serialize for SubStep {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
         let mut state = serializer.serialize_struct("SubStep", 2)?;
         state.serialize_field("stepInstruction", &self.description())?;
         state.serialize_field(
             "operations",
-            &self.get_steps()
+            &self
+                .get_steps()
                 .into_iter()
                 .map(|x| x.latex_string())
                 .collect::<Vec<String>>(),
-
         )?;
         state.end()
     }

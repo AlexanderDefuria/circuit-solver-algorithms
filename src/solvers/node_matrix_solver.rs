@@ -46,8 +46,8 @@ impl Solver for NodeMatrixSolver {
             self.a_matrix.ncols(),
             self.a_matrix.iter().map(|x| x.value()),
         )
-            .try_inverse()
-            .unwrap();
+        .try_inverse()
+        .unwrap();
 
         let z_vector: DVector<f64> = self
             .z_matrix
@@ -61,7 +61,6 @@ impl Solver for NodeMatrixSolver {
         result
             .iter_mut()
             .for_each(|x| *x = (*x * 100.).round() / 100.);
-
 
         steps.push(Step {
             description: Some("Form matrices".to_string()),
@@ -90,15 +89,13 @@ impl Solver for NodeMatrixSolver {
                         self.a_matrix.equation_repr(),
                         self.z_matrix.equation_repr()
                     ))],
-                }
+                },
             ],
-            result: Some(
-                Text(format!(
-                    "{} = {}",
-                    self.x_matrix.equation_repr(),
-                    result.equation_repr()
-                ))
-            ),
+            result: Some(Text(format!(
+                "{} = {}",
+                self.x_matrix.equation_repr(),
+                result.equation_repr()
+            ))),
         });
 
         Ok(steps)
@@ -185,7 +182,7 @@ fn form_g_matrix(container: Rc<RefCell<Container>>, n: usize) -> DMatrix<Operati
     matrix
 }
 
-pub(crate) fn form_b_matrix(container: Rc<RefCell<Container>>, n: usize, m: usize) -> DMatrix<Operation> {
+pub fn form_b_matrix(container: Rc<RefCell<Container>>, n: usize, m: usize) -> DMatrix<Operation> {
     let mut matrix: DMatrix<Operation> = DMatrix::zeros(n, m);
 
     for (i, tool) in container.borrow().nodes().iter().enumerate() {
@@ -208,7 +205,11 @@ pub(crate) fn form_b_matrix(container: Rc<RefCell<Container>>, n: usize, m: usiz
     matrix
 }
 
-fn form_c_matrix(container: Rc<RefCell<Container>>, n: usize, m: usize) -> DMatrix<Operation> {
+pub(crate) fn form_c_matrix(
+    container: Rc<RefCell<Container>>,
+    n: usize,
+    m: usize,
+) -> DMatrix<Operation> {
     let matrix: DMatrix<Operation> = form_b_matrix(container.clone(), n, m);
     matrix.transpose()
 }

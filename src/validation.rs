@@ -82,7 +82,7 @@ pub(crate) fn check_weak_duplicates<T: Validation + PartialEq + Display>(
 /// Check for duplicates in a list
 ///
 /// Returns a Vec of StatusError::KnownIssue. If the vec is empty, there are no duplicates.
-pub(crate) fn check_duplicates<T: Validation + PartialEq + Display >(
+pub(crate) fn check_duplicates<T: Validation + PartialEq + Display>(
     list: &Vec<Rc<T>>,
 ) -> Vec<StatusError> {
     let mut errors: Vec<StatusError> = Vec::new();
