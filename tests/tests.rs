@@ -10,7 +10,7 @@ use circuit_solver_algorithms::validation::Validation;
 
 #[wasm_bindgen_test]
 fn test_validateable_containers() {
-    let raw_json: &str = include_str!("./data/basic_container.json");
+    let raw_json: &str = include_str!("./data/case_1/input.json");
     let setup: ContainerSetup = serde_json::from_str(raw_json).unwrap();
     let mut container: Container = setup.into();
     assert_eq!(container.validate().unwrap(), Valid);
@@ -20,8 +20,8 @@ fn test_validateable_containers() {
     let solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(container)));
     let steps: Vec<Step> = solver.solve().unwrap();
     let steps_string: String = serde_json::to_string(&steps).unwrap();
-    let mut expected: &str = include_str!("./data/basic_container_result.json");
-    assert_eq!(expected.replace("\n", ""), steps_string, "Steps should be empty")
+    let mut expected: &str = include_str!("./data/case_1/result.json");
+    assert_eq!(expected.replace("\n", ""), steps_string, "Steps are not matching")
 
 }
 
