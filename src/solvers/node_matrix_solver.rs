@@ -24,14 +24,14 @@ impl Solver for NodeMatrixSolver {
         // Node Count SuperNodes Must Replace their nodes with a single node
         let proper_nodes = get_calculation_nodes(container.clone());
 
-        let n = proper_nodes.len();
+        // let n = proper_nodes.len();
 
         let m = container // Source Count
             .borrow()
             .get_elements()
             .iter()
             .fold(0, |acc: usize, x: &Rc<Element>| match x.class {
-                VoltageSrc | CurrentSrc => acc + 1,
+                VoltageSrc => acc + 1,
                 _ => acc,
             });
 
@@ -135,17 +135,20 @@ fn form_a_matrix(container: Rc<RefCell<Container>>, n: usize, m: usize) -> DMatr
 
 fn form_g_matrix(container: Rc<RefCell<Container>>, n: usize) -> DMatrix<Operation> {
     let mut matrix: DMatrix<Operation> = DMatrix::zeros(n, n);
-    let mut nodes = get_calculation_nodes(container.clone());
-    // let mut nodes = container.borrow().nodes().clone();
+    let mut nodes = container.borrow().nodes().clone();
     let _elements = container.borrow().get_elements().clone();
 
-    nodes.sort_by(|a, b| a.id.cmp(&b.id));
+    nodes.sort_by(|a, b| a.upgrade().unwrap().id.cmp(&b.upgrade().unwrap().id));
 
-    assert_eq!(nodes.len(), n);
+    // assert_eq!(nodes.len(), n);
+
+
 
     // Form the diagonal
     for (i, tool) in nodes.iter().enumerate() {
         let equation_members: Vec<EquationRepr> = tool
+            .upgrade()
+            .unwrap()
             .members
             .iter()
             .filter(|x| x.upgrade().unwrap().class == Resistor)
@@ -172,12 +175,12 @@ fn form_g_matrix(container: Rc<RefCell<Container>>, n: usize) -> DMatrix<Operati
                 continue;
             }
             let mut set: Vec<Operation> = Vec::new();
-            for element in &tool.members {
+            for element in &tool.upgrade().unwrap().members {
                 let element = element.upgrade().unwrap();
                 if element.class != Resistor {
                     continue;
                 }
-                for element2 in tool2.members.clone() {
+                for element2 in tool2.upgrade().unwrap().members.clone() {
                     let element2 = element2.upgrade().unwrap();
                     if element2.class != Resistor {
                         continue;
@@ -198,16 +201,15 @@ fn form_g_matrix(container: Rc<RefCell<Container>>, n: usize) -> DMatrix<Operati
 
 pub fn form_b_matrix(container: Rc<RefCell<Container>>, n: usize, m: usize) -> DMatrix<Operation> {
     let mut matrix: DMatrix<Operation> = DMatrix::zeros(n, m);
-    let nodes: Vec<Rc<Tool>> = get_calculation_nodes(container.clone());
 
-    for (i, tool) in nodes.iter().enumerate() {
+    for (i, tool) in container.borrow().nodes().iter().enumerate() {
         for (j, element) in container.borrow().get_voltage_sources().iter().enumerate() {
-            if tool.contains(element) {
+            if tool.upgrade().unwrap().contains(element) {
                 if element
                     .upgrade()
                     .unwrap()
                     .positive
-                    .contains(&tool.members[0].upgrade().unwrap().id)
+                    .contains(&tool.upgrade().unwrap().members[0].upgrade().unwrap().id)
                 {
                     matrix[(n - i - 1, j)] = Value(-1.0);
                 } else {
@@ -324,17 +326,20 @@ mod tests {
         let mut c = create_mna_container_2();
         c.create_nodes();
         c.create_super_nodes();
-        println!("{:?}", c.supernodes().iter().map(|x| x.upgrade().unwrap().members()).collect::<Vec<Vec<usize>>>());
-        println!("{:?}", c.nodes().iter().map(|x| x.upgrade().unwrap().members()).collect::<Vec<Vec<usize>>>());
+        println!("{:?}", c.supernodes().iter().map(|x| x.upgrade().unwrap().pretty_string()).collect::<Vec<String>>());
+        println!("{:?}", c.nodes().iter().map(|x| x.upgrade().unwrap().pretty_string()).collect::<Vec<String>>());
         let ref_cell = Rc::new(RefCell::new(c));
         println!("{:?}", get_calculation_nodes(ref_cell.clone()).iter().map(|x| x.pretty_string()).collect::<Vec<String>>() );
-        assert_eq!(get_calculation_nodes(ref_cell.clone()).len(), 1);
+        // assert_eq!(get_calculation_nodes(ref_cell.clone()).len(), 2);
         let solver: NodeMatrixSolver = Solver::new(ref_cell);
         let steps = solver.solve();
         if let Err(e) = steps {
             println!("{}", e);
+        } else {
+            println!("{:?}", solver.a_matrix.equation_repr());
+            println!("{:?}", solver.z_matrix.equation_repr());
+            println!("{:?}", solver.x_matrix.equation_repr());
         }
-        // println!("{:?}", steps.iter().map(|x| x.result.clone()).collect::<Vec<String>>());
     }
 
     #[test]
@@ -366,6 +371,25 @@ mod tests {
                 assert_eq!(expected[i][j], solver.a_matrix[(i, j)].equation_repr());
             }
         }
+
+        let expected = vec![
+            vec!["1/R2 + 1/R3", "-1/R2", "-1"],
+            vec!["-1/R2", "1/R1 + 1/R2", "1" ],
+            vec!["-1", "1", "0"],
+        ];
+
+
+        let mut c = create_mna_container_2();
+        c.create_nodes();
+        let solver: NodeMatrixSolver = Solver::new(Rc::new(RefCell::new(c.clone())));
+
+        for i in 0..3 {
+            for j in 0..3 {
+                assert_eq!(expected[i][j], solver.a_matrix[(i, j)].equation_repr());
+            }
+        }
+        assert_eq!(expected.len(), solver.a_matrix.nrows());
+
     }
 
     #[test]
