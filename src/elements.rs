@@ -8,6 +8,7 @@ use operations::math::{EquationMember, EquationRepr};
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Serialize, Serializer};
 use std::fmt::Display;
+use std::rc::Weak;
 
 /// Representation of a Schematic Element
 #[derive(Debug, Deserialize, Clone)]

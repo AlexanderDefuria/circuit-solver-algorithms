@@ -190,6 +190,8 @@ impl Validation for Tool {
                 "Tool {} has duplicate members",
                 self.id
             ))]);
+            println!("{:?}", &self.members.iter().map(|x| x.upgrade().unwrap().id).collect::<Vec<usize>>());
+            println!("{:?}", self);
             return Err(Multiple(duplicates));
         }
 

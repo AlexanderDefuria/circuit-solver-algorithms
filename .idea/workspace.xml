@@ -13,11 +13,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="52c330b2-a72e-46d5-bbef-071fc6e5ee26" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/tests/data/mna_container/input.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.github/create_mna_container_2.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.github/create_four_mesh_container.png" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/interfaces.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/interfaces.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/container.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/container.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/elements.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/elements.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/solvers/node_matrix_solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/node_matrix_solver.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/solvers/node_step_solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/node_step_solver.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/solvers/solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/solver.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tools.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/tools.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/util.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/util.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/tests.rs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/tests.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/validation.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/validation.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/data/case_1/input.json" beforeDir="false" afterPath="$PROJECT_DIR$/tests/data/case_1/input.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/data/case_1/result.json" beforeDir="false" afterPath="$PROJECT_DIR$/tests/data/case_1/result.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,7 +80,7 @@
     &quot;javascript.nodejs.core.library.configured.version&quot;: &quot;18.13.0&quot;,
     &quot;javascript.nodejs.core.library.typings.version&quot;: &quot;18.13.0&quot;,
     &quot;last.edited.regexp&quot;: &quot;Sample Text&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/alexander/Desktop/circuit-solver-algorithms/pkg&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/alexander/Desktop/circuit-solver-algorithms/tests/data/mna_container&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -95,6 +104,7 @@
 }</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/tests/data/mna_container" />
       <recent name="$PROJECT_DIR$/pkg" />
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/.github" />
@@ -108,7 +118,7 @@
       <recent name="$PROJECT_DIR$/libs/math/src" />
     </key>
   </component>
-  <component name="RunManager" selected="wasm-pack.Test">
+  <component name="RunManager" selected="Cargo.Test">
     <configuration name="Test solvers::solver::tests::test_solve_steps" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="command" value="test --package circuit-solver-algorithms --lib solvers::solver::tests::test_solve_steps -- --exact" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
@@ -248,8 +258,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Cargo.Test test_get_nodes" />
         <item itemvalue="Cargo.Test solvers::solver::tests::test_solve_steps" />
+        <item itemvalue="Cargo.Test test_get_nodes" />
         <item itemvalue="Cargo.Test test_validateable_containers" />
         <item itemvalue="Cargo.Test util::tests::test_create_containers" />
       </list>
@@ -355,7 +365,8 @@
       <workItem from="1693769479612" duration="4584000" />
       <workItem from="1693793940802" duration="1628000" />
       <workItem from="1693853696647" duration="18768000" />
-      <workItem from="1693926024296" duration="17244000" />
+      <workItem from="1693926024296" duration="28063000" />
+      <workItem from="1694029021595" duration="3213000" />
     </task>
     <servers />
   </component>
@@ -371,7 +382,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/validation.rs</url>
-          <line>91</line>
+          <line>92</line>
           <option name="timeStamp" value="3" />
         </line-breakpoint>
       </breakpoints>

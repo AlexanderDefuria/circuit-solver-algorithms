@@ -96,6 +96,14 @@ impl Container {
             .collect()
     }
 
+    pub fn supernodes(&self) -> Vec<Weak<Tool>> {
+        self.tools
+            .iter()
+            .filter(|x| x.class == ToolType::SuperNode)
+            .map(|x| Rc::downgrade(x))
+            .collect()
+    }
+
     pub fn meshes(&self) -> Vec<Weak<Tool>> {
         self.tools
             .iter()
@@ -187,8 +195,11 @@ impl Container {
                 members.push(Rc::downgrade(self.get_element_by_id(*element)));
             }
             for element in &source.upgrade().unwrap().negative {
-                members.push(Rc::downgrade(self.get_element_by_id(*element)));
+                if !members.iter().any(|x| x.upgrade().unwrap().id == *element) {
+                    members.push(Rc::downgrade(self.get_element_by_id(*element)));
+                }
             }
+            members.push(source);
             super_nodes.push(Tool::create_supernode(members));
         }
 
@@ -464,7 +475,7 @@ mod tests {
             .iter()
             .find(|x| x.class == SuperNode)
             .unwrap();
-        let expected_ids: Vec<usize> = vec![2, 3, 4];
+        let expected_ids: Vec<usize> = vec![1, 2, 3, 4];
         assert_eq!(super_node.members.len(), expected_ids.len());
         for member in super_node.members.iter() {
             assert!(expected_ids.contains(&member.upgrade().unwrap().id));

@@ -4,6 +4,7 @@ use serde::ser::SerializeStruct;
 use serde::{Serialize, Serializer};
 use std::cell::RefCell;
 use std::fmt::Display;
+use std::ops::Sub;
 use std::rc::Rc;
 use wasm_bindgen::JsValue;
 
@@ -17,8 +18,8 @@ pub trait Solver {
 
 pub struct Step {
     pub description: Option<String>,
+    pub result: String,
     pub sub_steps: Vec<SubStep>,
-    pub result: Option<Operation>,
 }
 
 #[derive(Clone)]
@@ -32,7 +33,15 @@ impl Step {
         Step {
             description: Some(label.to_string()),
             sub_steps: vec![],
-            result: None,
+            result: "".to_string(),
+        }
+    }
+
+    pub fn new_with_steps(label: &str, steps: Vec<SubStep>) -> Self {
+        Step {
+            description: Some(label.to_string()),
+            sub_steps: steps,
+            result: "".to_string(),
         }
     }
 
@@ -96,8 +105,26 @@ impl Serialize for SubStep {
 impl Display for Step {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut output: String = self.description.clone().unwrap_or_else(|| "".to_string());
+
+        if self.sub_steps.len() > 0 {
+            output.push_str("\nSub Steps:\n");
+        }
         for i in self.sub_steps.clone() {
-            output.push_str(&format!("{}\n", serde_json::to_string(&i).unwrap()));
+            output.push_str(&format!("\t{}\n", i));
+        }
+
+        write!(f, "{}", output)
+    }
+}
+
+impl Display for SubStep {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut output: String = self.description.clone().unwrap_or_else(|| "".to_string());
+        if self.operations.len() > 0 {
+            output.push_str("\n");
+            for i in self.operations.clone() {
+                output.push_str(&format!("\t\t{:?}\n", i));
+            }
         }
 
         write!(f, "{}", output)
@@ -131,7 +158,7 @@ mod tests {
         let solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(c)));
 
         for i in solver.solve().unwrap() {
-            println!("{}", i);
+            println!("---- Step ---- \n{}", i);
         }
     }
 }

@@ -77,6 +77,7 @@ pub(crate) fn check_weak_duplicates<T: Validation + PartialEq + Display>(
     list: &Vec<Weak<T>>,
 ) -> Vec<StatusError> {
     check_duplicates(&list.iter().filter_map(|x| x.upgrade()).collect())
+    // TODO Redrop?
 }
 
 /// Check for duplicates in a list

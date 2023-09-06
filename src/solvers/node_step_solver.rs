@@ -15,6 +15,7 @@ pub struct NodeStepSolver {
     container: Rc<RefCell<Container>>,
     sources: Vec<SourceConnection>,
     node_pairs: Vec<(usize, usize, Rc<Element>)>,
+    steps: Vec<Operation>,
 }
 
 #[derive(Debug)]
@@ -24,32 +25,36 @@ struct SourceConnection {
 }
 
 impl Solver for NodeStepSolver {
+
+    /// Creates a new NodeStepSolver
+    ///
+    /// This is where all the steps are created and handled
     fn new(container: Rc<RefCell<Container>>) -> Self {
         let node_pairs = container.borrow().get_all_node_pairs();
         let mut out: NodeStepSolver = NodeStepSolver {
             container,
             sources: vec![],
             node_pairs,
+            steps: vec![],
         };
+        out.setup_kcl();
         out.setup_connections();
 
         out
     }
 
     /// Returns a vector of strings that represent the steps to solve the circuit.
+    ///
+    /// This Handles the formatting of the data into what the frontend requires.
     fn solve(&self) -> Result<Vec<Step>, String> {
         let mut steps: Vec<Step> = Vec::new();
 
         // Step 1 Declare
-        steps.push(Step::new("Steps to solve the circuit:"));
         steps.push(self.declare_variables());
 
         // Step 2 Setup Voltages
         steps.push(self.breakdown_resistor_equations());
         steps.push(self.breakdown_voltage_src_equations());
-
-        // Step 3 Solve Voltages
-        steps.push(Step::new("Solve for voltages:"));
 
         Ok(steps)
     }
@@ -82,7 +87,6 @@ impl NodeStepSolver {
                             .map(|x: &mut f64| *x = -1.0);
                     }
                 }
-                println!("Voltage Connections: {:?}", voltage_connections);
                 self.sources.push(SourceConnection {
                     matrix: voltage_connections,
                     voltage: src.value(),
@@ -104,11 +108,11 @@ impl NodeStepSolver {
                 });
             });
 
-        Step {
-            description: Some("Find voltage and current between nodes.".to_string()),
-            sub_steps,
-            result: None,
-        }
+        Step::new_with_steps("Find voltage and current between nodes.", sub_steps)
+    }
+
+    fn setup_kcl(&mut self) {
+
     }
 
     fn breakdown_resistor_equations(&self) -> Step {
@@ -245,7 +249,7 @@ impl NodeStepSolver {
                     ],
                 },
             ],
-            result: None,
+            result: "".to_string(),
         }
     }
 
@@ -281,16 +285,7 @@ impl NodeStepSolver {
                 })
             });
 
-        for i in 0..eq_steps.len() {
-            if let Equal(a, _) = eq_steps[i].operations[0].clone() {
-                println!("{:?}", a.unwrap().value());
-            }
-        }
 
-        Step {
-            description: Some("Find voltage across each voltage source".to_string()),
-            sub_steps: eq_steps,
-            result: None,
-        }
+        Step::new_with_steps("Find voltage across each voltage source", eq_steps)
     }
 }
