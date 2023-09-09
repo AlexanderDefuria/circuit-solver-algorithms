@@ -13,18 +13,19 @@ use wasm_bindgen::JsValue;
 
 pub trait Solver {
     fn new(container: Rc<RefCell<Container>>) -> Self;
-    fn solve(&self) -> Result<Vec<Step>, String>;
+    fn solve(&mut self) -> Result<Vec<Step>, String>;
 }
 
 pub struct Step {
     pub description: Option<String>,
-    pub result: String,
+    pub result: Option<Operation>,
     pub sub_steps: Vec<SubStep>,
 }
 
 #[derive(Clone)]
 pub struct SubStep {
     pub description: Option<String>,
+    pub result: Option<Operation>,
     pub operations: Vec<Operation>,
 }
 
@@ -33,7 +34,7 @@ impl Step {
         Step {
             description: Some(label.to_string()),
             sub_steps: vec![],
-            result: "".to_string(),
+            result: None,
         }
     }
 
@@ -41,7 +42,7 @@ impl Step {
         Step {
             description: Some(label.to_string()),
             sub_steps: steps,
-            result: "".to_string(),
+            result: None,
         }
     }
 
@@ -59,6 +60,7 @@ impl SubStep {
         SubStep {
             description: Some(label.to_string()),
             operations: vec![],
+            result: None,
         }
     }
 
@@ -76,7 +78,13 @@ impl Serialize for Step {
     where
         S: Serializer,
     {
-        let mut state = serializer.serialize_struct("Step", 2)?;
+        let mut state: <S>::SerializeStruct;
+        if &self.result == &None {
+            state = serializer.serialize_struct("Step", 2)?;
+        } else {
+            state = serializer.serialize_struct("Step", 3)?;
+            state.serialize_field("result", &latex_serialize(self.result.clone().unwrap()))?;
+        }
         state.serialize_field("description", &self.description())?;
         state.serialize_field("sub_steps", &self.get_steps())?;
         state.end()
@@ -88,29 +96,44 @@ impl Serialize for SubStep {
     where
         S: Serializer,
     {
-        let mut state = serializer.serialize_struct("SubStep", 2)?;
+        let mut state: <S>::SerializeStruct;
+        if &self.result == &None {
+            state = serializer.serialize_struct("SubStep", 2)?;
+        } else {
+            state = serializer.serialize_struct("SubStep", 3)?;
+            state.serialize_field("result", &latex_serialize(self.result.clone().unwrap()))?;
+        }
         state.serialize_field("stepInstruction", &self.description())?;
         state.serialize_field(
             "operations",
             &self
                 .get_steps()
                 .into_iter()
-                .map(|x| x.latex_string())
+                .map(|x| latex_serialize(x))
                 .collect::<Vec<String>>(),
         )?;
         state.end()
     }
 }
 
+
+fn latex_serialize(op: Operation) -> String {
+    "$".to_string() + &*op.latex_string() + "$"
+}
+
+
 impl Display for Step {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut output: String = self.description.clone().unwrap_or_else(|| "".to_string());
 
+        if let Some(result) = &self.result {
+            output.push_str(&format!("\nResult: {:?}", result));
+        }
         if self.sub_steps.len() > 0 {
-            output.push_str("\nSub Steps:\n");
+            output.push_str("\nSub Steps:");
         }
         for i in self.sub_steps.clone() {
-            output.push_str(&format!("\t{}\n", i));
+            output.push_str(&format!("\n\t{}\n", i));
         }
 
         write!(f, "{}", output)
@@ -119,7 +142,11 @@ impl Display for Step {
 
 impl Display for SubStep {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut output: String = self.description.clone().unwrap_or_else(|| "".to_string());
+        let mut output: String = String::from("Step: ");
+        output.push_str(&self.description.clone().unwrap_or_else(|| "".to_string()));
+        if let Some(result) = &self.result {
+            output.push_str(&format!("\n\tResult: {:?}", result));
+        }
         if self.operations.len() > 0 {
             output.push_str("\n");
             for i in self.operations.clone() {
@@ -150,12 +177,23 @@ mod tests {
     use crate::util::create_mna_container;
     use std::cell::RefCell;
     use std::rc::Rc;
+    use crate::solvers::node_matrix_solver::NodeMatrixSolver;
 
     #[test]
     fn test_solve_steps() {
         let mut c = create_mna_container();
         c.create_nodes();
-        let solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(c)));
+        let mut solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(c)));
+
+        for i in solver.solve().unwrap() {
+            println!("---- Step ---- \n{}", i);
+        }
+    }
+    #[test]
+    fn test_solve_matrix() {
+        let mut c = create_mna_container();
+        c.create_nodes();
+        let mut solver: NodeMatrixSolver = Solver::new(Rc::new(RefCell::new(c)));
 
         for i in solver.solve().unwrap() {
             println!("---- Step ---- \n{}", i);

@@ -44,7 +44,7 @@ impl Solver for NodeMatrixSolver {
     }
 
     /// Returns a string that represents the matrix equation to solve the circuit.
-    fn solve(&self) -> Result<Vec<Step>, String> {
+    fn solve(&mut self) -> Result<Vec<Step>, String> {
         let mut steps: Vec<Step> = Vec::new();
 
         let inverse_result: Option<DMatrix<f64>> = DMatrix::from_iterator(
@@ -82,22 +82,27 @@ impl Solver for NodeMatrixSolver {
             sub_steps: vec![
                 SubStep {
                     description: Some("A Matrix".to_string()),
+                    result: None,
                     operations: vec![Variable(Rc::new(self.a_matrix.clone()))],
                 },
                 SubStep {
                     description: Some("Z Matrix".to_string()),
+                    result: None,
                     operations: vec![Variable(Rc::new(self.z_matrix.clone()))],
                 },
                 SubStep {
+                    result: None,
                     description: Some("X Matrix".to_string()),
                     operations: vec![Variable(Rc::new(self.x_matrix.clone()))],
                 },
                 SubStep {
                     description: Some("Inverse A Matrix".to_string()),
+                    result: None,
                     operations: vec![Variable(Rc::new(inverse.clone()))],
                 },
                 SubStep {
                     description: Some("Final Equation".to_string()),
+                    result: None,
                     operations: vec![Text(format!(
                         "{} = {}^{{-1}} * {}",
                         self.x_matrix.equation_repr(),
@@ -106,11 +111,11 @@ impl Solver for NodeMatrixSolver {
                     ))],
                 },
             ],
-            result: format!(
-                "{} = {}",
+            result: Some(Text(format!(
+                "${} = {}$",
                 self.x_matrix.equation_repr(),
                 result.equation_repr()
-            ),
+            ))),
         });
 
         Ok(steps)
@@ -326,20 +331,8 @@ mod tests {
         let mut c = create_mna_container_2();
         c.create_nodes();
         c.create_super_nodes();
-        println!("{:?}", c.supernodes().iter().map(|x| x.upgrade().unwrap().pretty_string()).collect::<Vec<String>>());
-        println!("{:?}", c.nodes().iter().map(|x| x.upgrade().unwrap().pretty_string()).collect::<Vec<String>>());
-        let ref_cell = Rc::new(RefCell::new(c));
-        println!("{:?}", get_calculation_nodes(ref_cell.clone()).iter().map(|x| x.pretty_string()).collect::<Vec<String>>() );
-        // assert_eq!(get_calculation_nodes(ref_cell.clone()).len(), 2);
-        let solver: NodeMatrixSolver = Solver::new(ref_cell);
+        let mut solver: NodeMatrixSolver = Solver::new(Rc::new(RefCell::new(c)));
         let steps = solver.solve();
-        if let Err(e) = steps {
-            println!("{}", e);
-        } else {
-            println!("{:?}", solver.a_matrix.equation_repr());
-            println!("{:?}", solver.z_matrix.equation_repr());
-            println!("{:?}", solver.x_matrix.equation_repr());
-        }
     }
 
     #[test]

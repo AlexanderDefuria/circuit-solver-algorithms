@@ -134,6 +134,10 @@ impl Tool {
             .map(|x| x.upgrade().unwrap().id)
             .collect()
     }
+
+    pub fn set_value(&mut self, value: f64) {
+        self.value = value;
+    }
 }
 
 /// Implement PartialEq for Tool

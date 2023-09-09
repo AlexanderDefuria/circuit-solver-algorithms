@@ -18,7 +18,7 @@ fn test_validateable_containers() {
 
     container.create_nodes();
     container.create_super_nodes();
-    let solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(container)));
+    let mut solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(container)));
     let steps: Vec<Step> = solver.solve().unwrap();
     let steps_string: String = serde_json::to_string(&steps).unwrap();
     let expected: &str = include_str!("./data/case_1/result.json");

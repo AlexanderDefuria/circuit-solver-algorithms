@@ -14,7 +14,7 @@ impl Solver for MeshStepSolver {
         MeshStepSolver { container }
     }
 
-    fn solve(&self) -> Result<Vec<Step>, String> {
+    fn solve(&mut self) -> Result<Vec<Step>, String> {
         todo!()
     }
 }

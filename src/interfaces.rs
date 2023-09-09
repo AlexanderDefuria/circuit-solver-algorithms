@@ -57,11 +57,11 @@ pub fn solve(matrix: bool, nodal: bool, container_js: JsValue) -> Result<String,
             c.create_nodes();
             c.create_super_nodes();
             if matrix {
-                let solver: NodeMatrixSolver = Solver::new(Rc::new(RefCell::new(c)));
+                let mut solver: NodeMatrixSolver = Solver::new(Rc::new(RefCell::new(c)));
                 let steps = solver.solve().unwrap();
                 return Ok(serde_json::to_string(&steps).unwrap());
             } else {
-                let solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(c)));
+                let mut solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(c)));
                 let steps = solver.solve().unwrap();
                 return Ok(serde_json::to_string(&steps).unwrap());
             }
@@ -85,7 +85,7 @@ pub fn return_solved_step_example() -> String {
     let mut c: Container = create_mna_container();
     c.create_nodes();
     c.create_super_nodes();
-    let solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(c)));
+    let mut solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(c)));
 
     let steps = solver.solve().unwrap();
     serde_json::to_string(&steps).unwrap()
@@ -96,7 +96,7 @@ pub fn test_serialize_steps() {
     let mut c: Container = create_mna_container();
     c.create_nodes();
     c.create_super_nodes();
-    let solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(c)));
+    let mut solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(c)));
 
     let steps = solver.solve();
     match steps {
@@ -116,9 +116,9 @@ pub fn test_solver_select() {
     let mut c: Container = create_mna_container();
     c.create_nodes();
     c.create_super_nodes();
-    let solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(c)));
+    let mut solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(c)));
 
-    let steps = solver.solve();
+    let mut steps = solver.solve();
     match steps {
         Ok(x) => {
             let result = serde_json::to_string(&x).unwrap();
@@ -136,7 +136,7 @@ pub fn return_solved_matrix_example() -> String {
     let mut c: Container = create_mna_container();
     c.create_nodes();
     c.create_super_nodes();
-    let solver: NodeMatrixSolver = Solver::new(Rc::new(RefCell::new(c)));
+    let mut solver: NodeMatrixSolver = Solver::new(Rc::new(RefCell::new(c)));
     let steps = solver.solve().unwrap();
     serde_json::to_string(&steps).unwrap()
 }
@@ -149,7 +149,7 @@ pub fn test_wasm() -> String {
 #[wasm_bindgen]
 pub fn solve_mna_container() -> Vec<JsValue> {
     let c: Container = create_mna_container();
-    let solver: NodeMatrixSolver = Solver::new(Rc::new(RefCell::new(c)));
+    let mut solver: NodeMatrixSolver = Solver::new(Rc::new(RefCell::new(c)));
     let x = solver.solve().unwrap();
     x.into_iter().map(JsValue::from).collect()
 }
