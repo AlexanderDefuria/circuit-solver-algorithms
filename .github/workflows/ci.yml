@@ -20,6 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: rustup update ${{ matrix.toolchain }} && rustup default ${{ matrix.toolchain }}
+      - run: cd .. && git clone https://github.com/AlexanderDefuria/operations && cd ./circuit-solver-algorithms
       - run: cargo build --verbose
       - run: cargo test --verbose
 
@@ -41,20 +42,19 @@ jobs:
         with:
           # Optional version of wasm-pack to install(eg. 'v0.9.1', 'latest')
           version: 'v0.9.1'
+      - run: cd .. && git clone https://github.com/AlexanderDefuria/operations && cd ./circuit-solver-algorithms
       - name: Test wasm
         run: wasm-pack test --node
-      - name: Build wasm release
-        run: wasm-pack build --target web --release
       - run: cp ./package.json ./pkg/
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '16.x'
-          registry-url: 'https://npm.pkg.github.com'
-          # Defaults to the user or organization that owns the workflow file
-          scope: '@alexanderdefuria'
-      - run: ls && cd ./pkg && ls && npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#      - uses: actions/setup-node@v3
+#        with:
+#          node-version: '16.x'
+#          registry-url: 'https://npm.pkg.github.com'
+#          # Defaults to the user or organization that owns the workflow file
+#          scope: '@alexanderdefuria'
+#      - run: ls && cd ./pkg && ls && npm publish
+#        env:
+#          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   print_doc_coverage:
     name: Print documentation coverage
@@ -64,6 +64,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: nightly
+      - run: cd .. && git clone https://github.com/AlexanderDefuria/operations && cd ./circuit-solver-algorithms
       - id: coverage
         uses: bewee/rustdoc-coverage-action@v1
       - run: echo ${{ steps.coverage.outputs.documented }}

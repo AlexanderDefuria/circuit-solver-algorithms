@@ -13,14 +13,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="52c330b2-a72e-46d5-bbef-071fc6e5ee26" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.github/workflows/ci.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/ci.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/interfaces.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/interfaces.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/solvers/mesh_matrix_solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/mesh_matrix_solver.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/solvers/mesh_step_solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/mesh_step_solver.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/solvers/node_matrix_solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/node_matrix_solver.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/solvers/node_step_solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/node_step_solver.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/solvers/solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/solver.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tools.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/tools.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/tests.rs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/tests.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -75,7 +69,7 @@
     &quot;javascript.nodejs.core.library.configured.version&quot;: &quot;18.13.0&quot;,
     &quot;javascript.nodejs.core.library.typings.version&quot;: &quot;18.13.0&quot;,
     &quot;last.edited.regexp&quot;: &quot;Sample Text&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/alexander/Desktop/circuit-solver-algorithms/tests/data/mna_container&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/alexander/Desktop/circuit-solver-algorithms/pkg&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -99,8 +93,8 @@
 }</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/tests/data/mna_container" />
       <recent name="$PROJECT_DIR$/pkg" />
+      <recent name="$PROJECT_DIR$/tests/data/mna_container" />
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/.github" />
       <recent name="$PROJECT_DIR$/.github/workflows" />
@@ -113,7 +107,7 @@
       <recent name="$PROJECT_DIR$/libs/math/src" />
     </key>
   </component>
-  <component name="RunManager" selected="wasm-pack.Build">
+  <component name="RunManager" selected="wasm-pack.Test">
     <configuration name="Test solvers::solver::tests::test_solve_steps" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="command" value="test --package circuit-solver-algorithms --lib solvers::solver::tests::test_solve_steps -- --exact" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
@@ -361,7 +355,9 @@
       <workItem from="1693793940802" duration="1628000" />
       <workItem from="1693853696647" duration="18768000" />
       <workItem from="1693926024296" duration="28063000" />
-      <workItem from="1694029021595" duration="36914000" />
+      <workItem from="1694029021595" duration="37948000" />
+      <workItem from="1694304044474" duration="7000" />
+      <workItem from="1694308935120" duration="850000" />
     </task>
     <servers />
   </component>
