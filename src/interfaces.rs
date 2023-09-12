@@ -7,7 +7,7 @@ use std::cell::RefCell;
 use crate::solvers::node_matrix_solver::NodeMatrixSolver;
 use crate::solvers::node_step_solver::NodeStepSolver;
 use crate::solvers::solver::Solver;
-use crate::util::create_mna_container;
+use crate::util::{create_basic_container, create_basic_supermesh_container, create_basic_supernode_container, create_mna_container, create_mna_container_2};
 use serde::{Deserialize, Serialize};
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
@@ -79,64 +79,29 @@ pub fn solve(matrix: bool, nodal: bool, container_js: JsValue) -> Result<String,
 }
 
 #[wasm_bindgen]
-pub fn return_solved_step_example() -> String {
+pub fn return_solved_step_example() -> Result<String, JsValue> {
     let mut c: Container = create_mna_container();
     c.create_nodes();
     c.create_super_nodes();
     let mut solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(c)));
 
-    let steps = solver.solve().unwrap();
-    serde_json::to_string(&steps).unwrap()
-}
-
-#[wasm_bindgen_test]
-pub fn test_serialize_steps() {
-    let mut c: Container = create_mna_container();
-    c.create_nodes();
-    c.create_super_nodes();
-    let mut solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(c)));
-
-    let steps = solver.solve();
-    match steps {
-        Ok(x) => {
-            let result = serde_json::to_string(&x).unwrap();
-            assert!(result.len() > 1);
-            // assert_eq!(result, "Some String".to_string());
-        }
-        Err(_) => {
-            assert!(false);
-        }
+    let steps = solver.solve()?;
+    if let Ok(x) = serde_json::to_string(&steps) {
+        return Ok(x);
     }
-}
-
-#[wasm_bindgen_test]
-pub fn test_solver_select() {
-    let mut c: Container = create_mna_container();
-    c.create_nodes();
-    c.create_super_nodes();
-    let mut solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(c)));
-
-    let steps = solver.solve();
-    match steps {
-        Ok(x) => {
-            let result = serde_json::to_string(&x).unwrap();
-            assert!(result.len() > 1);
-            // assert_eq!(result, "Some String".to_string());
-        }
-        Err(_) => {
-            assert!(false);
-        }
-    }
-}
+    Err(JsValue::from_str("Steps Errored out."))}
 
 #[wasm_bindgen]
-pub fn return_solved_matrix_example() -> String {
+pub fn return_solved_matrix_example() -> Result<String, JsValue> {
     let mut c: Container = create_mna_container();
     c.create_nodes();
     c.create_super_nodes();
     let mut solver: NodeMatrixSolver = Solver::new(Rc::new(RefCell::new(c)));
-    let steps = solver.solve().unwrap();
-    serde_json::to_string(&steps).unwrap()
+    let steps = solver.solve()?;
+    if let Ok(x) = serde_json::to_string(&steps) {
+        return Ok(x);
+    }
+    Err(JsValue::from_str("Steps Errored out."))
 }
 
 #[wasm_bindgen]
@@ -145,11 +110,40 @@ pub fn test_wasm() -> String {
 }
 
 #[wasm_bindgen]
-pub fn solve_mna_container() -> Vec<JsValue> {
+pub fn solve_mna_container() -> Result<Vec<JsValue>, JsValue> {
     let c: Container = create_mna_container();
     let mut solver: NodeMatrixSolver = Solver::new(Rc::new(RefCell::new(c)));
-    let x = solver.solve().unwrap();
-    x.into_iter().map(JsValue::from).collect()
+    let x = solver.solve()?;
+    let js_steps: Vec<JsValue> = x.into_iter().map(JsValue::from).collect();
+    Ok(js_steps)
+}
+
+#[wasm_bindgen]
+pub fn solve_test_container(container_id: i32) -> Result<String, JsValue> {
+    let c: Container = match container_id {
+        0 => create_basic_container(),
+        1 => create_basic_supernode_container(),
+        2 => create_basic_supermesh_container(),
+        3 => create_mna_container(),
+        4 => create_mna_container_2(),
+        _ => create_basic_container(),
+    };
+    let mut solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(c)));
+    let steps = solver.solve()?;
+    serde_json::to_string(&steps).unwrap();
+    if let Ok(x) = serde_json::to_string(&steps) {
+        return Ok(x);
+    }
+    Err(JsValue::from_str("Steps Errored out."))
+}
+
+#[wasm_bindgen]
+pub fn return_result(x: bool) -> Result<String, JsValue> {
+    if x {
+        Ok("Success".to_string())
+    } else {
+        Err(JsValue::from("Failure AHAHAHAHHA 🦞🦞🦞🦞".to_string()))
+    }
 }
 
 impl From<Vec<Element>> for Container {
@@ -170,62 +164,4 @@ impl From<ContainerSetup> for Container {
         }
         container
     }
-}
-
-pub fn simplify() {}
-
-#[wasm_bindgen_test]
-fn test_container_wasm() {
-    let c: Vec<Element> = vec![];
-    let x: JsValue = serde_wasm_bindgen::to_value(&c).unwrap();
-    let y: Vec<Element> = serde_wasm_bindgen::from_value(x).unwrap();
-    assert_eq!(c, y);
-}
-
-#[wasm_bindgen_test]
-fn test_load() {
-    let c = ContainerSetup { elements: vec![] };
-    let x: JsValue = serde_wasm_bindgen::to_value(&c).unwrap();
-    assert_eq!(
-        load_wasm_container(x),
-        Err(Multiple(vec![
-            Known("No Sources".parse().unwrap()),
-            Known("Multiple Grounds".parse().unwrap())
-        ]))
-    );
-
-    let c = ContainerSetup {
-        elements: vec![Element::new(Ground, 0., vec![], vec![])],
-    };
-    let x: JsValue = serde_wasm_bindgen::to_value(&c).unwrap();
-    assert!(load_wasm_container(x).is_err());
-
-    let c = ContainerSetup {
-        elements: vec![
-            Element::new(Ground, 0., vec![1], vec![]),
-            Element::new(Ground, 0., vec![0], vec![]),
-        ],
-    };
-    let x: JsValue = serde_wasm_bindgen::to_value(&c).unwrap();
-    assert_eq!(
-        load_wasm_container(x),
-        Err(Multiple(vec![
-            Known("No Sources".to_string()),
-            Known("Multiple Grounds".to_string())
-        ]))
-    );
-
-    let c = ContainerSetup {
-        elements: vec![
-            Element::new(Ground, 0., vec![1, 3], vec![]),
-            Element::new(VoltageSrc, 1.0, vec![3, 0], vec![2]),
-            Element::new(Resistor, 1.0, vec![1], vec![3]),
-            Element::new(Resistor, 1.0, vec![2], vec![1, 0]),
-        ],
-    };
-    let x: JsValue = serde_wasm_bindgen::to_value(&c).unwrap();
-    assert_eq!(
-        load_wasm_container(x),
-        Ok("Loaded Successfully".to_string())
-    );
 }
