@@ -3,13 +3,13 @@ use crate::component::Component::{Resistor, VoltageSrc};
 use crate::container::Container;
 use crate::elements::Element;
 use crate::solvers::solver::{Solver, Step, SubStep};
-use nalgebra::{DMatrix, DVector, Matrix};
+use nalgebra::{DMatrix, DVector};
 use operations::mappings::expand;
 use operations::math::EquationMember;
 use operations::operations::Operation;
 use operations::prelude::{Divide, Equal, Negate, Sum, Text, Value, Variable};
 use std::cell::RefCell;
-use std::ops::{Deref, DerefMut};
+use std::ops::Deref;
 use std::panic;
 use std::rc::Rc;
 
@@ -17,7 +17,6 @@ pub struct NodeStepSolver {
     container: Rc<RefCell<Container>>,
     sources: Vec<SourceConnection>, // Voltage sources
     node_pairs: Vec<(usize, usize, Rc<Element>)>, // Each element is attached to a pair of nodes.
-    steps: Vec<Operation>,
     node_coefficients: Vec<Operation>, // Coefficients of the node summation for the matrix
     node_voltages: DVector<f64>, // This is the result of matrix manipulation
     connection_matrix: DMatrix<f64>, // This is the base matrix for manipulation
@@ -40,11 +39,10 @@ impl Solver for NodeStepSolver {
     /// This is where all the steps are created and handled
     fn new(container: Rc<RefCell<Container>>) -> Self {
         let node_pairs = container.borrow().get_all_node_pairs();
-        let mut out: NodeStepSolver = NodeStepSolver {
+        let out: NodeStepSolver = NodeStepSolver {
             container,
             sources: vec![],
             node_pairs,
-            steps: vec![],
             node_coefficients: vec![],
             node_voltages: DVector::zeros(0),
             connection_matrix: DMatrix::zeros(0, 0),
@@ -422,7 +420,7 @@ mod tests {
         c.create_nodes();
         c.create_super_nodes();
         let mut solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(c)));
-        solver.solve();
+        solver.solve().expect("Unable to solve");
         solver
     }
 

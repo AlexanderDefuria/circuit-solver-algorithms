@@ -45,16 +45,6 @@ jobs:
       - run: cd .. && git clone https://github.com/AlexanderDefuria/operations && cd ./circuit-solver-algorithms
       - name: Test wasm
         run: wasm-pack test --node
-      - run: cp ./package.json ./pkg/
-#      - uses: actions/setup-node@v3
-#        with:
-#          node-version: '16.x'
-#          registry-url: 'https://npm.pkg.github.com'
-#          # Defaults to the user or organization that owns the workflow file
-#          scope: '@alexanderdefuria'
-#      - run: ls && cd ./pkg && ls && npm publish
-#        env:
-#          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   print_doc_coverage:
     name: Print documentation coverage

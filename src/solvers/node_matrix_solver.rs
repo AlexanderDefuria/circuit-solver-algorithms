@@ -8,7 +8,7 @@ use operations::prelude::{Divide, Negate, Operation, Sum, Text, Value, Variable}
 use std::cell::RefCell;
 use std::rc::Rc;
 use crate::elements::Element;
-use crate::tools::{Tool, ToolType};
+use crate::tools::Tool;
 
 pub struct NodeMatrixSolver {
     a_matrix: DMatrix<Operation>,
@@ -20,12 +20,6 @@ impl Solver for NodeMatrixSolver {
     fn new(container: Rc<RefCell<Container>>) -> NodeMatrixSolver {
         container.borrow_mut().create_nodes();
         let n = container.borrow().nodes().len();
-
-        // Node Count SuperNodes Must Replace their nodes with a single node
-        let proper_nodes = get_calculation_nodes(container.clone());
-
-        // let n = proper_nodes.len();
-
         let m = container // Source Count
             .borrow()
             .get_elements()
@@ -240,7 +234,7 @@ fn form_d_matrix(_container: Rc<RefCell<Container>>, m: usize) -> DMatrix<Operat
     DMatrix::zeros(m, m)
 }
 
-fn get_calculation_nodes(container: Rc<RefCell<Container>>) -> Vec<Rc<Tool>> {
+fn _get_calculation_nodes(container: Rc<RefCell<Container>>) -> Vec<Rc<Tool>> {
     let nodes: Vec<Rc<Tool>> = container.borrow().nodes().iter().map(|x| x.upgrade().unwrap()).collect();
     let binding = container.borrow();
     let super_nodes: Vec<Rc<Tool>> = binding.supernodes().iter().map(|x| x.upgrade().unwrap()).collect();
@@ -315,9 +309,9 @@ fn form_x_vector(container: Rc<RefCell<Container>>) -> DVector<Operation> {
 
 #[cfg(test)]
 mod tests {
-    use crate::solvers::node_matrix_solver::{form_b_matrix, form_c_matrix, form_d_matrix, form_g_matrix, get_calculation_nodes, NodeMatrixSolver};
+    use crate::solvers::node_matrix_solver::{form_b_matrix, form_c_matrix, form_d_matrix, form_g_matrix, NodeMatrixSolver};
     use crate::solvers::solver::Solver;
-    use crate::util::{create_mna_container, create_mna_container_2, PrettyPrint};
+    use crate::util::{create_mna_container, create_mna_container_2};
     use operations::prelude::*;
     use std::cell::RefCell;
     use std::rc::Rc;
@@ -333,6 +327,7 @@ mod tests {
         c.create_super_nodes();
         let mut solver: NodeMatrixSolver = Solver::new(Rc::new(RefCell::new(c)));
         let steps = solver.solve();
+        assert!(steps.is_ok());
     }
 
     #[test]

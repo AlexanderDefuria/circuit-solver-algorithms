@@ -4,11 +4,9 @@ use crate::elements::Element;
 use crate::validation::StatusError::{Known, Multiple};
 use crate::validation::{StatusError, Validation};
 use std::cell::RefCell;
-
 use crate::solvers::node_matrix_solver::NodeMatrixSolver;
 use crate::solvers::node_step_solver::NodeStepSolver;
 use crate::solvers::solver::Solver;
-use crate::tools::Tool;
 use crate::util::create_mna_container;
 use serde::{Deserialize, Serialize};
 use std::rc::Rc;
@@ -118,7 +116,7 @@ pub fn test_solver_select() {
     c.create_super_nodes();
     let mut solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(c)));
 
-    let mut steps = solver.solve();
+    let steps = solver.solve();
     match steps {
         Ok(x) => {
             let result = serde_json::to_string(&x).unwrap();

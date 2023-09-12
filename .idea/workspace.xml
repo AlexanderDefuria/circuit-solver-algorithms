@@ -15,6 +15,12 @@
     <list default="true" id="52c330b2-a72e-46d5-bbef-071fc6e5ee26" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.github/workflows/ci.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/ci.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/elements.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/elements.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/interfaces.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/interfaces.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/solvers/node_matrix_solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/node_matrix_solver.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/solvers/node_step_solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/node_step_solver.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/solvers/solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/solver.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/tests.rs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/tests.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -107,7 +113,7 @@
       <recent name="$PROJECT_DIR$/libs/math/src" />
     </key>
   </component>
-  <component name="RunManager" selected="wasm-pack.Test">
+  <component name="RunManager" selected="Cargo.Test">
     <configuration name="Test solvers::solver::tests::test_solve_steps" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="command" value="test --package circuit-solver-algorithms --lib solvers::solver::tests::test_solve_steps -- --exact" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
@@ -221,7 +227,6 @@
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
       <option name="emulateTerminal" value="false" />
       <method v="2">
-        <option name="RunConfigurationTask" enabled="false" run_configuration_name="Test" run_configuration_type="WasmPackCommandRunConfiguration" />
         <option name="RunConfigurationTask" enabled="true" run_configuration_name="Build" run_configuration_type="WasmPackCommandRunConfiguration" />
         <option name="RunConfigurationTask" enabled="true" run_configuration_name="publish" run_configuration_type="ShConfigurationType" />
       </method>
@@ -234,12 +239,20 @@
         <option name="WASM_PACK.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
+    <configuration name="start" type="js.build_tools.npm" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/../circuit-solver-web/package.json" />
+      <command value="start" />
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
     <list>
       <item itemvalue="Cargo.Test" />
       <item itemvalue="Cargo.Test test_get_nodes" />
       <item itemvalue="Cargo.Test solvers::solver::tests::test_solve_steps" />
       <item itemvalue="Cargo.Test test_validateable_containers" />
       <item itemvalue="Cargo.Test util::tests::test_create_containers" />
+      <item itemvalue="npm.start" />
       <item itemvalue="Shell Script.publish" />
       <item itemvalue="wasm-pack.Build" />
       <item itemvalue="wasm-pack.Test" />
@@ -357,7 +370,10 @@
       <workItem from="1693926024296" duration="28063000" />
       <workItem from="1694029021595" duration="37948000" />
       <workItem from="1694304044474" duration="7000" />
-      <workItem from="1694308935120" duration="850000" />
+      <workItem from="1694308935120" duration="2316000" />
+      <workItem from="1694364931528" duration="185000" />
+      <workItem from="1694374145994" duration="743000" />
+      <workItem from="1694480330599" duration="717000" />
     </task>
     <servers />
   </component>

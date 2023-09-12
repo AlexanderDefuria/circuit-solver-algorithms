@@ -8,7 +8,6 @@ use operations::math::{EquationMember, EquationRepr};
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Serialize, Serializer};
 use std::fmt::Display;
-use std::rc::Weak;
 
 /// Representation of a Schematic Element
 #[derive(Debug, Deserialize, Clone)]
@@ -108,6 +107,10 @@ impl EquationMember for Element {
         match self.class {
             Component::VoltageSrc => format!("V_{{\\texttt{{src}}{}}}", self.id),
             Component::CurrentSrc => format!("I_{{\\texttt{{src}}{}}}", self.id),
+            Component::Resistor => format!("R_{{{}}}", self.id),
+            Component::Capacitor => format!("C_{{{}}}", self.id),
+            Component::Inductor => format!("L_{{{}}}", self.id),
+            Component::Ground => format!("GND"),
             _ => format!("{}_{{{}}}", self.name, self.id),
         }
     }
