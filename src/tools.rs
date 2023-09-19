@@ -135,6 +135,10 @@ impl Tool {
             .collect()
     }
 
+    pub fn members_weak(&self) -> Vec<Weak<Element>> {
+        self.members.clone()
+    }
+
     pub fn set_value(&mut self, value: f64) {
         self.value = value;
     }
@@ -145,7 +149,7 @@ impl Tool {
 /// Compare two Tool by their id
 impl PartialEq<Self> for Tool {
     fn eq(&self, other: &Self) -> bool {
-        self.id == other.id
+        self.id == other.id && self.class == other.class
     }
 }
 
@@ -194,7 +198,14 @@ impl Validation for Tool {
                 "Tool {} has duplicate members",
                 self.id
             ))]);
-            println!("{:?}", &self.members.iter().map(|x| x.upgrade().unwrap().id).collect::<Vec<usize>>());
+            println!(
+                "{:?}",
+                &self
+                    .members
+                    .iter()
+                    .map(|x| x.upgrade().unwrap().id)
+                    .collect::<Vec<usize>>()
+            );
             println!("{:?}", self);
             return Err(Multiple(duplicates));
         }

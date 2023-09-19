@@ -1,0 +1,11 @@
+TODO
+
+Step 2:
+- Put in Ohms law and KCL
+    Node 1: = ....
+
+Step 3:
+- Split into create and then rearrange for the coefficients
+- Set everything equal to zero
+- Brackets for clarity
+- Add in the coefficients

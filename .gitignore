@@ -21,3 +21,7 @@ Cargo.lock
 /pkg/package.json
 !/pkg/README.md
 /tests/node_modules/
+
+.idea/*
+/.idea/*
+

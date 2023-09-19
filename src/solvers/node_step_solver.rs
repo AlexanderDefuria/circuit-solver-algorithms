@@ -1,13 +1,17 @@
-use std::any::Any;
 use crate::component::Component::{Resistor, VoltageSrc};
 use crate::container::Container;
 use crate::elements::Element;
 use crate::solvers::solver::{Solver, Step, SubStep};
+use crate::tools::Tool;
+use crate::tools::ToolType::SuperNode;
 use nalgebra::{DMatrix, DVector};
 use operations::mappings::expand;
 use operations::math::EquationMember;
 use operations::operations::Operation;
-use operations::prelude::{Divide, Equal, Negate, Sum, Text, Value, Variable};
+use operations::prelude::{
+    Display, Divide, Equal, Multiply, Negate, Power, Sum, Text, Value, Variable,
+};
+use std::any::Any;
 use std::cell::RefCell;
 use std::ops::Deref;
 use std::panic;
@@ -15,11 +19,12 @@ use std::rc::Rc;
 
 pub struct NodeStepSolver {
     container: Rc<RefCell<Container>>,
-    sources: Vec<SourceConnection>, // Voltage sources
+    sources: Vec<SourceConnection>,               // Voltage sources
+    current_values: Vec<(usize, Operation)>,      // (Element ID, Equation for current form nodes)
     node_pairs: Vec<(usize, usize, Rc<Element>)>, // Each element is attached to a pair of nodes.
     node_coefficients: Vec<Operation>, // Coefficients of the node summation for the matrix
-    node_voltages: DVector<f64>, // This is the result of matrix manipulation
-    connection_matrix: DMatrix<f64>, // This is the base matrix for manipulation
+    node_voltages: DVector<f64>,       // This is the result of matrix manipulation
+    connection_matrix: DMatrix<f64>,   // This is the base matrix for manipulation
     node_combination_steps: Vec<Operation>,
     matrix_evaluation: Operation, // Simple operation holding the matrix multiplication display.
     kcl_operations: Vec<Operation>,
@@ -33,7 +38,6 @@ struct SourceConnection {
 }
 
 impl Solver for NodeStepSolver {
-
     /// Creates a new NodeStepSolver
     ///
     /// This is where all the steps are created and handled
@@ -42,6 +46,7 @@ impl Solver for NodeStepSolver {
         let out: NodeStepSolver = NodeStepSolver {
             container,
             sources: vec![],
+            current_values: vec![],
             node_pairs,
             node_coefficients: vec![],
             node_voltages: DVector::zeros(0),
@@ -59,28 +64,24 @@ impl Solver for NodeStepSolver {
     ///
     /// This Handles the formatting of the data into what the frontend requires.
     fn solve(&mut self) -> Result<Vec<Step>, String> {
-
         // SETUP and CALCULATIONS
         self.setup_connections()?;
         self.setup_node_equations()?;
         self.setup_node_coefficients()?;
         self.solve_node_voltages()?;
-        self.solve_current_values()?;
-
+        // self.solve_current_values()?;
 
         // FORMATTING and OUTPUT
         let mut steps: Vec<Step> = Vec::new();
-        steps.push(self.declare_variables());
-        steps.push(self.voltage_src_equations());
-        steps.push(self.kcl_equations());
-        steps.push(self.connection_matrix());
-        steps.push(self.solve_matrix());
+        steps.push(self.display_base_kcl_equations()?);
+        steps.push(self.display_connection_matrix()?);
+        steps.push(self.display_solved_matrix()?);
+        steps.push(self.display_currents()?);
         Ok(steps)
     }
 }
 
 impl NodeStepSolver {
-
     /// Node Pairs
     fn setup_connections(&mut self) -> Result<(), String> {
         let vec_size: usize = self
@@ -113,6 +114,7 @@ impl NodeStepSolver {
                     voltage: src.value(),
                 });
             });
+
         Ok(())
     }
 
@@ -128,22 +130,29 @@ impl NodeStepSolver {
         let m: usize = 1 + self.sources.len();
         self.connection_matrix = DMatrix::zeros(n, m);
 
-        self.node_coefficients.iter().enumerate().for_each(|(i, x)| {
-            self.connection_matrix.get_mut((0, i)).map(|y| *y = x.value());
-        });
+        self.node_coefficients
+            .iter()
+            .enumerate()
+            .for_each(|(i, x)| {
+                self.connection_matrix
+                    .get_mut((0, i))
+                    .map(|y| *y = x.value());
+            });
         self.sources.iter().enumerate().for_each(|(i, x)| {
             x.matrix.iter().enumerate().for_each(|(j, y)| {
                 self.connection_matrix.get_mut((i + 1, j)).map(|z| *z = *y);
             });
         });
 
-        let inverse_result: Result<DMatrix<f64>, Box<dyn Any + Send>> = panic::catch_unwind(|| {
-            self.connection_matrix.clone().try_inverse().unwrap()
-        });
+        let inverse_result: Result<DMatrix<f64>, Box<dyn Any + Send>> =
+            panic::catch_unwind(|| self.connection_matrix.clone().try_inverse().unwrap());
 
         let inverse: DMatrix<f64>;
         if let Err(_) = inverse_result {
-            return Err(format!("Unable to invert matrix: {}", self.connection_matrix.equation_repr()))
+            return Err(format!(
+                "Unable to invert matrix: {}",
+                self.connection_matrix.equation_repr()
+            ));
         } else {
             inverse = inverse_result.unwrap();
         }
@@ -152,12 +161,16 @@ impl NodeStepSolver {
         let result_matrix = inverse * source_voltages.clone();
         self.node_voltages = result_matrix.clone();
 
-        self.matrix_evaluation = Text(format!(
-            "{}^{{-1}} * {} = {}",
-            self.connection_matrix.equation_repr(),
-            source_voltages.equation_repr(),
-            self.node_voltages.equation_repr()
-        ));
+        self.matrix_evaluation = Display(Rc::new(Equal(
+            Some(Box::new(Multiply(vec![
+                Power(
+                    Some(Box::new(Display(Rc::new(self.connection_matrix.clone())))),
+                    Some(Box::new(Value(-1.0))),
+                ),
+                Display(Rc::new(source_voltages.clone())),
+            ]))),
+            Some(Box::new(Display(Rc::new(result_matrix.clone())))),
+        )));
 
         // TODO Propagate the values of the nodes back into the container / solver.
         // let results: Vec<f64> = result_matrix.iter().map(|x| x.clone()).collect::<Vec<f64>>();
@@ -191,17 +204,28 @@ impl NodeStepSolver {
                         self.container.borrow().get_tool_by_id(id_2).clone(),
                     )))));
                 }
-                self.node_combination_steps.push(Negate(Some(Box::new(Divide(
-                    Some(Box::new(Sum(tools).simplify().unwrap())),
-                    Some(Box::new(Variable(element.clone()))),
-                )))));
+
+                self.current_values.push((
+                    element.id,
+                    Divide(
+                        Some(Box::new(Sum(tools).simplify().unwrap())),
+                        Some(Box::new(Variable(element.clone()))),
+                    ),
+                ));
+
+                self.node_combination_steps.push(Negate(Some(Box::new(
+                    self.current_values.last().unwrap().1.clone(),
+                ))));
             });
 
         assert_ne!(self.node_combination_steps.len(), 0);
-        self.kcl_operations.push(Sum(self.node_combination_steps.clone()));
+
+        self.kcl_operations
+            .push(Sum(self.node_combination_steps.clone()));
 
         // Create nicely readable equation
-        self.node_combination_steps = self.node_combination_steps
+        self.node_combination_steps = self
+            .node_combination_steps
             .iter()
             .map(|x| x.simplify().unwrap_or_else(|| x.clone()))
             .collect();
@@ -212,7 +236,8 @@ impl NodeStepSolver {
     fn setup_node_coefficients(&mut self) -> Result<(), String> {
         // Expand equation
         assert_ne!(self.node_combination_steps.len(), 0);
-        let mut combination_steps = self.node_combination_steps
+        let mut combination_steps = self
+            .node_combination_steps
             .iter()
             .map(|x| expand(x.clone()).unwrap_or_else(|_| x.clone()))
             .collect::<Vec<Operation>>();
@@ -250,12 +275,7 @@ impl NodeStepSolver {
         Ok(())
     }
 
-    fn solve_current_values(&mut self) -> Result<(), String> {
-
-        Ok(())
-    }
-
-    fn declare_variables(&self) -> Step {
+    fn declare_variables(&self) -> Vec<SubStep> {
         let mut sub_steps: Vec<SubStep> = Vec::new();
         self.node_pairs
             .iter()
@@ -270,28 +290,98 @@ impl NodeStepSolver {
                     operations: vec![],
                 });
             });
-        let node_labels: Vec<String> = self.container.borrow().nodes().iter().map(|x| x.upgrade().unwrap().latex_string()).collect();
+        let node_labels: Vec<String> = self
+            .container
+            .borrow()
+            .nodes()
+            .iter()
+            .map(|x| x.upgrade().unwrap().latex_string())
+            .collect();
         sub_steps.push(SubStep {
             description: Some("Voltage at each node".to_string()),
             result: Some(Text(node_labels.join(", "))),
             operations: vec![],
         });
-        Step::new_with_steps("Declare Variables.", sub_steps)
+        sub_steps
     }
 
-    fn kcl_equations(&self) -> Step {
-        Step {
-            description: Some("KCL equations".to_string()),
-            result: Some(Equal(Some(Box::new(Value(0.0))), Some(Box::new(self.kcl_operations.last().unwrap().clone())))),
-            sub_steps: vec![SubStep {
-                description: None,
-                result: None,
-                operations: self.kcl_operations.clone(),
-            }],
+    fn display_base_kcl_equations(&self) -> Result<Step, String> {
+        let mut steps: Vec<SubStep> = Vec::new();
+        let nodes: Vec<Rc<Tool>> = self.container.borrow().get_calculation_nodes();
+
+        let mut kcl_equations: Vec<Operation> = Vec::new();
+        let mut node_count = 0;
+        let mut supernode_count = 0;
+        for node in nodes.iter() {
+            let members: Vec<Rc<Element>> = node
+                .members_weak()
+                .iter()
+                .map(|x| x.upgrade())
+                .filter(|y| y.is_some())
+                .map(|z| z.unwrap())
+                .collect();
+
+            let cleaned_i: Vec<Operation> = members
+                .iter()
+                .filter(|x| x.class != VoltageSrc)
+                .map(|x| {
+                    let mut new: Element = (**x).clone();
+                    new.set_name("i".to_string());
+                    Variable(Rc::new(new))
+                })
+                .collect();
+
+            let (node_type, count): (&str, usize) = if node.class == SuperNode {
+                supernode_count += 1;
+                ("Super Node", supernode_count)
+            } else {
+                node_count += 1;
+                ("Node", node_count)
+            };
+
+            kcl_equations.push(Equal(
+                Some(Box::new(Text(format!("{node_type} ({count}): ")))),
+                Some(Box::new(Sum(cleaned_i))),
+            ));
         }
+
+        steps.push(SubStep {
+            description: Some("Super Nodes".to_string()),
+            result: None,
+            operations: vec![],
+        });
+
+        steps.push(SubStep {
+            description: Some("Current entering and exiting each node.".to_string()),
+            result: None,
+            operations: kcl_equations,
+        });
+
+        let mut i_values: Vec<Operation> = Vec::new();
+        self.current_values.iter().for_each(|(id, equation)| {
+            let mut i_element = (**self.container.borrow().get_element_by_id(*id)).clone();
+            i_element.name = "i".to_string();
+
+            i_values.push(Equal(
+                Some(Box::new(Variable(Rc::new(i_element.clone())))),
+                Some(Box::new(equation.clone())),
+            ));
+        });
+
+        steps.push(SubStep{
+            description: Some("Use potential difference between nodes ($ N_j $) and Ohm's law to solve for current.".to_string()),
+            result: None,
+            operations: i_values,
+        });
+
+        Ok(Step {
+            description: Some("KCL Equations".to_string()),
+            result: None,
+            sub_steps: steps,
+        })
     }
 
-    fn voltage_src_equations(&self) -> Step {
+    fn voltage_src_equations(&self) -> Result<Step, String> {
         let mut eq_steps: Vec<SubStep> = Vec::new();
         // Step 2.1.2 Find all voltage sources going between nodes including ground
 
@@ -324,74 +414,124 @@ impl NodeStepSolver {
                 })
             });
 
-
-        Step::new_with_steps("Find voltage across each voltage source", eq_steps)
+        Ok(Step {
+            description: Some("Find voltage across each voltage source".to_string()),
+            result: None,
+            sub_steps: eq_steps,
+        })
     }
 
-    fn connection_matrix(&self) -> Step {
-        Step {
+    fn display_connection_matrix(&self) -> Result<Step, String> {
+        Ok(Step {
             description: Some("Connection Matrix".to_string()),
-            result: Some(Text(format!("{}", self.connection_matrix.equation_repr()))),
+            result: Some(Display(Rc::new(self.connection_matrix.clone()))),
             sub_steps: vec![
                 SubStep {
                     description: Some("Coefficients".to_string()),
-                    result: Some(Text(format!("{}", DVector::from(self.node_coefficients.clone()).equation_repr()))),
+                    result: Some(Display(Rc::new(DVector::from(
+                        self.node_coefficients.clone(),
+                    )))),
                     operations: vec![],
                 },
                 SubStep {
                     description: Some("Connections".to_string()),
-                    result: Some(Text(format!("{}", self.connection_matrix.clone().remove_rows(0, 1).equation_repr()))),
+                    result: Some(Display(Rc::new(
+                        self.connection_matrix.clone().remove_rows(0, 1),
+                    ))),
                     operations: vec![],
                 },
                 SubStep {
                     description: Some("TODO explain this super step".to_string()),
                     result: None,
                     operations: vec![],
-                }
+                },
             ],
-        }
+        })
     }
 
-    fn solve_matrix(&self) -> Step {
-        Step {
-            description: Some("Matrix equations".to_string()),
-            result: Some(Text(self.node_voltages.clone().equation_repr())),
+    fn display_solved_matrix(&self) -> Result<Step, String> {
+        let i_values: DVector<Operation> = DVector::from_vec(
+            self.container
+                .borrow()
+                .nodes()
+                .iter()
+                .map(|x| Variable(x.upgrade().unwrap().clone()))
+                .collect::<Vec<Operation>>(),
+        );
+        let result: Operation = Equal(
+            Some(Box::new(Display(Rc::new(i_values.clone())))),
+            Some(Box::new(Display(Rc::new(self.node_voltages.clone())))),
+        );
+
+        Ok(Step {
+            description: Some("Solve For Node Voltages".to_string()),
+            result: Some(result),
             sub_steps: vec![
                 SubStep {
                     description: Some("Invert the matrix".to_string()),
                     result: Some(Text(self.inverse.clone().equation_repr())),
-                    operations: vec![
-                        Text(format!("M^{{-1}}")),
-                        Text(format!("{}^{{-1}}", self.connection_matrix.equation_repr())),
-                    ],
+                    operations: vec![Power(
+                        Some(Box::new(Display(Rc::new(self.connection_matrix.clone())))),
+                        Some(Box::new(Value(-1.0))),
+                    )],
                 },
                 SubStep {
-                    description: Some("Multiply the inverted matrix by the source voltages".to_string()),
-                    result: Some(Text(self.node_voltages.equation_repr())),
-                    operations: vec![
-                        self.matrix_evaluation.clone(),
-                    ],
+                    description: Some(
+                        "Multiply the inverted matrix by the source voltages".to_string(),
+                    ),
+                    result: Some(Display(Rc::new(self.node_voltages.clone()))),
+                    operations: vec![Display(Rc::new(self.matrix_evaluation.clone()))],
                 },
             ],
-        }
+        })
+    }
+
+    fn solve_currents(&mut self) -> Result<(), String> {
+        Ok(())
+    }
+
+    fn display_currents(&self) -> Result<Step, String> {
+        let mut steps: Vec<SubStep> = Vec::new();
+        let mut i_values: Vec<Operation> = Vec::new();
+        self.current_values.iter().for_each(|(id, equation)| {
+            let mut i_element = (**self.container.borrow().get_element_by_id(*id)).clone();
+            i_element.name = "i".to_string();
+
+            i_values.push(Equal(
+                Some(Box::new(Variable(Rc::new(i_element.clone())))),
+                Some(Box::new(equation.clone())),
+            ));
+        });
+
+        steps.push(SubStep{
+            description: Some("Use potential difference between nodes ($ N_j $) and Ohm's law to solve for current.".to_string()),
+            result: None,
+            operations: i_values,
+        });
+
+        Ok(Step {
+            description: Some("Currents".to_string()),
+            result: None,
+            sub_steps: steps,
+        })
     }
 }
 
-
 #[cfg(test)]
 mod tests {
-    use std::cell::RefCell;
-    use std::rc::Rc;
-    use nalgebra::DVector;
-    use operations::math::EquationMember;
     use crate::container::Container;
     use crate::solvers::node_step_solver::NodeStepSolver;
     use crate::solvers::solver::Solver;
     use crate::util::create_mna_container;
+    use nalgebra::DVector;
+    use operations::math::EquationMember;
+    use std::cell::RefCell;
+    use std::rc::Rc;
 
     #[test]
     fn test_node_pairs() {
         let solver = setup_mna_solver();
+        println!("{:?}", solver.node_pairs);
         assert_eq!(solver.node_pairs.len(), 5);
     }
 
@@ -399,7 +539,14 @@ mod tests {
     fn test_coefficients() {
         let solver = setup_mna_solver();
         assert_eq!(solver.node_coefficients.len(), 3);
-        assert_eq!(solver.node_coefficients.into_iter().map(|x| x.value()).collect::<Vec<f64>>(), vec![-0.25, 0.375, 0.5]);
+        assert_eq!(
+            solver
+                .node_coefficients
+                .into_iter()
+                .map(|x| x.value())
+                .collect::<Vec<f64>>(),
+            vec![-0.25, 0.375, 0.5]
+        );
     }
 
     #[test]
@@ -412,7 +559,10 @@ mod tests {
     fn test_matrix() {
         let solver = setup_mna_solver();
         assert_eq!(solver.node_voltages.len(), 3);
-        assert_eq!(solver.node_voltages, DVector::from_vec(vec![20.0, 24.0, -8.0]));
+        assert_eq!(
+            solver.node_voltages,
+            DVector::from_vec(vec![20.0, 24.0, -8.0])
+        );
     }
 
     fn setup_mna_solver() -> NodeStepSolver {
@@ -423,6 +573,4 @@ mod tests {
         solver.solve().expect("Unable to solve");
         solver
     }
-
-
 }

@@ -7,13 +7,13 @@ use wasm_bindgen_test::wasm_bindgen_test;
 use circuit_solver_algorithms::component::Component::{Ground, Resistor, VoltageSrc};
 use circuit_solver_algorithms::container::Container;
 use circuit_solver_algorithms::elements::Element;
-use circuit_solver_algorithms::interfaces::{ContainerSetup, get_tools, load_wasm_container, solve_test_container};
+use circuit_solver_algorithms::interfaces::{get_tools, load_wasm_container, ContainerSetup};
 use circuit_solver_algorithms::solvers::node_step_solver::NodeStepSolver;
 use circuit_solver_algorithms::solvers::solver::{Solver, Step};
 use circuit_solver_algorithms::util::create_mna_container;
-use circuit_solver_algorithms::validation::{StatusError, Validation};
 use circuit_solver_algorithms::validation::Status::Valid;
 use circuit_solver_algorithms::validation::StatusError::{Known, Multiple};
+use circuit_solver_algorithms::validation::{StatusError, Validation};
 
 #[wasm_bindgen_test]
 fn test_validateable_containers() {
@@ -35,26 +35,6 @@ fn test_validateable_containers() {
         "Steps are not matching"
     )
 }
-
-
-#[wasm_bindgen_test]
-pub fn test_every_container() {
-    for i in 0..5 {
-        let steps = solve_test_container(i);
-
-    }
-
-
-}
-
-#[wasm_bindgen_test]
-pub fn test_result_wasm() {
-    let a: Result<String, String> = Ok("Some String".to_string());
-    let x: JsValue = serde_wasm_bindgen::to_value(&a).unwrap();
-
-}
-
-
 
 #[wasm_bindgen_test]
 pub fn test_solver_select() {
@@ -87,10 +67,10 @@ pub fn test_get_tools() {
     let nodes = container.nodes();
     assert_eq!(nodes.len(), 3);
 
-    let nodes: Result<String, StatusError> = get_tools(serde_wasm_bindgen::to_value(&container).unwrap());
+    let nodes: Result<String, StatusError> =
+        get_tools(serde_wasm_bindgen::to_value(&container).unwrap());
     assert_eq!(nodes.unwrap(), "[[5,2],[2,4,3],[1,4]]")
 }
-
 
 #[wasm_bindgen_test]
 pub fn test_serialize_steps() {
@@ -110,7 +90,6 @@ pub fn test_serialize_steps() {
         }
     }
 }
-
 
 #[wasm_bindgen_test]
 fn test_container_wasm() {

@@ -59,6 +59,9 @@ impl Container {
 
     pub(crate) fn add_element_core(&mut self, mut element: Element) -> usize {
         let id: usize = self.elements.len();
+        if element.name == "" {
+            element.name = element.class.basic_string();
+        }
         element.id = id;
         self.elements.push(Rc::new(element));
         id
@@ -173,6 +176,37 @@ impl Container {
                 node.upgrade().unwrap().basic_string()
             );
         }
+    }
+
+    pub(crate) fn get_calculation_nodes(&self) -> Vec<Rc<Tool>> {
+        let nodes: Vec<Rc<Tool>> = self.nodes().iter().map(|x| x.upgrade().unwrap()).collect();
+        let super_nodes: Vec<Rc<Tool>> = self
+            .supernodes()
+            .iter()
+            .map(|x| x.upgrade().unwrap())
+            .collect();
+        let mut cleaned: Vec<Rc<Tool>> = nodes
+            .into_iter()
+            .filter(|node| {
+                for super_node in &super_nodes {
+                    let super_node_member_ids: Vec<usize> = super_node
+                        .members
+                        .iter()
+                        .map(|x| x.upgrade().unwrap().id)
+                        .collect();
+                    if node
+                        .members
+                        .iter()
+                        .all(|y| super_node_member_ids.contains(&y.upgrade().unwrap().id))
+                    {
+                        return false;
+                    }
+                }
+                true
+            })
+            .collect();
+        cleaned.extend(super_nodes);
+        cleaned
     }
 
     pub fn create_super_nodes(&mut self) -> &mut Self {
@@ -503,6 +537,15 @@ mod tests {
         for member in mesh.members.iter() {
             assert!(mesh_members.contains(&member.upgrade().unwrap().id),);
         }
+    }
+
+    #[test]
+    fn test_get_calculation_nodes() {
+        let mut basic: Container = create_basic_container();
+        basic.create_nodes();
+        basic.create_meshes();
+        let nodes = basic.get_calculation_nodes();
+        assert_eq!(nodes.len(), 2);
     }
 }
 

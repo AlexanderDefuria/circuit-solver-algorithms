@@ -66,6 +66,10 @@ impl Element {
     pub(crate) fn connected_to_ground(&self) -> bool {
         self.positive.contains(&0) || self.negative.contains(&0)
     }
+
+    pub(crate) fn set_name(&mut self, name: String) {
+        self.name = name;
+    }
 }
 
 impl PrettyPrint for Element {
@@ -104,15 +108,7 @@ impl EquationMember for Element {
     }
 
     fn latex_string(&self) -> String {
-        match self.class {
-            Component::VoltageSrc => format!("V_{{\\texttt{{src}}{}}}", self.id),
-            Component::CurrentSrc => format!("I_{{\\texttt{{src}}{}}}", self.id),
-            Component::Resistor => format!("R_{{{}}}", self.id),
-            Component::Capacitor => format!("C_{{{}}}", self.id),
-            Component::Inductor => format!("L_{{{}}}", self.id),
-            Component::Ground => format!("GND"),
-            _ => format!("{}_{{{}}}", self.name, self.id),
-        }
+        format!("{{{}}}_{{{}}}", self.name, self.id)
     }
 }
 

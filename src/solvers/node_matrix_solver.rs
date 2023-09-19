@@ -1,5 +1,6 @@
 use crate::component::Component::{CurrentSrc, Resistor, VoltageSrc};
 use crate::container::Container;
+use crate::elements::Element;
 use crate::solvers::solver::{Solver, Step, SubStep};
 use crate::util::PrettyPrint;
 use nalgebra::{DMatrix, DVector};
@@ -7,8 +8,6 @@ use operations::math::{EquationMember, EquationRepr};
 use operations::prelude::{Divide, Negate, Operation, Sum, Text, Value, Variable};
 use std::cell::RefCell;
 use std::rc::Rc;
-use crate::elements::Element;
-use crate::tools::Tool;
 
 pub struct NodeMatrixSolver {
     a_matrix: DMatrix<Operation>,
@@ -54,7 +53,10 @@ impl Solver for NodeMatrixSolver {
                 inverse = a;
             }
             None => {
-                return Err(format!("Matrix is not invertible!\nThis might have something to do with sizing.\n{}\n", self.a_matrix.latex_string()));
+                return Err(format!(
+                    "Matrix is not invertible!\nThis might have something to do with sizing.\n{}\n",
+                    self.a_matrix.latex_string()
+                ));
             }
         }
 
@@ -140,8 +142,6 @@ fn form_g_matrix(container: Rc<RefCell<Container>>, n: usize) -> DMatrix<Operati
     nodes.sort_by(|a, b| a.upgrade().unwrap().id.cmp(&b.upgrade().unwrap().id));
 
     // assert_eq!(nodes.len(), n);
-
-
 
     // Form the diagonal
     for (i, tool) in nodes.iter().enumerate() {
@@ -234,23 +234,6 @@ fn form_d_matrix(_container: Rc<RefCell<Container>>, m: usize) -> DMatrix<Operat
     DMatrix::zeros(m, m)
 }
 
-fn _get_calculation_nodes(container: Rc<RefCell<Container>>) -> Vec<Rc<Tool>> {
-    let nodes: Vec<Rc<Tool>> = container.borrow().nodes().iter().map(|x| x.upgrade().unwrap()).collect();
-    let binding = container.borrow();
-    let super_nodes: Vec<Rc<Tool>> = binding.supernodes().iter().map(|x| x.upgrade().unwrap()).collect();
-    let mut cleaned: Vec<Rc<Tool>> = nodes.into_iter().filter(|node| {
-        for super_node in &super_nodes {
-            let super_node_member_ids: Vec<usize> = super_node.members.iter().map(|x| x.upgrade().unwrap().id).collect();
-            if node.members.iter().all(|y| super_node_member_ids.contains(&y.upgrade().unwrap().id)) {
-                return false;
-            }
-        }
-        true
-    }).collect();
-    cleaned.extend(super_nodes);
-    cleaned
-}
-
 fn form_z_vector(container: Rc<RefCell<Container>>) -> DVector<Operation> {
     let mut z_vec: Vec<Operation> = Vec::new();
 
@@ -309,7 +292,9 @@ fn form_x_vector(container: Rc<RefCell<Container>>) -> DVector<Operation> {
 
 #[cfg(test)]
 mod tests {
-    use crate::solvers::node_matrix_solver::{form_b_matrix, form_c_matrix, form_d_matrix, form_g_matrix, NodeMatrixSolver};
+    use crate::solvers::node_matrix_solver::{
+        form_b_matrix, form_c_matrix, form_d_matrix, form_g_matrix, NodeMatrixSolver,
+    };
     use crate::solvers::solver::Solver;
     use crate::util::{create_mna_container, create_mna_container_2};
     use operations::prelude::*;
@@ -362,10 +347,9 @@ mod tests {
 
         let expected = vec![
             vec!["1/R2 + 1/R3", "-1/R2", "-1"],
-            vec!["-1/R2", "1/R1 + 1/R2", "1" ],
+            vec!["-1/R2", "1/R1 + 1/R2", "1"],
             vec!["-1", "1", "0"],
         ];
-
 
         let mut c = create_mna_container_2();
         c.create_nodes();
@@ -377,7 +361,6 @@ mod tests {
             }
         }
         assert_eq!(expected.len(), solver.a_matrix.nrows());
-
     }
 
     #[test]

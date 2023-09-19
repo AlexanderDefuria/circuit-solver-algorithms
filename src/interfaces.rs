@@ -1,18 +1,19 @@
-use crate::component::Component::{Ground, Resistor, VoltageSrc};
 use crate::container::Container;
 use crate::elements::Element;
-use crate::validation::StatusError::{Known, Multiple};
-use crate::validation::{StatusError, Validation};
-use std::cell::RefCell;
 use crate::solvers::node_matrix_solver::NodeMatrixSolver;
 use crate::solvers::node_step_solver::NodeStepSolver;
 use crate::solvers::solver::Solver;
-use crate::util::{create_basic_container, create_basic_supermesh_container, create_basic_supernode_container, create_mna_container, create_mna_container_2};
+use crate::util::{
+    create_basic_container, create_basic_supermesh_container, create_basic_supernode_container,
+    create_mna_container, create_mna_container_2,
+};
+use crate::validation::StatusError::Known;
+use crate::validation::{StatusError, Validation};
 use serde::{Deserialize, Serialize};
+use std::cell::RefCell;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsValue;
-use wasm_bindgen_test::*;
 
 #[derive(Serialize, Deserialize)]
 pub struct ContainerSetup {
@@ -89,7 +90,8 @@ pub fn return_solved_step_example() -> Result<String, JsValue> {
     if let Ok(x) = serde_json::to_string(&steps) {
         return Ok(x);
     }
-    Err(JsValue::from_str("Steps Errored out."))}
+    Err(JsValue::from_str("Steps Errored out."))
+}
 
 #[wasm_bindgen]
 pub fn return_solved_matrix_example() -> Result<String, JsValue> {

@@ -40,8 +40,8 @@ impl Step {
     pub fn new_with_steps(label: &str, steps: Vec<SubStep>) -> Self {
         Step {
             description: Some(label.to_string()),
-            sub_steps: steps,
             result: None,
+            sub_steps: steps,
         }
     }
 
@@ -115,11 +115,10 @@ impl Serialize for SubStep {
     }
 }
 
-
 fn latex_serialize(op: Operation) -> String {
-    "$".to_string() + &*op.latex_string() + "$"
+    let content = &*op.latex_string();
+    format!("${}$", content.replace("$$", "$ $"))
 }
-
 
 impl Display for Step {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -171,12 +170,12 @@ impl From<Step> for JsValue {
 
 #[cfg(test)]
 mod tests {
+    use crate::solvers::node_matrix_solver::NodeMatrixSolver;
     use crate::solvers::node_step_solver::NodeStepSolver;
     use crate::solvers::solver::Solver;
     use crate::util::create_mna_container;
     use std::cell::RefCell;
     use std::rc::Rc;
-    use crate::solvers::node_matrix_solver::NodeMatrixSolver;
 
     #[test]
     fn test_solve_steps() {

@@ -89,8 +89,6 @@ mod tests {
 
     #[test]
     fn test_create_containers() {
-
-
         let mut containers: Vec<Container> = vec![
             create_basic_container(),
             create_basic_supernode_container(),

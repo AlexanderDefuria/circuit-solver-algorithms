@@ -82,6 +82,9 @@ create_basic_supernode_container()<br>
 create_basic_supermesh_container()<br>
 ![img.png](.github%2Fcreate_basic_supermesh_container.jpg)
 
+create_mna_container()<br>
+![img.png](.github%2Fcreate_mna_container.png)
+
 <style type="text/css">
     img {
         width: 400px;
