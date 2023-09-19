@@ -1,4 +1,12 @@
 # Circuit Solver Algorithms
+
+## SEG 4105
+*Note that this repository is concurrently being evaluated as a part of SEG 4105 Project Mangement. \
+As such it will house all project management artifacts throughout the term.*
+
+Alexander De Furia - Student Number: 300190815 
+
+## Description
 This is the repository for the core circuit solver algorithm and supporting calculations. 
 The main concept is to create a circuit solver that can be used in a variety of applications for elementary circuit analysis.
 This API Conceptualizes a literal circuit as a container of elements and tools.
