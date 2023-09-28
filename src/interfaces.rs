@@ -12,6 +12,7 @@ use crate::validation::{StatusError, Validation};
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use std::rc::Rc;
+use serde_wasm_bindgen::from_value;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsValue;
 
@@ -24,7 +25,7 @@ pub struct ContainerSetup {
 #[wasm_bindgen]
 pub fn load_wasm_container(js: JsValue) -> Result<String, StatusError> {
     // This JsValue is a ContainerInterface and also needs operations
-    let setup: ContainerSetup = serde_wasm_bindgen::from_value(js).unwrap();
+    let setup: ContainerSetup = from_value(js).unwrap();
     let container = Container::from(setup);
     container.validate()?;
     Ok(String::from("Loaded Successfully"))
@@ -32,7 +33,7 @@ pub fn load_wasm_container(js: JsValue) -> Result<String, StatusError> {
 
 #[wasm_bindgen]
 pub fn get_tools(container_js: JsValue) -> Result<String, StatusError> {
-    let setup: ContainerSetup = serde_wasm_bindgen::from_value(container_js).unwrap();
+    let setup: ContainerSetup = from_value(container_js).unwrap();
     let mut c: Container = Container::from(setup);
     c.validate()?;
     c.create_nodes();
@@ -48,7 +49,7 @@ pub fn get_tools(container_js: JsValue) -> Result<String, StatusError> {
 
 #[wasm_bindgen]
 pub fn solve(matrix: bool, nodal: bool, container_js: JsValue) -> Result<String, StatusError> {
-    let setup: ContainerSetup = serde_wasm_bindgen::from_value(container_js).unwrap();
+    let setup: ContainerSetup = from_value(container_js).unwrap();
     let mut c: Container = Container::from(setup);
     c.validate()?;
     match nodal {

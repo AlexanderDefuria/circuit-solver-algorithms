@@ -17,6 +17,7 @@ use std::ops::Deref;
 use std::panic;
 use std::rc::Rc;
 
+
 pub struct NodeStepSolver {
     container: Rc<RefCell<Container>>,
     sources: Vec<SourceConnection>,               // Voltage sources
@@ -77,6 +78,7 @@ impl Solver for NodeStepSolver {
         steps.push(self.display_connection_matrix()?);
         steps.push(self.display_solved_matrix()?);
         steps.push(self.display_currents()?);
+        steps.push(self.current_steps()?);
         Ok(steps)
     }
 }
@@ -360,11 +362,21 @@ impl NodeStepSolver {
         let mut i_values: Vec<Operation> = Vec::new();
         self.current_values.iter().for_each(|(id, equation)| {
             let mut i_element = (**self.container.borrow().get_element_by_id(*id)).clone();
+            let mut v_element = (**self.container.borrow().get_element_by_id(*id)).clone();
             i_element.name = "i".to_string();
+            v_element.name = "V".to_string();
 
             i_values.push(Equal(
                 Some(Box::new(Variable(Rc::new(i_element.clone())))),
-                Some(Box::new(equation.clone())),
+                Some(Box::new(Equal(
+                    Some(Box::new(Divide(
+                        Some(Box::new(Variable(Rc::new(v_element.clone())))),
+                        Some(Box::new(Variable(
+                            self.container.borrow().get_element_by_id(*id).clone(),
+                        ))),
+                    ))),
+                    Some(Box::new(equation.clone())),
+                ))),
             ));
         });
 
@@ -421,6 +433,35 @@ impl NodeStepSolver {
         })
     }
 
+    fn current_steps(&self) -> Result<Step, String> {
+        let mut current_equations: Vec<Operation> = Vec::new();
+        self.node_pairs
+            .iter()
+            .filter(|(_, _, element)| element.class == Resistor)
+            .for_each(|(node1, node2, element)| {
+                let mut tools: Vec<Operation> = Vec::new();
+                if *node1 != 0 {
+                    tools.push(Value(self.node_voltages[*node1 - 1]));
+                }
+                if *node2 != 0 {
+                    tools.push(Negate(Some(Box::new(Value(self.node_voltages[*node2 - 1])))));
+                }
+
+                current_equations.push(
+                    Divide(
+                        Some(Box::new(Sum(tools).simplify().unwrap())),
+                        Some(Box::new(Value(element.value()))),
+                    ).simplify().unwrap(),
+                );
+            });
+
+        Ok(Step {
+            description: None,
+            result: Some(Display(Rc::new(DVector::from(current_equations)))),
+            sub_steps: vec![],
+        })
+    }
+
     fn display_connection_matrix(&self) -> Result<Step, String> {
         Ok(Step {
             description: Some("Connection Matrix".to_string()),
@@ -438,7 +479,18 @@ impl NodeStepSolver {
                     result: Some(Display(Rc::new(
                         self.connection_matrix.clone().remove_rows(0, 1),
                     ))),
-                    operations: vec![],
+                    operations: self
+                        .node_pairs
+                        .iter()
+                        .filter_map(|x| {
+                            if x.0 != 0 && x.1 != 0 || x.2.class == VoltageSrc {
+                                return Some(Display(Rc::new(DVector::from_vec(vec![
+                                    x.0 as f64, x.1 as f64,
+                                ]))));
+                            }
+                            None
+                        })
+                        .collect(),
                 },
                 SubStep {
                     description: Some("TODO explain this super step".to_string()),
@@ -503,9 +555,18 @@ impl NodeStepSolver {
             ));
         });
 
+
+
+        let results = self.current_values.iter().map(|(_, x)| {
+            let mut y = x.clone();
+            y.apply_variables();
+            y
+        }).collect::<Vec<Operation>>();
+
+
         steps.push(SubStep{
             description: Some("Use potential difference between nodes ($ N_j $) and Ohm's law to solve for current.".to_string()),
-            result: None,
+            result: Some(results[0].clone()),
             operations: i_values,
         });
 

@@ -398,7 +398,7 @@ mod tests {
     use crate::util::*;
     use crate::validation::Status::Valid;
     use crate::validation::{StatusError, Validation};
-    use regex::Regex;
+    use regex_lite::Regex;
 
     #[test]
     fn test_debug() {
