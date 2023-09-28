@@ -2,7 +2,8 @@
 
 ## SEG 4105
 *Note that this repository is concurrently being evaluated as a part of SEG 4105 Project Mangement. \
-As such it will house all project management artifacts throughout the term.*
+As such it will house all project management artifacts throughout the term. \ 
+All project management is done through github issues.*
 
 Alexander De Furia - Student Number: 300190815 
 
