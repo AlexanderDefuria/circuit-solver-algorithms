@@ -3,7 +3,7 @@
 ## SEG 4105
 *Note that this repository is concurrently being evaluated as a part of SEG 4105 Project Mangement. \
 As such it will house all project management artifacts throughout the term. \ 
-All project management is done through github issues.*
+All project management is done through GitHub issues.*
 
 Alexander De Furia - Student Number: 300190815 
 
@@ -15,8 +15,21 @@ Elements being the physical components of the circuit and tools being the concep
 
 A user can provide a container of elements and tools and the API will solve the circuit and return the results.
 
+
+## Container Rework
+This project has aspects that are not ideal and should be reworked. There are pitfalls in the
+integration between the `solver` and `container` modules. The `container` module should be
+reworked to be more of a data structure and less of a solver. The `solver` module should be
+reworked to be more of a solver and less of a data structure. There is no mutability of the container
+contents from the solver module. This is a problem because the solver module is the only module that
+is intended to be called by the user. It should handle all of the solving and by times this involves
+updating the values of the container contents (elements and tools). This is not possible with the current
+implementation.
+
+
+
 ## WASM API
-The bulk of the WASM API is defined within [inerfaces.rs](./src/inerfaces.rs).
+The bulk of the API is defined within [interfaces.rs](./src/inerfaces.rs).
 #### Load Container
 - `load_wasm_container(container_object) -> Result<String, StatusError> `
 - This can be used as a test to see if the container is being loaded in properly.

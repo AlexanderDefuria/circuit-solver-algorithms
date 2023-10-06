@@ -16,13 +16,14 @@ use std::cell::RefCell;
 use std::ops::Deref;
 use std::panic;
 use std::rc::Rc;
+use crate::validation::Validation;
 
 
 pub struct NodeStepSolver {
-    container: Rc<RefCell<Container>>,
+    pub(crate) container: Rc<RefCell<Container>>,
     sources: Vec<SourceConnection>,               // Voltage sources
     current_values: Vec<(usize, Operation)>,      // (Element ID, Equation for current form nodes)
-    node_pairs: Vec<(usize, usize, Rc<Element>)>, // Each element is attached to a pair of nodes.
+    node_pairs: Vec<(usize, usize, Rc<RefCell<Element>>)>, // Each element is attached to a pair of nodes.
     node_coefficients: Vec<Operation>, // Coefficients of the node summation for the matrix
     node_voltages: DVector<f64>,       // This is the result of matrix manipulation
     connection_matrix: DMatrix<f64>,   // This is the base matrix for manipulation
@@ -95,7 +96,7 @@ impl NodeStepSolver {
 
         self.node_pairs
             .iter()
-            .filter(|(_, _, element)| element.class == VoltageSrc)
+            .filter(|(_, _, element)| element.borrow().class == VoltageSrc)
             .for_each(|(node1, node2, src)| {
                 let mut voltage_connections: DVector<f64> = DVector::zeros(vec_size);
                 match (node1, node2) {
@@ -113,7 +114,7 @@ impl NodeStepSolver {
                 }
                 self.sources.push(SourceConnection {
                     matrix: voltage_connections,
-                    voltage: src.value(),
+                    voltage: src.borrow().value(),
                 });
             });
 
@@ -174,11 +175,11 @@ impl NodeStepSolver {
             Some(Box::new(Display(Rc::new(result_matrix.clone())))),
         )));
 
-        // TODO Propagate the values of the nodes back into the container / solver.
-        // let results: Vec<f64> = result_matrix.iter().map(|x| x.clone()).collect::<Vec<f64>>();
-        // self.container.borrow_mut().nodes().iter().enumerate().for_each(|(i, x)| {
-        //     x.upgrade().unwrap().set_value(results[i]);
-        // });
+        // Propagate the values of the nodes back into the container / solver.
+        let results: Vec<f64> = result_matrix.iter().map(|x| x.clone()).collect::<Vec<f64>>();
+        self.container.borrow_mut().nodes().iter().enumerate().for_each(|(i, x)| {
+            x.upgrade().unwrap().borrow_mut().set_value(results[i]);
+        });
 
         Ok(())
     }
@@ -188,7 +189,7 @@ impl NodeStepSolver {
         assert_ne!(self.node_pairs.len(), 0);
         self.node_pairs
             .iter()
-            .filter(|(_, _, element)| element.class == Resistor)
+            .filter(|(_, _, element)| element.borrow().class == Resistor)
             .for_each(|(node1, node2, element)| {
                 let mut tools: Vec<Operation> = Vec::new();
                 let mut id_1 = *node1;
@@ -197,21 +198,21 @@ impl NodeStepSolver {
                 if *node1 != 0 {
                     id_1 -= 1;
                     tools.push(Variable(
-                        self.container.borrow().get_tool_by_id(id_1).clone(),
+                        Rc::new(self.container.borrow().get_tool_by_id(id_1).borrow().clone()),
                     ));
                 }
                 if *node2 != 0 {
                     id_2 -= 1;
                     tools.push(Negate(Some(Box::new(Variable(
-                        self.container.borrow().get_tool_by_id(id_2).clone(),
+                        Rc::new(self.container.borrow().get_tool_by_id(id_2).borrow().clone()),
                     )))));
                 }
 
                 self.current_values.push((
-                    element.id,
+                    element.id(),
                     Divide(
                         Some(Box::new(Sum(tools).simplify().unwrap())),
-                        Some(Box::new(Variable(element.clone()))),
+                        Some(Box::new(Variable(Rc::new(element.borrow().clone())))),
                     ),
                 ));
 
@@ -281,7 +282,7 @@ impl NodeStepSolver {
         let mut sub_steps: Vec<SubStep> = Vec::new();
         self.node_pairs
             .iter()
-            .filter(|(_, _, element)| element.class == VoltageSrc)
+            .filter(|(_, _, element)| element.borrow().class == VoltageSrc)
             .for_each(|(node1, node2, _)| {
                 sub_steps.push(SubStep {
                     description: Some(
@@ -297,7 +298,7 @@ impl NodeStepSolver {
             .borrow()
             .nodes()
             .iter()
-            .map(|x| x.upgrade().unwrap().latex_string())
+            .map(|x| x.upgrade().unwrap().borrow().latex_string())
             .collect();
         sub_steps.push(SubStep {
             description: Some("Voltage at each node".to_string()),
@@ -309,31 +310,25 @@ impl NodeStepSolver {
 
     fn display_base_kcl_equations(&self) -> Result<Step, String> {
         let mut steps: Vec<SubStep> = Vec::new();
-        let nodes: Vec<Rc<Tool>> = self.container.borrow().get_calculation_nodes();
+        let nodes: Vec<Rc<RefCell<Tool>>> = self.container.borrow().get_calculation_nodes();
 
         let mut kcl_equations: Vec<Operation> = Vec::new();
         let mut node_count = 0;
         let mut supernode_count = 0;
         for node in nodes.iter() {
-            let members: Vec<Rc<Element>> = node
-                .members_weak()
-                .iter()
-                .map(|x| x.upgrade())
-                .filter(|y| y.is_some())
-                .map(|z| z.unwrap())
-                .collect();
+            let members: Vec<Rc<RefCell<Element>>> = node.borrow().clone().into_iter().collect();
 
             let cleaned_i: Vec<Operation> = members
                 .iter()
-                .filter(|x| x.class != VoltageSrc)
+                .filter(|x| x.borrow().class != VoltageSrc)
                 .map(|x| {
-                    let mut new: Element = (**x).clone();
+                    let mut new: Element = (**x).borrow().clone();
                     new.set_name("i".to_string());
                     Variable(Rc::new(new))
                 })
                 .collect();
 
-            let (node_type, count): (&str, usize) = if node.class == SuperNode {
+            let (node_type, count): (&str, usize) = if node.borrow().class == SuperNode {
                 supernode_count += 1;
                 ("Super Node", supernode_count)
             } else {
@@ -361,18 +356,18 @@ impl NodeStepSolver {
 
         let mut i_values: Vec<Operation> = Vec::new();
         self.current_values.iter().for_each(|(id, equation)| {
-            let mut i_element = (**self.container.borrow().get_element_by_id(*id)).clone();
-            let mut v_element = (**self.container.borrow().get_element_by_id(*id)).clone();
-            i_element.name = "i".to_string();
-            v_element.name = "V".to_string();
+            let i_element = (**self.container.borrow().get_element_by_id(*id)).clone();
+            let v_element = (**self.container.borrow().get_element_by_id(*id)).clone();
+            i_element.borrow_mut().name = "i".to_string();
+            v_element.borrow_mut().name = "V".to_string();
 
             i_values.push(Equal(
-                Some(Box::new(Variable(Rc::new(i_element.clone())))),
+                Some(Box::new(Variable(Rc::new(i_element.borrow().clone())))),
                 Some(Box::new(Equal(
                     Some(Box::new(Divide(
-                        Some(Box::new(Variable(Rc::new(v_element.clone())))),
+                        Some(Box::new(Variable(Rc::new(v_element.borrow().clone())))),
                         Some(Box::new(Variable(
-                            self.container.borrow().get_element_by_id(*id).clone(),
+                            Rc::new(self.container.borrow().get_element_by_id(*id).borrow().clone()),
                         ))),
                     ))),
                     Some(Box::new(equation.clone())),
@@ -399,7 +394,7 @@ impl NodeStepSolver {
 
         self.node_pairs
             .iter()
-            .filter(|(_, _, element)| element.class == VoltageSrc)
+            .filter(|(_, _, element)| element.borrow().class == VoltageSrc)
             .for_each(|(node1, node2, element)| {
                 let mut tool2: Operation = Value(0.0);
                 let mut tool1: Operation = Value(0.0);
@@ -407,11 +402,11 @@ impl NodeStepSolver {
                 let mut id_2 = *node2;
                 if *node1 != 0 {
                     id_1 -= 1;
-                    tool1 = Variable(self.container.borrow().get_tool_by_id(id_1).clone());
+                    tool1 = Variable(Rc::new(self.container.borrow().get_tool_by_id(id_1).borrow().clone()));
                 }
                 if *node2 != 0 {
                     id_2 -= 1;
-                    tool2 = Variable(self.container.borrow().get_tool_by_id(id_2).clone());
+                    tool2 = Variable(Rc::new(self.container.borrow().get_tool_by_id(id_2).borrow().clone()));
                 }
 
                 tool2 = Negate(Some(Box::new(tool2)));
@@ -420,7 +415,7 @@ impl NodeStepSolver {
                     description: None,
                     result: None,
                     operations: vec![Equal(
-                        Some(Box::new(Variable(element.clone()))),
+                        Some(Box::new(Variable(Rc::new(element.borrow().clone())))),
                         Some(Box::new(Sum(vec![tool1, tool2]))),
                     )],
                 })
@@ -437,7 +432,7 @@ impl NodeStepSolver {
         let mut current_equations: Vec<Operation> = Vec::new();
         self.node_pairs
             .iter()
-            .filter(|(_, _, element)| element.class == Resistor)
+            .filter(|(_, _, element)| element.borrow().class == Resistor)
             .for_each(|(node1, node2, element)| {
                 let mut tools: Vec<Operation> = Vec::new();
                 if *node1 != 0 {
@@ -450,7 +445,7 @@ impl NodeStepSolver {
                 current_equations.push(
                     Divide(
                         Some(Box::new(Sum(tools).simplify().unwrap())),
-                        Some(Box::new(Value(element.value()))),
+                        Some(Box::new(Value(element.borrow().value()))),
                     ).simplify().unwrap(),
                 );
             });
@@ -483,7 +478,7 @@ impl NodeStepSolver {
                         .node_pairs
                         .iter()
                         .filter_map(|x| {
-                            if x.0 != 0 && x.1 != 0 || x.2.class == VoltageSrc {
+                            if x.0 != 0 && x.1 != 0 || x.2.borrow().class == VoltageSrc {
                                 return Some(Display(Rc::new(DVector::from_vec(vec![
                                     x.0 as f64, x.1 as f64,
                                 ]))));
@@ -507,7 +502,7 @@ impl NodeStepSolver {
                 .borrow()
                 .nodes()
                 .iter()
-                .map(|x| Variable(x.upgrade().unwrap().clone()))
+                .map(|x| Variable(Rc::new(x.upgrade().unwrap().borrow().deref().clone())))
                 .collect::<Vec<Operation>>(),
         );
         let result: Operation = Equal(
@@ -538,24 +533,18 @@ impl NodeStepSolver {
         })
     }
 
-    fn solve_currents(&mut self) -> Result<(), String> {
-        Ok(())
-    }
-
     fn display_currents(&self) -> Result<Step, String> {
         let mut steps: Vec<SubStep> = Vec::new();
         let mut i_values: Vec<Operation> = Vec::new();
         self.current_values.iter().for_each(|(id, equation)| {
-            let mut i_element = (**self.container.borrow().get_element_by_id(*id)).clone();
-            i_element.name = "i".to_string();
+            let  i_element = (**self.container.borrow().get_element_by_id(*id)).clone();
+            i_element.borrow_mut().name = "i".to_string();
 
             i_values.push(Equal(
-                Some(Box::new(Variable(Rc::new(i_element.clone())))),
+                Some(Box::new(Variable(Rc::new(i_element.borrow().clone())))),
                 Some(Box::new(equation.clone())),
             ));
         });
-
-
 
         let results = self.current_values.iter().map(|(_, x)| {
             let mut y = x.clone();

@@ -1,7 +1,7 @@
 use crate::container::Container;
 use operations::prelude::*;
 use serde::ser::SerializeStruct;
-use serde::{Serialize, Serializer};
+use serde::{Deserialize, Serialize, Serializer};
 use std::cell::RefCell;
 use std::fmt::Display;
 use std::rc::Rc;
@@ -13,6 +13,12 @@ use wasm_bindgen::JsValue;
 pub trait Solver {
     fn new(container: Rc<RefCell<Container>>) -> Self;
     fn solve(&mut self) -> Result<Vec<Step>, String>;
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub enum SolverType {
+    NodeMatrix,
+    NodeStep,
 }
 
 pub struct Step {
@@ -186,6 +192,8 @@ mod tests {
         for i in solver.solve().unwrap() {
             println!("---- Step ---- \n{}", i);
         }
+
+        println!("---- Container ---- \n{:?}", solver.container.borrow());
     }
     #[test]
     fn test_solve_matrix() {

@@ -1,0 +1,9 @@
+{
+  "container": {
+    "elements": ["GND0: 0 V", "R1: 2 Ω", "R2: 4 Ω", "R3: 8 Ω", "SRC(V)4: 32 V", "SRC(V)5: 20 V"],
+    "tools": [RefCell { value: Tool { id: 1, class: Node, members: [(Weak), (Weak)], value: 20.0 } }, RefCell { value: Tool { id: 2, class: Node, members: [(Weak), (Weak), (Weak)], value: 24.0 } }, RefCell { value: Tool { id: 3, class: Node, members: [(Weak), (Weak)], value: -8.0 } }], state: Ok(Valid) }
+  ,
+  "steps": {
+
+  }
+}

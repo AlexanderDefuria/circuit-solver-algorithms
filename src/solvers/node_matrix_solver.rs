@@ -8,6 +8,7 @@ use operations::math::{EquationMember, EquationRepr};
 use operations::prelude::{Divide, Negate, Operation, Sum, Text, Value, Variable};
 use std::cell::RefCell;
 use std::rc::Rc;
+use crate::validation::Validation;
 
 pub struct NodeMatrixSolver {
     a_matrix: DMatrix<Operation>,
@@ -23,7 +24,7 @@ impl Solver for NodeMatrixSolver {
             .borrow()
             .get_elements()
             .iter()
-            .fold(0, |acc: usize, x: &Rc<Element>| match x.class {
+            .fold(0, |acc: usize, x: &Rc<RefCell<Element>>| match x.borrow().class {
                 VoltageSrc => acc + 1,
                 _ => acc,
             });
@@ -139,7 +140,7 @@ fn form_g_matrix(container: Rc<RefCell<Container>>, n: usize) -> DMatrix<Operati
     let mut nodes = container.borrow().nodes().clone();
     let _elements = container.borrow().get_elements().clone();
 
-    nodes.sort_by(|a, b| a.upgrade().unwrap().id.cmp(&b.upgrade().unwrap().id));
+    nodes.sort_by(|a, b| a.upgrade().unwrap().id().cmp(&b.upgrade().unwrap().id()));
 
     // assert_eq!(nodes.len(), n);
 
@@ -148,10 +149,11 @@ fn form_g_matrix(container: Rc<RefCell<Container>>, n: usize) -> DMatrix<Operati
         let equation_members: Vec<EquationRepr> = tool
             .upgrade()
             .unwrap()
+            .borrow()
             .members
             .iter()
-            .filter(|x| x.upgrade().unwrap().class == Resistor)
-            .map(|x| EquationRepr::from(x.upgrade().unwrap()))
+            .filter(|x| x.upgrade().unwrap().borrow().class == Resistor)
+            .map(|x| EquationRepr::from(Rc::new(x.upgrade().unwrap().borrow().clone())))
             .collect();
         let set: Vec<Operation> = equation_members
             .into_iter()
@@ -174,20 +176,20 @@ fn form_g_matrix(container: Rc<RefCell<Container>>, n: usize) -> DMatrix<Operati
                 continue;
             }
             let mut set: Vec<Operation> = Vec::new();
-            for element in &tool.upgrade().unwrap().members {
+            for element in &tool.upgrade().unwrap().borrow().members {
                 let element = element.upgrade().unwrap();
-                if element.class != Resistor {
+                if element.borrow().class != Resistor {
                     continue;
                 }
-                for element2 in tool2.upgrade().unwrap().members.clone() {
+                for element2 in tool2.upgrade().unwrap().borrow().members.clone() {
                     let element2 = element2.upgrade().unwrap();
-                    if element2.class != Resistor {
+                    if element2.borrow().class != Resistor {
                         continue;
                     }
-                    if element.id == element2.id {
+                    if element.borrow().id == element2.borrow().id {
                         set.push(Negate(Some(Box::new(Divide(
                             Some(Box::new(Value(1.0))),
-                            Some(Box::from(Variable(element.clone()))),
+                            Some(Box::from(Variable(Rc::new(element.borrow().clone())))),
                         )))));
                     }
                 }
@@ -203,12 +205,13 @@ pub fn form_b_matrix(container: Rc<RefCell<Container>>, n: usize, m: usize) -> D
 
     for (i, tool) in container.borrow().nodes().iter().enumerate() {
         for (j, element) in container.borrow().get_voltage_sources().iter().enumerate() {
-            if tool.upgrade().unwrap().contains(element) {
+            if tool.upgrade().unwrap().borrow().contains(element.upgrade().unwrap()) {
                 if element
                     .upgrade()
                     .unwrap()
+                    .borrow()
                     .positive
-                    .contains(&tool.upgrade().unwrap().members[0].upgrade().unwrap().id)
+                    .contains(&tool.upgrade().unwrap().borrow().members[0].upgrade().unwrap().id())
                 {
                     matrix[(n - i - 1, j)] = Value(-1.0);
                 } else {
@@ -241,12 +244,12 @@ fn form_z_vector(container: Rc<RefCell<Container>>) -> DVector<Operation> {
     // The balance of current flowing in the node.
     container.borrow().nodes().iter().for_each(|tool| {
         let mut set: Vec<Operation> = Vec::new();
-        for element in &tool.upgrade().unwrap().members {
+        for element in &tool.upgrade().unwrap().borrow().members {
             let element = element.upgrade().unwrap();
-            if element.class != CurrentSrc {
+            if element.borrow().class != CurrentSrc {
                 continue;
             }
-            set.push(Value(element.value));
+            set.push(Value(element.borrow().value));
         }
         if set.len() == 0 {
             z_vec.push(Value(0.0));
@@ -262,7 +265,7 @@ fn form_z_vector(container: Rc<RefCell<Container>>) -> DVector<Operation> {
         .get_voltage_sources()
         .iter()
         .for_each(|source| {
-            z_vec.push(Value(source.upgrade().unwrap().value));
+            z_vec.push(Value(source.upgrade().unwrap().borrow().value));
         });
 
     DVector::from(z_vec)
@@ -274,7 +277,7 @@ fn form_x_vector(container: Rc<RefCell<Container>>) -> DVector<Operation> {
     // V Matrix
     for tool in container.borrow().nodes() {
         x_vec.push(Variable(Rc::new(EquationRepr::new(
-            format!("{}", tool.upgrade().unwrap().pretty_string()),
+            format!("{}", tool.upgrade().unwrap().borrow().pretty_string()),
             0.0,
         ))));
     }
@@ -329,13 +332,13 @@ mod tests {
         c.create_nodes();
         let solver: NodeMatrixSolver = Solver::new(Rc::new(RefCell::new(c.clone())));
 
-        assert_eq!(2., c.get_element_by_id(1).clone().value);
+        assert_eq!(2., c.get_element_by_id(1).clone().borrow().value);
         assert_eq!(1. / 2., solver.a_matrix[(0, 0)].value());
         assert_eq!(
             solver.a_matrix[(0, 0)].value(),
             Divide(
                 Some(Box::new(Value(1.0))),
-                Some(Box::new(Variable(c.get_element_by_id(1).clone())))
+                Some(Box::new(Variable(Rc::new(c.get_element_by_id(1).borrow().clone()))))
             )
             .value()
         );

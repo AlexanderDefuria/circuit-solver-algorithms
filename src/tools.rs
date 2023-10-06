@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use crate::component::Component::Ground;
 use crate::elements::Element;
 use crate::tools::ToolType::*;
@@ -9,7 +10,7 @@ use operations::prelude::EquationMember;
 use petgraph::graph::UnGraph;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
-use std::rc::Weak;
+use std::rc::{Rc, Weak};
 
 /// Possible Tool Types
 #[derive(Serialize, Deserialize, Debug, PartialEq, Copy, Clone)]
@@ -18,37 +19,66 @@ pub enum ToolType {
     Mesh,
     SuperNode,
     SuperMesh,
-    None,
 }
 
 /// Tools are used to solve circuits
 ///
 /// Representation of a Tool (Node, Mesh, SuperNode, SuperMesh)
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 pub struct Tool {
     pub(crate) id: usize,
     pub(crate) class: ToolType,
-    pub(crate) members: Vec<Weak<Element>>,
+    pub(crate) members: Vec<Weak<RefCell<Element>>>,
     pub(crate) value: f64,
+}
+
+pub struct ToolIterator {
+    tool: Tool,
+    index: usize,
+}
+
+impl IntoIterator for Tool {
+    type Item = Rc<RefCell<Element>>;
+    type IntoIter = ToolIterator;
+
+    fn into_iter(self) -> ToolIterator {
+        ToolIterator {
+            tool: self,
+            index: 0,
+        }
+    }
+}
+
+impl Iterator for ToolIterator {
+    type Item = Rc<RefCell<Element>>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let x = self.tool.members.get(self.index);
+        self.index += 1;
+        if let Some(y) = x {
+            return Some(y.upgrade().unwrap());
+        }
+        None
+    }
 }
 
 impl Tool {
     /// Create a mesh from the elements
-    pub(crate) fn create_mesh(elements: Vec<Weak<Element>>) -> Tool {
+    pub(crate) fn create_mesh(elements: Vec<Weak<RefCell<Element>>>) -> Tool {
         Tool::create(Mesh, elements)
     }
 
     /// Create a node from the elements
-    pub(crate) fn create_node(elements: Vec<Weak<Element>>) -> Tool {
+    pub(crate) fn create_node(elements: Vec<Weak<RefCell<Element>>>) -> Tool {
         Tool::create(Node, elements)
     }
 
     /// Create a supernode from the elements
-    pub(crate) fn create_supernode(elements: Vec<Weak<Element>>) -> Tool {
+    pub(crate) fn create_supernode(elements: Vec<Weak<RefCell<Element>>>) -> Tool {
         Tool::create(SuperNode, elements)
     }
 
-    fn create(class: ToolType, elements: Vec<Weak<Element>>) -> Tool {
+    fn create(class: ToolType, elements: Vec<Weak<RefCell<Element>>>) -> Tool {
         let mut tool = Tool {
             id: 0,
             class,
@@ -60,26 +90,25 @@ impl Tool {
     }
 
     /// Check if the tool contains an element
-    pub(crate) fn contains(&self, element: &Weak<Element>) -> bool {
-        let element = element.upgrade().unwrap();
+    pub(crate) fn contains(&self, element: Rc<RefCell<Element>>) -> bool {
         self.members
             .iter()
-            .any(|e| e.upgrade().unwrap().id == element.id)
+            .any(|e| e.upgrade().unwrap().id() == element.id())
     }
 
-    pub(crate) fn contains_all(&self, elements: &Vec<Weak<Element>>) -> bool {
-        self.members.iter().all(|tool_element| {
+    pub(crate) fn contains_all(&self, elements: &Vec<Weak<RefCell<Element>>>) -> bool {
+        self.members.iter().filter_map(|x| x.upgrade()).all(|tool_element| {
             elements.iter().any(|node_element| {
-                node_element.upgrade().unwrap().id == tool_element.upgrade().unwrap().id
+                node_element.upgrade().unwrap().borrow().id == tool_element.borrow().id
             })
         })
     }
 
-    fn node_edges(nodes: &Vec<Weak<Tool>>) -> Result<Vec<(u32, u32)>, StatusError> {
+    fn node_edges(nodes: &Vec<Weak<RefCell<Tool>>>) -> Result<Vec<(u32, u32)>, StatusError> {
         // If no nodes are present, return an error
         if !nodes.iter().any(|p| {
             return if let Some(x) = p.upgrade() {
-                x.class == Node
+                x.borrow().class == Node
             } else {
                 false
             };
@@ -92,14 +121,9 @@ impl Tool {
         // Check each permutation of nodes
         for node in nodes {
             let node = node.upgrade().unwrap();
-            if node.class == Node {
-                if node
-                    .members
-                    .iter()
-                    .any(|x| x.upgrade().unwrap().connected_to_ground())
-                {
-                    let x = (node.id as u32, 0);
-
+            if node.borrow().class == Node {
+                if node.borrow().members.iter().filter_map(|x| x.upgrade()).any(|x| x.borrow().connected_to_ground()) {
+                    let x = (node.borrow().id as u32, 0);
                     if !edges.contains(&x) && (x.0 != x.1) {
                         edges.push(x);
                     }
@@ -107,10 +131,10 @@ impl Tool {
 
                 for second in nodes {
                     // Check for a connection between the nodes (if they share an element)
-                    for element in &node.members {
-                        if second.upgrade().unwrap().contains(element) {
-                            let x = (node.id as u32, second.upgrade().unwrap().id as u32);
-                            let y = (second.upgrade().unwrap().id as u32, node.id as u32);
+                    for element in node.borrow().members.iter().filter_map(|x| x.upgrade()) {
+                        if second.upgrade().unwrap().borrow().contains(element) {
+                            let x = (node.borrow().id as u32, second.upgrade().unwrap().borrow().id as u32);
+                            let y = (second.upgrade().unwrap().borrow().id as u32, node.borrow().id as u32);
                             if !edges.contains(&x) && !edges.contains(&y) && x.0 != x.1 {
                                 edges.push(x);
                             }
@@ -123,19 +147,18 @@ impl Tool {
         Ok(edges)
     }
 
-    pub fn nodes_to_graph(nodes: &Vec<Weak<Tool>>) -> Result<UnGraph<i32, ()>, StatusError> {
+    pub fn nodes_to_graph(nodes: &Vec<Weak<RefCell<Tool>>>) -> Result<UnGraph<i32, ()>, StatusError> {
         let edges: Vec<(u32, u32)> = Tool::node_edges(nodes)?;
         Ok(UnGraph::<i32, ()>::from_edges(edges.as_slice()))
     }
 
-    pub fn members(&self) -> Vec<usize> {
-        self.members
-            .iter()
-            .map(|x| x.upgrade().unwrap().id)
+    pub fn member_ids(&self) -> Vec<usize> {
+        self.members.iter().filter_map(|x| x.upgrade())
+            .map(|x| x.id())
             .collect()
     }
 
-    pub fn members_weak(&self) -> Vec<Weak<Element>> {
+    pub fn members_weak(&self) -> Vec<Weak<RefCell<Element>>> {
         self.members.clone()
     }
 
@@ -168,27 +191,17 @@ impl EquationMember for Tool {
             Mesh => format!("M_{{{}}}", self.id),
             SuperNode => format!("SN_{{{}}}", self.id),
             SuperMesh => format!("SM_{{{}}}", self.id),
-            None => format!("T_{{{}}}", self.id),
         }
     }
 }
 
 impl Validation for Tool {
     fn validate(&self) -> ValidationResult {
-        if self.class == None {
-            return Err(Known("Tool has no class".to_string()));
-        }
-
         if self.members.len() == 0 {
             return Err(Known("Tool has no members".to_string()));
         }
 
-        if self.class == Node
-            && self
-                .members
-                .iter()
-                .any(|x| x.upgrade().unwrap().class == Ground)
-        {
+        if self.class == Node && self.members.iter().filter_map(|x| x.upgrade()).any(|x| x.borrow().class == Ground) {
             return Err(Known("Tool contains a ground element".to_string()));
         }
 
@@ -200,10 +213,8 @@ impl Validation for Tool {
             ))]);
             println!(
                 "{:?}",
-                &self
-                    .members
-                    .iter()
-                    .map(|x| x.upgrade().unwrap().id)
+                &self.members.iter().filter_map(|x| x.upgrade())
+                    .map(|x| x.borrow().id)
                     .collect::<Vec<usize>>()
             );
             println!("{:?}", self);
@@ -216,6 +227,24 @@ impl Validation for Tool {
     fn id(&self) -> usize {
         self.id
     }
+
+    fn class(&self) -> String {
+        format!("{:?}", self.class)
+    }
+}
+
+impl Validation for RefCell<Tool> {
+    fn validate(&self) -> ValidationResult {
+        self.borrow().validate()
+    }
+
+    fn id(&self) -> usize {
+        self.borrow().id
+    }
+
+    fn class(&self) -> String {
+        self.borrow().class.to_string()
+    }
 }
 
 impl Display for Tool {
@@ -225,9 +254,8 @@ impl Display for Tool {
             "Tool: {} Id:{} Elements:{:?}",
             self.class,
             self.id,
-            self.members
-                .iter()
-                .map(|x| x.upgrade().unwrap().id)
+            self.members.iter().filter_map(|x| x.upgrade())
+                .map(|x| x.borrow().id)
                 .collect::<Vec<usize>>()
         )
     }
@@ -247,9 +275,8 @@ impl PrettyPrint for Tool {
     fn basic_string(&self) -> String {
         format!(
             "{:?}",
-            self.members
-                .iter()
-                .map(|x| x.upgrade().unwrap().id)
+            self.members.iter().filter_map(|x| x.upgrade())
+                .map(|x| x.borrow().id)
                 .collect::<Vec<usize>>()
         )
     }
@@ -257,6 +284,7 @@ impl PrettyPrint for Tool {
 
 #[cfg(test)]
 mod tests {
+    use std::cell::RefCell;
     use crate::container::Container;
     use crate::tools::{Tool, ToolType};
     use crate::util::{create_basic_container, create_basic_supermesh_container};
@@ -277,7 +305,7 @@ mod tests {
     #[test]
     fn test_create_node_graph() {
         let mut basic: Container = create_basic_container();
-        let container: Vec<Weak<Tool>> = basic.create_nodes().nodes();
+        let container: Vec<Weak<RefCell<Tool>>> = basic.create_nodes().nodes();
         let edges = Tool::node_edges(&container).unwrap();
         let expected = vec![(1, 0), (1, 2), (2, 0)];
 
@@ -286,7 +314,7 @@ mod tests {
             assert!(expected.contains(&edge));
         }
 
-        let container: Vec<Weak<Tool>> = basic.create_nodes().nodes();
+        let container: Vec<Weak<RefCell<Tool>>> = basic.create_nodes().nodes();
         let graph = Tool::nodes_to_graph(&container).unwrap();
         assert_eq!(graph.node_count(), 3);
         assert_eq!(graph.edge_count(), 3);

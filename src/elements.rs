@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use crate::component::Component;
 use crate::component::Component::Ground;
 use crate::util::PrettyPrint;
@@ -7,7 +8,7 @@ use crate::validation::{Validation, ValidationResult};
 use operations::math::{EquationMember, EquationRepr};
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Serialize, Serializer};
-use std::fmt::Display;
+use std::fmt::{Display};
 
 /// Representation of a Schematic Element
 #[derive(Debug, Deserialize, Clone)]
@@ -70,6 +71,14 @@ impl Element {
     pub(crate) fn set_name(&mut self, name: String) {
         self.name = name;
     }
+
+    pub(crate) fn set_current(&mut self, current: f64) {
+        self.current = current;
+    }
+
+    pub(crate) fn set_voltage_drop(&mut self, voltage_drop: f64) {
+        self.voltage_drop = voltage_drop;
+    }
 }
 
 impl PrettyPrint for Element {
@@ -85,6 +94,16 @@ impl PrettyPrint for Element {
 
     fn basic_string(&self) -> String {
         format!("{}{}", self.name, self.id)
+    }
+}
+
+impl PrettyPrint for RefCell<Element> {
+    fn pretty_string(&self) -> String {
+        self.borrow().pretty_string()
+    }
+
+    fn basic_string(&self) -> String {
+        self.borrow().basic_string()
     }
 }
 
@@ -118,6 +137,16 @@ impl EquationMember for Element {
 impl PartialEq<Self> for Element {
     fn eq(&self, other: &Self) -> bool {
         self.id == other.id
+    }
+}
+
+impl Validation for RefCell<Element> {
+    fn validate(&self) -> ValidationResult {
+        self.borrow().validate()
+    }
+
+    fn id(&self) -> usize {
+        self.borrow().id
     }
 }
 

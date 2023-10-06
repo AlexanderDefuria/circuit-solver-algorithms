@@ -21,6 +21,7 @@ pub struct ContainerSetup {
     pub elements: Vec<Element>,
 }
 
+
 /// This can be used as a test to see if the container is being loaded in properly.
 #[wasm_bindgen]
 pub fn load_wasm_container(js: JsValue) -> Result<String, StatusError> {
@@ -41,7 +42,7 @@ pub fn get_tools(container_js: JsValue) -> Result<String, StatusError> {
     let nodes: Vec<Vec<usize>> = c
         .nodes()
         .iter()
-        .map(|x| x.upgrade().unwrap().members())
+        .map(|x| x.upgrade().unwrap().borrow().member_ids())
         .collect();
 
     Ok(serde_json::to_string(&nodes).unwrap())
@@ -109,7 +110,7 @@ pub fn return_solved_matrix_example() -> Result<String, JsValue> {
 
 #[wasm_bindgen]
 pub fn test_wasm() -> String {
-    "Hello from Rust!".to_string()
+    "Hello from Rust! 🦀🦀🦀".to_string()
 }
 
 #[wasm_bindgen]
