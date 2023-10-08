@@ -15,9 +15,11 @@ use circuit_solver_algorithms::validation::Status::Valid;
 use circuit_solver_algorithms::validation::StatusError::{Known, Multiple};
 use circuit_solver_algorithms::validation::{StatusError, Validation};
 
+use crate::compare_test_case::InputCaseSerde;
+
 #[wasm_bindgen_test]
 fn test_validateable_containers() {
-    let raw_json: &str = include_str!("./data/!case_1/input.json");
+    let raw_json: &str = include_str!("../data/!case_1/input.json");
     let setup: ContainerSetup = serde_json::from_str(raw_json).unwrap();
     let mut container: Container = setup.into();
     assert_eq!(container.validate().unwrap(), Valid);
@@ -27,7 +29,7 @@ fn test_validateable_containers() {
     let mut solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(container)));
     let steps: Vec<Step> = solver.solve().unwrap();
     let steps_string: String = serde_json::to_string(&steps).unwrap();
-    let expected: &str = include_str!("./data/!case_1/result.json");
+    let expected: &str = include_str!("../data/!case_1/result.json");
     // TODO Change this to assert_eq! once the solver is fixed
     assert_ne!(
         cleanup_include_str(expected.to_string()),
@@ -58,9 +60,9 @@ pub fn test_solver_select() {
 
 #[wasm_bindgen_test]
 pub fn test_get_tools() {
-    let raw_json: &str = include_str!("./data/mna_container/input.json");
-    let setup: ContainerSetup = serde_json::from_str(raw_json).unwrap();
-    let mut container: Container = setup.into();
+    let raw_json: &str = include_str!("../data/mna_container/input.json");
+    let setup: InputCaseSerde = serde_json::from_str(raw_json).unwrap();
+    let mut container: Container = setup.container.into();
     assert_eq!(container.validate().unwrap(), Valid);
 
     container.create_nodes();

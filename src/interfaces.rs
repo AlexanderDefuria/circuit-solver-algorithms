@@ -10,9 +10,9 @@ use crate::util::{
 use crate::validation::StatusError::Known;
 use crate::validation::{StatusError, Validation};
 use serde::{Deserialize, Serialize};
+use serde_wasm_bindgen::from_value;
 use std::cell::RefCell;
 use std::rc::Rc;
-use serde_wasm_bindgen::from_value;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsValue;
 
@@ -20,7 +20,6 @@ use wasm_bindgen::JsValue;
 pub struct ContainerSetup {
     pub elements: Vec<Element>,
 }
-
 
 /// This can be used as a test to see if the container is being loaded in properly.
 #[wasm_bindgen]

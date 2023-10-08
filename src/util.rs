@@ -127,7 +127,7 @@ mod tests {
             name: "R1".to_string(),
             id: 1,
             value: 1.0,
-            current: 0.0,
+            current: Default::default(),
             voltage_drop: 0.0,
             class: Resistor,
             positive: vec![2],

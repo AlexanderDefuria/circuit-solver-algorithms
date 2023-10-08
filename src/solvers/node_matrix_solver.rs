@@ -3,12 +3,12 @@ use crate::container::Container;
 use crate::elements::Element;
 use crate::solvers::solver::{Solver, Step, SubStep};
 use crate::util::PrettyPrint;
+use crate::validation::Validation;
 use nalgebra::{DMatrix, DVector};
 use operations::math::{EquationMember, EquationRepr};
 use operations::prelude::{Divide, Negate, Operation, Sum, Text, Value, Variable};
 use std::cell::RefCell;
 use std::rc::Rc;
-use crate::validation::Validation;
 
 pub struct NodeMatrixSolver {
     a_matrix: DMatrix<Operation>,
@@ -24,9 +24,11 @@ impl Solver for NodeMatrixSolver {
             .borrow()
             .get_elements()
             .iter()
-            .fold(0, |acc: usize, x: &Rc<RefCell<Element>>| match x.borrow().class {
-                VoltageSrc => acc + 1,
-                _ => acc,
+            .fold(0, |acc: usize, x: &Rc<RefCell<Element>>| {
+                match x.borrow().class {
+                    VoltageSrc => acc + 1,
+                    _ => acc,
+                }
             });
 
         // https://lpsa.swarthmore.edu/Systems/Electrical/mna/MNA3.html#B_matrix
@@ -75,6 +77,7 @@ impl Solver for NodeMatrixSolver {
             .for_each(|x| *x = (*x * 100.).round() / 100.);
 
         steps.push(Step {
+            title: Some("Node Matrix Solver".to_string()),
             description: Some("Form matrices".to_string()),
             sub_steps: vec![
                 SubStep {
@@ -205,14 +208,18 @@ pub fn form_b_matrix(container: Rc<RefCell<Container>>, n: usize, m: usize) -> D
 
     for (i, tool) in container.borrow().nodes().iter().enumerate() {
         for (j, element) in container.borrow().get_voltage_sources().iter().enumerate() {
-            if tool.upgrade().unwrap().borrow().contains(element.upgrade().unwrap()) {
-                if element
-                    .upgrade()
-                    .unwrap()
-                    .borrow()
-                    .positive
-                    .contains(&tool.upgrade().unwrap().borrow().members[0].upgrade().unwrap().id())
-                {
+            if tool
+                .upgrade()
+                .unwrap()
+                .borrow()
+                .contains(element.upgrade().unwrap())
+            {
+                if element.upgrade().unwrap().borrow().positive.contains(
+                    &tool.upgrade().unwrap().borrow().members[0]
+                        .upgrade()
+                        .unwrap()
+                        .id(),
+                ) {
                     matrix[(n - i - 1, j)] = Value(-1.0);
                 } else {
                     matrix[(n - i - 1, j)] = Value(1.0);
@@ -338,7 +345,9 @@ mod tests {
             solver.a_matrix[(0, 0)].value(),
             Divide(
                 Some(Box::new(Value(1.0))),
-                Some(Box::new(Variable(Rc::new(c.get_element_by_id(1).borrow().clone()))))
+                Some(Box::new(Variable(Rc::new(
+                    c.get_element_by_id(1).borrow().clone()
+                ))))
             )
             .value()
         );

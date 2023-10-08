@@ -1,6 +1,6 @@
 {
   "name": "@alexanderdefuria/circuit-solver-algorithms",
-  "version": "0.1.13",
+  "version": "0.1.16",
   "files": [
     "circuit_solver_algorithms.js",
     "circuit_solver_algorithms.d.ts",

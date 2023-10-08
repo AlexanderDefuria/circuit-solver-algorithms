@@ -1,4 +1,3 @@
-use std::cell::RefCell;
 use crate::component::Component::{Ground, VoltageSrc};
 use crate::component::Simplification;
 use crate::elements::Element;
@@ -12,6 +11,7 @@ use crate::validation::{
 use petgraph::graph::UnGraph;
 use petgraph::prelude::NodeIndex;
 use rustworkx_core::connectivity;
+use std::cell::RefCell;
 
 use serde::Serialize;
 use std::fmt::{Debug, Formatter};
@@ -182,7 +182,8 @@ impl Container {
     }
 
     pub(crate) fn get_calculation_nodes(&self) -> Vec<Rc<RefCell<Tool>>> {
-        let nodes: Vec<Rc<RefCell<Tool>>> = self.nodes().iter().map(|x| x.upgrade().unwrap()).collect();
+        let nodes: Vec<Rc<RefCell<Tool>>> =
+            self.nodes().iter().map(|x| x.upgrade().unwrap()).collect();
         let super_nodes: Vec<Rc<RefCell<Tool>>> = self
             .supernodes()
             .iter()
@@ -192,10 +193,19 @@ impl Container {
             .into_iter()
             .filter(|node| {
                 for super_node in &super_nodes {
-                    let super_node_member_ids: Vec<usize> = (super_node.borrow().clone().into_iter()
+                    let super_node_member_ids: Vec<usize> = (super_node
+                        .borrow()
+                        .clone()
+                        .into_iter()
                         .map(|x| x.id())
-                        .collect::<Vec<usize>>()).to_vec();
-                    if node.borrow().clone().into_iter().all(|y| super_node_member_ids.contains(&y.id())) {
+                        .collect::<Vec<usize>>())
+                    .to_vec();
+                    if node
+                        .borrow()
+                        .clone()
+                        .into_iter()
+                        .all(|y| super_node_member_ids.contains(&y.id()))
+                    {
                         return false;
                     }
                 }
@@ -226,7 +236,10 @@ impl Container {
                 members.push(Rc::downgrade(self.get_element_by_id(*element)));
             }
             for element in &source.upgrade().unwrap().borrow().negative {
-                if !members.iter().any(|x| x.upgrade().unwrap().borrow().id == *element) {
+                if !members
+                    .iter()
+                    .any(|x| x.upgrade().unwrap().borrow().id == *element)
+                {
                     members.push(Rc::downgrade(self.get_element_by_id(*element)));
                 }
             }
@@ -297,7 +310,8 @@ impl Container {
         self.tools
             .iter()
             .filter(|x| {
-                x.borrow().members
+                x.borrow()
+                    .members
                     .iter()
                     .any(|y| y.upgrade().unwrap().borrow().id == element_id)
             })
@@ -312,7 +326,9 @@ impl Container {
         let mut node_to_node_resistors: Vec<(usize, usize, Rc<RefCell<Element>>)> = Vec::new();
 
         for element in self.get_elements() {
-            if node_to_node_resistors.iter().any(|x| x.2.borrow().id == element.borrow().id)
+            if node_to_node_resistors
+                .iter()
+                .any(|x| x.2.borrow().id == element.borrow().id)
                 || element.borrow().class == Ground
             {
                 continue;
@@ -320,7 +336,11 @@ impl Container {
 
             let tools = self.get_tools_for_element(element.borrow().id);
             if element.borrow().connected_to_ground() {
-                node_to_node_resistors.push((tools[0].upgrade().unwrap().borrow().id, 0, element.clone()));
+                node_to_node_resistors.push((
+                    tools[0].upgrade().unwrap().borrow().id,
+                    0,
+                    element.clone(),
+                ));
             } else {
                 node_to_node_resistors.push((
                     tools[0].upgrade().unwrap().borrow().id,
@@ -370,7 +390,13 @@ impl Validation for Container {
         if !self.elements.iter().any(|x| x.borrow().class.is_source()) {
             errors.push(Known("No Sources".parse().unwrap()));
         }
-        if self.elements.iter().filter(|x| x.borrow().class == Ground).count() != 1 {
+        if self
+            .elements
+            .iter()
+            .filter(|x| x.borrow().class == Ground)
+            .count()
+            != 1
+        {
             errors.push(Known("Multiple Grounds".parse().unwrap()));
         }
 

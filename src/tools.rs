@@ -1,4 +1,3 @@
-use std::cell::RefCell;
 use crate::component::Component::Ground;
 use crate::elements::Element;
 use crate::tools::ToolType::*;
@@ -9,6 +8,7 @@ use crate::validation::{check_weak_duplicates, StatusError, Validation, Validati
 use operations::prelude::EquationMember;
 use petgraph::graph::UnGraph;
 use serde::{Deserialize, Serialize};
+use std::cell::RefCell;
 use std::fmt::{Display, Formatter};
 use std::rc::{Rc, Weak};
 
@@ -97,11 +97,14 @@ impl Tool {
     }
 
     pub(crate) fn contains_all(&self, elements: &Vec<Weak<RefCell<Element>>>) -> bool {
-        self.members.iter().filter_map(|x| x.upgrade()).all(|tool_element| {
-            elements.iter().any(|node_element| {
-                node_element.upgrade().unwrap().borrow().id == tool_element.borrow().id
+        self.members
+            .iter()
+            .filter_map(|x| x.upgrade())
+            .all(|tool_element| {
+                elements.iter().any(|node_element| {
+                    node_element.upgrade().unwrap().borrow().id == tool_element.borrow().id
+                })
             })
-        })
     }
 
     fn node_edges(nodes: &Vec<Weak<RefCell<Tool>>>) -> Result<Vec<(u32, u32)>, StatusError> {
@@ -122,7 +125,13 @@ impl Tool {
         for node in nodes {
             let node = node.upgrade().unwrap();
             if node.borrow().class == Node {
-                if node.borrow().members.iter().filter_map(|x| x.upgrade()).any(|x| x.borrow().connected_to_ground()) {
+                if node
+                    .borrow()
+                    .members
+                    .iter()
+                    .filter_map(|x| x.upgrade())
+                    .any(|x| x.borrow().connected_to_ground())
+                {
                     let x = (node.borrow().id as u32, 0);
                     if !edges.contains(&x) && (x.0 != x.1) {
                         edges.push(x);
@@ -133,8 +142,14 @@ impl Tool {
                     // Check for a connection between the nodes (if they share an element)
                     for element in node.borrow().members.iter().filter_map(|x| x.upgrade()) {
                         if second.upgrade().unwrap().borrow().contains(element) {
-                            let x = (node.borrow().id as u32, second.upgrade().unwrap().borrow().id as u32);
-                            let y = (second.upgrade().unwrap().borrow().id as u32, node.borrow().id as u32);
+                            let x = (
+                                node.borrow().id as u32,
+                                second.upgrade().unwrap().borrow().id as u32,
+                            );
+                            let y = (
+                                second.upgrade().unwrap().borrow().id as u32,
+                                node.borrow().id as u32,
+                            );
                             if !edges.contains(&x) && !edges.contains(&y) && x.0 != x.1 {
                                 edges.push(x);
                             }
@@ -147,13 +162,17 @@ impl Tool {
         Ok(edges)
     }
 
-    pub fn nodes_to_graph(nodes: &Vec<Weak<RefCell<Tool>>>) -> Result<UnGraph<i32, ()>, StatusError> {
+    pub fn nodes_to_graph(
+        nodes: &Vec<Weak<RefCell<Tool>>>,
+    ) -> Result<UnGraph<i32, ()>, StatusError> {
         let edges: Vec<(u32, u32)> = Tool::node_edges(nodes)?;
         Ok(UnGraph::<i32, ()>::from_edges(edges.as_slice()))
     }
 
     pub fn member_ids(&self) -> Vec<usize> {
-        self.members.iter().filter_map(|x| x.upgrade())
+        self.members
+            .iter()
+            .filter_map(|x| x.upgrade())
             .map(|x| x.id())
             .collect()
     }
@@ -201,7 +220,13 @@ impl Validation for Tool {
             return Err(Known("Tool has no members".to_string()));
         }
 
-        if self.class == Node && self.members.iter().filter_map(|x| x.upgrade()).any(|x| x.borrow().class == Ground) {
+        if self.class == Node
+            && self
+                .members
+                .iter()
+                .filter_map(|x| x.upgrade())
+                .any(|x| x.borrow().class == Ground)
+        {
             return Err(Known("Tool contains a ground element".to_string()));
         }
 
@@ -213,7 +238,10 @@ impl Validation for Tool {
             ))]);
             println!(
                 "{:?}",
-                &self.members.iter().filter_map(|x| x.upgrade())
+                &self
+                    .members
+                    .iter()
+                    .filter_map(|x| x.upgrade())
                     .map(|x| x.borrow().id)
                     .collect::<Vec<usize>>()
             );
@@ -254,7 +282,9 @@ impl Display for Tool {
             "Tool: {} Id:{} Elements:{:?}",
             self.class,
             self.id,
-            self.members.iter().filter_map(|x| x.upgrade())
+            self.members
+                .iter()
+                .filter_map(|x| x.upgrade())
                 .map(|x| x.borrow().id)
                 .collect::<Vec<usize>>()
         )
@@ -275,7 +305,9 @@ impl PrettyPrint for Tool {
     fn basic_string(&self) -> String {
         format!(
             "{:?}",
-            self.members.iter().filter_map(|x| x.upgrade())
+            self.members
+                .iter()
+                .filter_map(|x| x.upgrade())
                 .map(|x| x.borrow().id)
                 .collect::<Vec<usize>>()
         )
@@ -284,13 +316,13 @@ impl PrettyPrint for Tool {
 
 #[cfg(test)]
 mod tests {
-    use std::cell::RefCell;
     use crate::container::Container;
     use crate::tools::{Tool, ToolType};
     use crate::util::{create_basic_container, create_basic_supermesh_container};
     use crate::validation::StatusError::Known;
     use crate::validation::Validation;
     use petgraph::graph::UnGraph;
+    use std::cell::RefCell;
     use std::rc::Weak;
 
     #[test]

@@ -3,7 +3,8 @@ use crate::container::Container;
 use crate::elements::Element;
 use crate::solvers::solver::{Solver, Step, SubStep};
 use crate::tools::Tool;
-use crate::tools::ToolType::SuperNode;
+use crate::tools::ToolType::{Node, SuperNode};
+use crate::validation::Validation;
 use nalgebra::{DMatrix, DVector};
 use operations::mappings::expand;
 use operations::math::EquationMember;
@@ -15,14 +16,12 @@ use std::any::Any;
 use std::cell::RefCell;
 use std::ops::Deref;
 use std::panic;
-use std::rc::Rc;
-use crate::validation::Validation;
-
+use std::rc::{Rc, Weak};
 
 pub struct NodeStepSolver {
     pub(crate) container: Rc<RefCell<Container>>,
-    sources: Vec<SourceConnection>,               // Voltage sources
-    current_values: Vec<(usize, Operation)>,      // (Element ID, Equation for current form nodes)
+    sources: Vec<SourceConnection>,          // Voltage sources
+    current_values: Vec<(usize, Operation)>, // (Element ID, Equation for current form nodes)
     node_pairs: Vec<(usize, usize, Rc<RefCell<Element>>)>, // Each element is attached to a pair of nodes.
     node_coefficients: Vec<Operation>, // Coefficients of the node summation for the matrix
     node_voltages: DVector<f64>,       // This is the result of matrix manipulation
@@ -71,7 +70,6 @@ impl Solver for NodeStepSolver {
         self.setup_node_equations()?;
         self.setup_node_coefficients()?;
         self.solve_node_voltages()?;
-        // self.solve_current_values()?;
 
         // FORMATTING and OUTPUT
         let mut steps: Vec<Step> = Vec::new();
@@ -176,10 +174,18 @@ impl NodeStepSolver {
         )));
 
         // Propagate the values of the nodes back into the container / solver.
-        let results: Vec<f64> = result_matrix.iter().map(|x| x.clone()).collect::<Vec<f64>>();
-        self.container.borrow_mut().nodes().iter().enumerate().for_each(|(i, x)| {
-            x.upgrade().unwrap().borrow_mut().set_value(results[i]);
-        });
+        let results: Vec<f64> = result_matrix
+            .iter()
+            .map(|x| x.clone())
+            .collect::<Vec<f64>>();
+        self.container
+            .borrow_mut()
+            .nodes()
+            .iter()
+            .enumerate()
+            .for_each(|(i, x)| {
+                x.upgrade().unwrap().borrow_mut().set_value(results[i]);
+            });
 
         Ok(())
     }
@@ -197,16 +203,30 @@ impl NodeStepSolver {
 
                 if *node1 != 0 {
                     id_1 -= 1;
-                    tools.push(Variable(
-                        Rc::new(self.container.borrow().get_tool_by_id(id_1).borrow().clone()),
-                    ));
+                    tools.push(Variable(Rc::new(
+                        self.container
+                            .borrow()
+                            .get_tool_by_id(id_1)
+                            .borrow()
+                            .clone(),
+                    )));
                 }
                 if *node2 != 0 {
                     id_2 -= 1;
-                    tools.push(Negate(Some(Box::new(Variable(
-                        Rc::new(self.container.borrow().get_tool_by_id(id_2).borrow().clone()),
-                    )))));
+                    tools.push(Negate(Some(Box::new(Variable(Rc::new(
+                        self.container
+                            .borrow()
+                            .get_tool_by_id(id_2)
+                            .borrow()
+                            .clone(),
+                    ))))));
                 }
+
+                let value: f64 = element.borrow().value().clone();
+                element.borrow_mut().set_current(Divide(
+                    Some(Box::new(Sum(tools.clone()).simplify().unwrap())),
+                    Some(Box::new(Value(value))),
+                ));
 
                 self.current_values.push((
                     element.id(),
@@ -311,6 +331,9 @@ impl NodeStepSolver {
     fn display_base_kcl_equations(&self) -> Result<Step, String> {
         let mut steps: Vec<SubStep> = Vec::new();
         let nodes: Vec<Rc<RefCell<Tool>>> = self.container.borrow().get_calculation_nodes();
+        let super_nodes: Vec<Weak<RefCell<Tool>>> =
+            self.container.borrow().get_tools_by_type(SuperNode);
+        let base_nodes: Vec<Weak<RefCell<Tool>>> = self.container.borrow().get_tools_by_type(Node);
 
         let mut kcl_equations: Vec<Operation> = Vec::new();
         let mut node_count = 0;
@@ -343,9 +366,21 @@ impl NodeStepSolver {
         }
 
         steps.push(SubStep {
-            description: Some("Super Nodes".to_string()),
+            description: Some("Mark Nodes".to_string()),
             result: None,
-            operations: vec![],
+            operations: base_nodes
+                .iter()
+                .map(|x| Variable(Rc::new(x.upgrade().unwrap().borrow().clone())))
+                .collect(),
+        });
+
+        steps.push(SubStep {
+            description: Some("Mark Supernodes".to_string()),
+            result: None,
+            operations: super_nodes
+                .iter()
+                .map(|x| Variable(Rc::new(x.upgrade().unwrap().borrow().clone())))
+                .collect(),
         });
 
         steps.push(SubStep {
@@ -360,29 +395,44 @@ impl NodeStepSolver {
             let v_element = (**self.container.borrow().get_element_by_id(*id)).clone();
             i_element.borrow_mut().name = "i".to_string();
             v_element.borrow_mut().name = "V".to_string();
+            let potential_expansion: Operation = match expand(equation.clone()) {
+                Ok(mut x) => {
+                    x.apply_variables();
+                    Equal(
+                        Some(Box::new(Variable(Rc::new(equation.clone())))),
+                        Some(Box::new(Variable(Rc::new(x.clone())))),
+                    )
+                }
+                Err(_) => Variable(Rc::new(equation.clone())),
+            };
 
             i_values.push(Equal(
                 Some(Box::new(Variable(Rc::new(i_element.borrow().clone())))),
                 Some(Box::new(Equal(
                     Some(Box::new(Divide(
                         Some(Box::new(Variable(Rc::new(v_element.borrow().clone())))),
-                        Some(Box::new(Variable(
-                            Rc::new(self.container.borrow().get_element_by_id(*id).borrow().clone()),
-                        ))),
+                        Some(Box::new(Variable(Rc::new(
+                            self.container
+                                .borrow()
+                                .get_element_by_id(*id)
+                                .borrow()
+                                .clone(),
+                        )))),
                     ))),
-                    Some(Box::new(equation.clone())),
+                    Some(Box::new(potential_expansion)),
                 ))),
             ));
         });
 
         steps.push(SubStep{
-            description: Some("Use potential difference between nodes ($ N_j $) and Ohm's law to solve for current.".to_string()),
+            description: Some("Use potential difference between nodes ($ N_{j, k} $) and Ohm's law to solve for current. Where $j, k$ are the two nodes that the element is connected to. We can treat GND as 0.".to_string()),
             result: None,
             operations: i_values,
         });
 
         Ok(Step {
-            description: Some("KCL Equations".to_string()),
+            title: Some("KCL Equations".to_string()),
+            description: Some("Outline the basis of the circuit using KCL equations".to_string()),
             result: None,
             sub_steps: steps,
         })
@@ -402,11 +452,23 @@ impl NodeStepSolver {
                 let mut id_2 = *node2;
                 if *node1 != 0 {
                     id_1 -= 1;
-                    tool1 = Variable(Rc::new(self.container.borrow().get_tool_by_id(id_1).borrow().clone()));
+                    tool1 = Variable(Rc::new(
+                        self.container
+                            .borrow()
+                            .get_tool_by_id(id_1)
+                            .borrow()
+                            .clone(),
+                    ));
                 }
                 if *node2 != 0 {
                     id_2 -= 1;
-                    tool2 = Variable(Rc::new(self.container.borrow().get_tool_by_id(id_2).borrow().clone()));
+                    tool2 = Variable(Rc::new(
+                        self.container
+                            .borrow()
+                            .get_tool_by_id(id_2)
+                            .borrow()
+                            .clone(),
+                    ));
                 }
 
                 tool2 = Negate(Some(Box::new(tool2)));
@@ -421,56 +483,84 @@ impl NodeStepSolver {
                 })
             });
 
-        Ok(Step {
-            description: Some("Find voltage across each voltage source".to_string()),
-            result: None,
-            sub_steps: eq_steps,
-        })
+        Ok(Step::new_with_steps(
+            "Find voltage across each voltage source",
+            eq_steps,
+        ))
     }
 
     fn current_steps(&self) -> Result<Step, String> {
         let mut current_equations: Vec<Operation> = Vec::new();
+        let mut element_vector: Vec<Operation> = Vec::new();
         self.node_pairs
             .iter()
             .filter(|(_, _, element)| element.borrow().class == Resistor)
             .for_each(|(node1, node2, element)| {
+                let mut i = element.borrow().clone();
+                i.set_name("i".to_string());
+                element_vector.push(Variable(Rc::new(i)));
                 let mut tools: Vec<Operation> = Vec::new();
                 if *node1 != 0 {
                     tools.push(Value(self.node_voltages[*node1 - 1]));
                 }
                 if *node2 != 0 {
-                    tools.push(Negate(Some(Box::new(Value(self.node_voltages[*node2 - 1])))));
+                    tools.push(Negate(Some(Box::new(Value(
+                        self.node_voltages[*node2 - 1],
+                    )))));
                 }
 
                 current_equations.push(
                     Divide(
                         Some(Box::new(Sum(tools).simplify().unwrap())),
                         Some(Box::new(Value(element.borrow().value()))),
-                    ).simplify().unwrap(),
+                    )
+                    .simplify()
+                    .unwrap(),
                 );
             });
 
         Ok(Step {
+            title: Some("Current Results".to_string()),
             description: None,
-            result: Some(Display(Rc::new(DVector::from(current_equations)))),
+            result: Some(Equal(
+                Some(Box::new(Display(Rc::new(DVector::from_vec(
+                    element_vector.clone(),
+                ))))),
+                Some(Box::new(Display(Rc::new(DVector::from_vec(
+                    current_equations.clone(),
+                ))))),
+            )),
             sub_steps: vec![],
         })
     }
 
     fn display_connection_matrix(&self) -> Result<Step, String> {
         Ok(Step {
-            description: Some("Connection Matrix".to_string()),
+            title: Some("Connection Matrix".to_string()),
+            description: None,
             result: Some(Display(Rc::new(self.connection_matrix.clone()))),
             sub_steps: vec![
                 SubStep {
-                    description: Some("Coefficients".to_string()),
-                    result: Some(Display(Rc::new(DVector::from(
-                        self.node_coefficients.clone(),
-                    )))),
+                    description: Some("Coefficients from the expanded KCL equations".to_string()),
+                    result: Some(Equal(
+                        Some(Box::new(Display(Rc::new(DVector::from(
+                            self.node_coefficients.clone(),
+                        ))))),
+                        Some(Box::new(Display(Rc::new(DVector::from_vec(
+                            self.container
+                                .borrow()
+                                .nodes()
+                                .iter()
+                                .map(|x| {
+                                    Variable(Rc::new(x.upgrade().unwrap().borrow().deref().clone()))
+                                })
+                                .collect::<Vec<Operation>>(),
+                        ))))),
+                    )),
                     operations: vec![],
                 },
                 SubStep {
-                    description: Some("Connections".to_string()),
+                    description: Some("Element connections between nodes.".to_string()),
                     result: Some(Display(Rc::new(
                         self.connection_matrix.clone().remove_rows(0, 1),
                     ))),
@@ -479,13 +569,19 @@ impl NodeStepSolver {
                         .iter()
                         .filter_map(|x| {
                             if x.0 != 0 && x.1 != 0 || x.2.borrow().class == VoltageSrc {
-                                return Some(Display(Rc::new(DVector::from_vec(vec![
-                                    x.0 as f64, x.1 as f64,
-                                ]))));
+                                return Some(Equal(
+                                    Some(Box::new(Display(Rc::new(DVector::from_vec(vec![
+                                        x.0 as f64, x.1 as f64,
+                                    ]))))),
+                                    Some(Box::new(Text(format!(
+                                        " The current flows from Node {} to Node {}",
+                                        x.0, x.1
+                                    )))),
+                                ));
                             }
                             None
                         })
-                        .collect(),
+                        .collect::<Vec<Operation>>(),
                 },
                 SubStep {
                     description: Some("TODO explain this super step".to_string()),
@@ -511,16 +607,20 @@ impl NodeStepSolver {
         );
 
         Ok(Step {
-            description: Some("Solve For Node Voltages".to_string()),
+            title: Some("Solve For Node Voltages".to_string()),
+            description: None,
             result: Some(result),
             sub_steps: vec![
                 SubStep {
                     description: Some("Invert the matrix".to_string()),
-                    result: Some(Text(self.inverse.clone().equation_repr())),
-                    operations: vec![Power(
-                        Some(Box::new(Display(Rc::new(self.connection_matrix.clone())))),
-                        Some(Box::new(Value(-1.0))),
-                    )],
+                    result: None,
+                    operations: vec![
+                        Power(
+                            Some(Box::new(Display(Rc::new(self.connection_matrix.clone())))),
+                            Some(Box::new(Value(-1.0))),
+                        ),
+                        Display(Rc::new(self.inverse.clone())),
+                    ],
                 },
                 SubStep {
                     description: Some(
@@ -537,7 +637,7 @@ impl NodeStepSolver {
         let mut steps: Vec<SubStep> = Vec::new();
         let mut i_values: Vec<Operation> = Vec::new();
         self.current_values.iter().for_each(|(id, equation)| {
-            let  i_element = (**self.container.borrow().get_element_by_id(*id)).clone();
+            let i_element = (**self.container.borrow().get_element_by_id(*id)).clone();
             i_element.borrow_mut().name = "i".to_string();
 
             i_values.push(Equal(
@@ -546,21 +646,28 @@ impl NodeStepSolver {
             ));
         });
 
-        let results = self.current_values.iter().map(|(_, x)| {
-            let mut y = x.clone();
-            y.apply_variables();
-            y
-        }).collect::<Vec<Operation>>();
-
+        let results = self
+            .current_values
+            .iter()
+            .map(|(_, x)| {
+                let mut y = x.clone();
+                y.apply_variables();
+                y
+            })
+            .collect::<Vec<Operation>>();
 
         steps.push(SubStep{
             description: Some("Use potential difference between nodes ($ N_j $) and Ohm's law to solve for current.".to_string()),
-            result: Some(results[0].clone()),
+            result: None,
             operations: i_values,
         });
 
         Ok(Step {
-            description: Some("Currents".to_string()),
+            title: Some("Currents".to_string()),
+            description: Some(
+                "Evaluate the currents using the KCL equations and node voltages shown previously."
+                    .to_string(),
+            ),
             result: None,
             sub_steps: steps,
         })

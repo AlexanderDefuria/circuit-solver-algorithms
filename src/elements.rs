@@ -1,4 +1,3 @@
-use std::cell::RefCell;
 use crate::component::Component;
 use crate::component::Component::Ground;
 use crate::util::PrettyPrint;
@@ -6,9 +5,11 @@ use crate::validation::Status::Valid;
 use crate::validation::StatusError::Known;
 use crate::validation::{Validation, ValidationResult};
 use operations::math::{EquationMember, EquationRepr};
+use operations::prelude::{Operation, Value};
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Serialize, Serializer};
-use std::fmt::{Display};
+use std::cell::RefCell;
+use std::fmt::Display;
 
 /// Representation of a Schematic Element
 #[derive(Debug, Deserialize, Clone)]
@@ -18,7 +19,7 @@ pub struct Element {
     pub(crate) id: usize,
     pub(crate) value: f64,
     #[serde(skip_deserializing)]
-    pub(crate) current: f64,
+    pub(crate) current: Operation,
     #[serde(skip_deserializing)]
     pub(crate) voltage_drop: f64,
     pub(crate) class: Component,
@@ -56,7 +57,7 @@ impl Element {
             name: class.basic_string(),
             id,
             value,
-            current: 0.0,
+            current: Default::default(),
             voltage_drop: 0.0,
             class,
             positive,
@@ -72,7 +73,11 @@ impl Element {
         self.name = name;
     }
 
-    pub(crate) fn set_current(&mut self, current: f64) {
+    pub(crate) fn set_current_value(&mut self, current: f64) {
+        self.current = Value(current);
+    }
+
+    pub(crate) fn set_current(&mut self, current: Operation) {
         self.current = current;
     }
 
@@ -224,7 +229,7 @@ impl Serialize for Element {
         state.serialize_field("name", &self.name)?;
         state.serialize_field("id", &self.id)?;
         state.serialize_field("value", &self.value)?;
-        state.serialize_field("current", &self.current)?;
+        state.serialize_field("current", &self.current.value())?;
         state.serialize_field("voltage_drop", &self.voltage_drop)?;
         state.serialize_field("class", &self.class)?;
         state.serialize_field("positive", &self.positive)?;
@@ -287,7 +292,7 @@ mod tests {
             name: "".to_string(),
             id: 0,
             value: 0.0,
-            current: 0.0,
+            current: Default::default(),
             voltage_drop: 0.0,
             class: Component::Ground,
             positive: vec![1],

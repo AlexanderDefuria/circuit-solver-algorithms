@@ -22,6 +22,7 @@ pub enum SolverType {
 }
 
 pub struct Step {
+    pub title: Option<String>,
     pub description: Option<String>,
     pub result: Option<Operation>,
     pub sub_steps: Vec<SubStep>,
@@ -37,7 +38,8 @@ pub struct SubStep {
 impl Step {
     pub fn new(label: &str) -> Self {
         Step {
-            description: Some(label.to_string()),
+            title: Some(label.to_string()),
+            description: None,
             sub_steps: vec![],
             result: None,
         }
@@ -45,7 +47,8 @@ impl Step {
 
     pub fn new_with_steps(label: &str, steps: Vec<SubStep>) -> Self {
         Step {
-            description: Some(label.to_string()),
+            title: Some(label.to_string()),
+            description: None,
             result: None,
             sub_steps: steps,
         }
@@ -53,6 +56,10 @@ impl Step {
 
     pub fn description(&self) -> Option<String> {
         self.description.clone()
+    }
+
+    pub fn title(&self) -> Option<String> {
+        self.title.clone()
     }
 
     pub fn get_steps(&self) -> Vec<SubStep> {
@@ -85,11 +92,12 @@ impl Serialize for Step {
     {
         let mut state: <S>::SerializeStruct;
         if &self.result == &None {
-            state = serializer.serialize_struct("Step", 2)?;
-        } else {
             state = serializer.serialize_struct("Step", 3)?;
+        } else {
+            state = serializer.serialize_struct("Step", 4)?;
             state.serialize_field("result", &latex_serialize(self.result.clone().unwrap()))?;
         }
+        state.serialize_field("title", &self.title())?;
         state.serialize_field("description", &self.description())?;
         state.serialize_field("sub_steps", &self.get_steps())?;
         state.end()
@@ -108,7 +116,7 @@ impl Serialize for SubStep {
             state = serializer.serialize_struct("SubStep", 3)?;
             state.serialize_field("result", &latex_serialize(self.result.clone().unwrap()))?;
         }
-        state.serialize_field("stepInstruction", &self.description())?;
+        state.serialize_field("description", &self.description())?;
         state.serialize_field(
             "operations",
             &self

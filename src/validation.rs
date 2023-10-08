@@ -85,7 +85,11 @@ pub(crate) fn check_weak_duplicates<T: Validation + PartialEq>(
     let mut seen: Vec<usize> = Vec::new();
     for x in references {
         if seen.contains(&x.borrow().id()) {
-            errors.push(StatusError::Known(format!("Duplicate: {}, {}", x.borrow().id(), x.borrow().class())));
+            errors.push(StatusError::Known(format!(
+                "Duplicate: {}, {}",
+                x.borrow().id(),
+                x.borrow().class()
+            )));
         }
         seen.push(x.borrow().id());
     }
@@ -95,14 +99,16 @@ pub(crate) fn check_weak_duplicates<T: Validation + PartialEq>(
 /// Check for duplicates in a list
 ///
 /// Returns a Vec of StatusError::KnownIssue. If the vec is empty, there are no duplicates.
-pub(crate) fn check_duplicates<T: Validation + PartialEq>(
-    list: &Vec<Rc<T>>,
-) -> Vec<StatusError> {
+pub(crate) fn check_duplicates<T: Validation + PartialEq>(list: &Vec<Rc<T>>) -> Vec<StatusError> {
     let mut errors: Vec<StatusError> = Vec::new();
     let mut seen: Vec<usize> = Vec::new();
     for x in list {
         if seen.contains(&x.id()) {
-            errors.push(StatusError::Known(format!("Duplicate: {}, {}", x.id(), x.class())));
+            errors.push(StatusError::Known(format!(
+                "Duplicate: {}, {}",
+                x.id(),
+                x.class()
+            )));
         }
         seen.push(x.id());
     }
