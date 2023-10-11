@@ -1,0 +1,100 @@
+[
+  {
+    "title": "KCL Equations",
+    "description": "Outline the basis of the circuit using KCL equations",
+    "sub_steps": [
+      {
+        "description": "Mark Nodes",
+        "operations": [
+          "$N_{1}$",
+          "$N_{2}$"
+        ]
+      },
+      {
+        "description": "Mark Supernodes",
+        "operations": []
+      },
+      {
+        "description": "Current entering and exiting each node.",
+        "operations": [
+          "$$Node (1): $ = {{i}_{4} + {i}_{5} + {i}_{1}}$",
+          "$$Node (2): $ = {{i}_{4} + {i}_{5} + {i}_{2}}$"
+        ]
+      },
+      {
+        "description": "Use potential difference between nodes ($ N_{j, k} $) and Ohm's law to solve for current. Where $j, k$ are the two nodes that the element is connected to. We can treat GND as 0.",
+        "operations": [
+          "${i}_{1} = \\frac{{V}_{1}}{{R}_{1}} = \\frac{N_{1}}{{R}_{1}} = \\frac{N_{1}}{2}$",
+          "${i}_{2} = \\frac{{V}_{2}}{{R}_{2}} = \\frac{N_{2}}{{R}_{2}} = \\frac{N_{2}}{6}$",
+          "${i}_{4} = \\frac{{V}_{4}}{{R}_{4}} = \\frac{{N_{1} - N_{2}}}{{R}_{4}} = {\\frac{N_{1}}{4} + \\frac{-{N_{2}}}{4}}$"
+        ]
+      }
+    ]
+  },
+  {
+    "result": "$\\begin{bmatrix}0.25 & 0.417\\\\0 & 1\\\\\\end{bmatrix}$",
+    "title": "Connection Matrix",
+    "description": null,
+    "sub_steps": [
+      {
+        "result": "$\\begin{bmatrix}0.25\\\\0.417\\\\\\end{bmatrix} = \\begin{bmatrix}N_{1}\\\\N_{2}\\\\\\end{bmatrix}$",
+        "description": "Coefficients from the expanded KCL equations",
+        "operations": []
+      },
+      {
+        "result": "$\\begin{bmatrix}0 & 1\\\\\\end{bmatrix}$",
+        "description": "Element connections between nodes.",
+        "operations": [
+          "$\\begin{bmatrix}2\\\\0\\\\\\end{bmatrix} = $ The current flows from Node 2 to Node 0$$",
+          "$\\begin{bmatrix}1\\\\2\\\\\\end{bmatrix} = $ The current flows from Node 1 to Node 2$$",
+          "$\\begin{bmatrix}1\\\\2\\\\\\end{bmatrix} = $ The current flows from Node 1 to Node 2$$"
+        ]
+      },
+      {
+        "description": "TODO explain this super step",
+        "operations": []
+      }
+    ]
+  },
+  {
+    "result": "$\\begin{bmatrix}N_{1}\\\\N_{2}\\\\\\end{bmatrix} = \\begin{bmatrix}-16.667\\\\10\\\\\\end{bmatrix}$",
+    "title": "Solve For Node Voltages",
+    "description": null,
+    "sub_steps": [
+      {
+        "description": "Invert the matrix",
+        "operations": [
+          "$\\begin{bmatrix}0.25 & 0.417\\\\0 & 1\\\\\\end{bmatrix}^{-1}$",
+          "$\\begin{bmatrix}4 & -1.667\\\\-0 & 1\\\\\\end{bmatrix}$"
+        ]
+      },
+      {
+        "result": "$\\begin{bmatrix}-16.667\\\\10\\\\\\end{bmatrix}$",
+        "description": "Multiply the inverted matrix by the source voltages",
+        "operations": [
+          "$\\begin{bmatrix}0.25 & 0.417\\\\0 & 1\\\\\\end{bmatrix}^{-1} \\cdot \\begin{bmatrix}0\\\\10\\\\\\end{bmatrix} = \\begin{bmatrix}-16.667\\\\10\\\\\\end{bmatrix}$"
+        ]
+      }
+    ]
+  },
+  {
+    "title": "Currents",
+    "description": "Evaluate the currents using the KCL equations and node voltages shown previously.",
+    "sub_steps": [
+      {
+        "description": "Use potential difference between nodes ($ N_j $) and Ohm's law to solve for current.",
+        "operations": [
+          "${i}_{1} = \\frac{N_{1}}{{R}_{1}}$",
+          "${i}_{2} = \\frac{N_{2}}{{R}_{2}}$",
+          "${i}_{4} = \\frac{{N_{1} - N_{2}}}{{R}_{4}}$"
+        ]
+      }
+    ]
+  },
+  {
+    "result": "$\\begin{bmatrix}{i}_{1}\\\\{i}_{2}\\\\{i}_{4}\\\\\\end{bmatrix} = \\begin{bmatrix}-8.333\\\\1.667\\\\-6.667\\\\\\end{bmatrix}$",
+    "title": "Current Results",
+    "description": null,
+    "sub_steps": []
+  }
+]

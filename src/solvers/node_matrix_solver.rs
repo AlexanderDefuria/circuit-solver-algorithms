@@ -314,11 +314,11 @@ mod tests {
     #[test]
     fn test_node_solver() {
         let mut c = create_mna_container();
-        c.create_nodes();
+        c.create_nodes().unwrap();
         let _solver: NodeMatrixSolver = Solver::new(Rc::new(RefCell::new(c)));
 
         let mut c = create_mna_container_2();
-        c.create_nodes();
+        c.create_nodes().unwrap();
         c.create_super_nodes();
         let mut solver: NodeMatrixSolver = Solver::new(Rc::new(RefCell::new(c)));
         let steps = solver.solve();
@@ -336,7 +336,7 @@ mod tests {
         ];
 
         let mut c = create_mna_container();
-        c.create_nodes();
+        c.create_nodes().unwrap();
         let solver: NodeMatrixSolver = Solver::new(Rc::new(RefCell::new(c.clone())));
 
         assert_eq!(2., c.get_element_by_id(1).clone().borrow().value);
@@ -364,7 +364,7 @@ mod tests {
         ];
 
         let mut c = create_mna_container_2();
-        c.create_nodes();
+        c.create_nodes().unwrap();
         let solver: NodeMatrixSolver = Solver::new(Rc::new(RefCell::new(c.clone())));
 
         for i in 0..3 {
@@ -384,7 +384,7 @@ mod tests {
         ];
 
         let mut c = create_mna_container();
-        c.create_nodes();
+        c.create_nodes().unwrap();
         let n = c.nodes().len();
         let matrix = form_g_matrix(Rc::new(RefCell::new(c)), n);
 
@@ -400,7 +400,7 @@ mod tests {
         let expected = vec![vec!["-1", "0"], vec!["1", "0"], vec!["0", "1"]];
 
         let mut c = create_mna_container();
-        c.create_nodes();
+        c.create_nodes().unwrap();
         let n = c.nodes().len();
         let m = c.get_voltage_sources().len();
         let matrix = form_b_matrix(Rc::new(RefCell::new(c)), n, m);
@@ -417,7 +417,7 @@ mod tests {
         let expected = vec![vec!["-1", "1", "0"], vec!["0", "0", "1"]];
 
         let mut c = create_mna_container();
-        c.create_nodes();
+        c.create_nodes().unwrap();
         let n = c.nodes().len();
         let m = c.get_voltage_sources().len();
 
@@ -435,7 +435,7 @@ mod tests {
         let expected = vec![vec!["0", "0"], vec!["0", "0"]];
 
         let mut c = create_mna_container();
-        c.create_nodes();
+        c.create_nodes().unwrap();
         let m = c.get_voltage_sources().len();
 
         let d_matrix = form_d_matrix(Rc::new(RefCell::new(c)), m);
@@ -452,7 +452,7 @@ mod tests {
         let expected = "\\begin{bmatrix}Node: 1\\\\Node: 2\\\\Node: 3\\\\SRC(V)4: 32 V\\\\SRC(V)5: 20 V\\\\\\end{bmatrix}";
 
         let mut c = create_mna_container();
-        c.create_nodes();
+        c.create_nodes().unwrap();
         let solver: NodeMatrixSolver = Solver::new(Rc::new(RefCell::new(c)));
 
         assert_eq!(solver.x_matrix.equation_repr(), expected);
@@ -463,7 +463,7 @@ mod tests {
         let expected = "\\begin{bmatrix}0\\\\0\\\\0\\\\32\\\\20\\\\\\end{bmatrix}";
 
         let mut c = create_mna_container();
-        c.create_nodes();
+        c.create_nodes().unwrap();
         let solver: NodeMatrixSolver = Solver::new(Rc::new(RefCell::new(c)));
 
         assert_eq!(solver.z_matrix.equation_repr(), expected);

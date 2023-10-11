@@ -182,6 +182,13 @@ impl From<Step> for JsValue {
     }
 }
 
+pub fn serialize_steps(steps: Vec<Step>) -> Result<String, JsValue> {
+    match serde_json::to_string(&steps) {
+        Ok(a) => Ok(a),
+        Err(_) => Err(JsValue::from("Error serializing steps")),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::solvers::node_matrix_solver::NodeMatrixSolver;
@@ -194,7 +201,7 @@ mod tests {
     #[test]
     fn test_solve_steps() {
         let mut c = create_mna_container();
-        c.create_nodes();
+        c.create_nodes().unwrap();
         let mut solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(c)));
 
         for i in solver.solve().unwrap() {
@@ -206,7 +213,7 @@ mod tests {
     #[test]
     fn test_solve_matrix() {
         let mut c = create_mna_container();
-        c.create_nodes();
+        c.create_nodes().unwrap();
         let mut solver: NodeMatrixSolver = Solver::new(Rc::new(RefCell::new(c)));
 
         for i in solver.solve().unwrap() {

@@ -14,27 +14,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="52c330b2-a72e-46d5-bbef-071fc6e5ee26" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.run/Build.run.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.run/Integration Test.run.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.run/Test.run.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.run/Unit Test.run.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.run/start.run.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/Cargo.toml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/src/lib.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/container.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/container.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/elements.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/elements.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/interfaces.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/interfaces.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/solvers/node_matrix_solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/node_matrix_solver.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/solvers/node_step_solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/node_step_solver.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/solvers/solver.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/solvers/solver.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tools.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/tools.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/util.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/util.rs" afterDir="false" />
+<<<<<<< HEAD
+      <change beforePath="$PROJECT_DIR$/tests/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Cargo.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/data/!case_1/input.json" beforeDir="false" afterPath="$PROJECT_DIR$/tests/data/case_1/input.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/data/!case_1/result.json" beforeDir="false" afterPath="$PROJECT_DIR$/tests/data/case_1/output.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/data/basic_container.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/data/mna_container/output.json" beforeDir="false" afterPath="$PROJECT_DIR$/tests/data/mna_container/output.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/data/validatable_containers.json" beforeDir="false" />
+=======
       <change beforePath="$PROJECT_DIR$/src/validation.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/validation.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/compare_test_case.rs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/src/compare_test_case.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/tests.rs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/src/wasm_tests.rs" afterDir="false" />
+>>>>>>> 6db055f (hosekeeping)
+      <change beforePath="$PROJECT_DIR$/tests/src/compare_test_case.rs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/src/compare_test_case.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/src/wasm_tests.rs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/src/wasm_tests.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -104,8 +99,8 @@
   },
   &quot;keyToStringList&quot;: {
     &quot;com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File&quot;: [
-      &quot;JSON&quot;,
       &quot;TEXT&quot;,
+      &quot;JSON&quot;,
       &quot;Rust&quot;
     ]
   }
@@ -129,20 +124,60 @@
   <component name="RsExternalLinterProjectSettings">
     <option name="runOnTheFly" value="true" />
   </component>
-  <component name="RunManager" selected="wasm-pack.Build">
+  <component name="RunManager" selected="wasm-pack.Test">
+    <configuration name="Test compare_test_case::test_case_discovery" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="test --package tests --lib compare_test_case::test_case_discovery -- --exact" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$/tests" />
+      <option name="emulateTerminal" value="true" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test wasm_tests::test_validateable_containers" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="test --package tests --lib wasm_tests::test_validateable_containers -- --exact" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$/tests" />
+      <option name="emulateTerminal" value="true" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
     <list>
       <item itemvalue="Cargo.Integration Test" />
       <item itemvalue="Cargo.Unit Test" />
+      <item itemvalue="Cargo.Test compare_test_case::test_case_discovery" />
+      <item itemvalue="Cargo.Test wasm_tests::test_validateable_containers" />
       <item itemvalue="Compound.Test" />
       <item itemvalue="npm.start" />
       <item itemvalue="wasm-pack.Build" />
       <item itemvalue="wasm-pack.Test" />
     </list>
+<<<<<<< HEAD
     <recent_temporary>
       <list>
-        <item itemvalue="Cargo.Test mod" />
+        <item itemvalue="Cargo.Test compare_test_case::test_case_discovery" />
+        <item itemvalue="Cargo.Test wasm_tests::test_validateable_containers" />
       </list>
     </recent_temporary>
+=======
+>>>>>>> 6db055f (hosekeeping)
   </component>
   <component name="RustProjectSettings">
     <option name="toolchainHomeDirectory" value="$USER_HOME$/.cargo/bin" />
@@ -255,7 +290,13 @@
       <workItem from="1695869390082" duration="6562000" />
       <workItem from="1695876189368" duration="329000" />
       <workItem from="1696600051467" duration="23740000" />
-      <workItem from="1696705395712" duration="6994000" />
+      <workItem from="1696705395712" duration="8051000" />
+<<<<<<< HEAD
+      <workItem from="1696967994420" duration="6149000" />
+      <workItem from="1697056145473" duration="2281000" />
+=======
+      <workItem from="1696967994420" duration="3449000" />
+>>>>>>> 6db055f (hosekeeping)
     </task>
     <servers />
   </component>

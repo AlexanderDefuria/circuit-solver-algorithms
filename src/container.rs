@@ -13,9 +13,11 @@ use petgraph::prelude::NodeIndex;
 use rustworkx_core::connectivity;
 use std::cell::RefCell;
 
+use crate::tools::ToolType::SuperNode;
 use serde::Serialize;
 use std::fmt::{Debug, Formatter};
 use std::rc::{Rc, Weak};
+use crate::tools::ToolType::SuperNode;
 
 /// Representation of a Schematic Container
 ///
@@ -101,26 +103,10 @@ impl Container {
             .collect()
     }
 
-    pub fn supernodes(&self) -> Vec<Weak<RefCell<Tool>>> {
+    pub fn get_tools(&self, tool_type: ToolType) -> Vec<Weak<RefCell<Tool>>> {
         self.tools
             .iter()
-            .filter(|x| x.borrow().class == ToolType::SuperNode)
-            .map(|x| Rc::downgrade(x))
-            .collect()
-    }
-
-    pub fn meshes(&self) -> Vec<Weak<RefCell<Tool>>> {
-        self.tools
-            .iter()
-            .filter(|x| x.borrow().class == ToolType::Mesh)
-            .map(|x| Rc::downgrade(x))
-            .collect()
-    }
-
-    pub fn components(&self) -> Vec<Weak<RefCell<Element>>> {
-        self.elements
-            .iter()
-            .filter(|x| x.borrow().class != Ground)
+            .filter(|x| x.borrow().class == tool_type)
             .map(|x| Rc::downgrade(x))
             .collect()
     }
@@ -131,7 +117,7 @@ impl Container {
     /// comparing the samples to see if they are the same. If they are the same
     /// then they are connected and should be added to the same node.
     /// By by filtering our duplicates we can create a pure list of nodes.
-    pub fn create_nodes(&mut self) -> &mut Self {
+    pub fn create_nodes(&mut self) -> Result<&mut Self, StatusError> {
         let mut new_nodes: Vec<Tool> = Vec::new();
 
         for element in &self.elements {
@@ -167,25 +153,14 @@ impl Container {
             self.add_tool(node);
         }
 
-        self
-    }
-
-    pub fn print_nodes(&self) {
-        println!("Nodes:");
-        for node in self.nodes() {
-            println!(
-                "  {} {}",
-                node.upgrade().unwrap().borrow().pretty_string(),
-                node.upgrade().unwrap().borrow().basic_string()
-            );
-        }
+        Ok(self)
     }
 
     pub(crate) fn get_calculation_nodes(&self) -> Vec<Rc<RefCell<Tool>>> {
         let nodes: Vec<Rc<RefCell<Tool>>> =
             self.nodes().iter().map(|x| x.upgrade().unwrap()).collect();
         let super_nodes: Vec<Rc<RefCell<Tool>>> = self
-            .supernodes()
+            .get_tools(SuperNode)
             .iter()
             .map(|x| x.upgrade().unwrap())
             .collect();
@@ -280,10 +255,6 @@ impl Container {
         &self.elements
     }
 
-    pub fn get_tools(&self) -> &Vec<Rc<RefCell<Tool>>> {
-        &self.tools
-    }
-
     /// Returns a vector of all the tools of a given type
     /// Note Weak RCs are returned
     pub fn get_tools_by_type(&self, tool_type: ToolType) -> Vec<Weak<RefCell<Tool>>> {
@@ -292,18 +263,6 @@ impl Container {
             .filter(|x| x.borrow().class == tool_type)
             .map(|x| Rc::downgrade(x))
             .collect()
-    }
-
-    pub fn get_ground(&self) -> &Rc<RefCell<Element>> {
-        self.elements.get(self.ground).unwrap()
-    }
-
-    pub fn simplify(&mut self, _method: &Simplification) -> &mut Self {
-        todo!()
-    }
-
-    pub fn solve(&mut self, _method: &ToolType) -> &mut Self {
-        todo!()
     }
 
     pub fn get_tools_for_element(&self, element_id: usize) -> Vec<Weak<RefCell<Tool>>> {
@@ -325,7 +284,7 @@ impl Container {
     pub fn get_all_node_pairs(&self) -> Vec<(usize, usize, Rc<RefCell<Element>>)> {
         let mut node_to_node_resistors: Vec<(usize, usize, Rc<RefCell<Element>>)> = Vec::new();
 
-        for element in self.get_elements() {
+        for element in self.elements.iter() {
             if node_to_node_resistors
                 .iter()
                 .any(|x| x.2.borrow().id == element.borrow().id)
@@ -417,7 +376,7 @@ mod tests {
     use crate::component::Component::{Ground, Resistor};
     use crate::container::Container;
     use crate::elements::Element;
-    use crate::tools::ToolType::SuperNode;
+    use crate::tools::ToolType::{Mesh, SuperNode};
     use crate::util::*;
     use crate::validation::Status::Valid;
     use crate::validation::{StatusError, Validation};
@@ -471,7 +430,7 @@ mod tests {
     #[test]
     fn test_create_nodes() {
         let mut container = create_basic_container();
-        let x = container.create_nodes();
+        let x = container.create_nodes().unwrap();
         let test_vectors = vec![
             vec![x.elements[3].id(), x.elements[1].id()],
             vec![x.elements[1].id(), x.elements[2].id()],
@@ -490,7 +449,7 @@ mod tests {
     #[test]
     fn test_get_nodes() {
         let mut x = create_basic_container();
-        let c = x.create_nodes();
+        let c = x.create_nodes().unwrap();
         let test_vectors = vec![
             vec![c.elements[3].id(), c.elements[1].id()],
             vec![c.elements[1].id(), c.elements[2].id()],
@@ -505,14 +464,14 @@ mod tests {
         }
 
         let mut x = create_mna_container();
-        let c = x.create_nodes();
+        let c = x.create_nodes().unwrap();
         assert!(c.validate().is_ok());
     }
 
     #[test]
     fn test_create_super_nodes() {
         let mut container = create_basic_supernode_container();
-        container.create_nodes().create_super_nodes();
+        container.create_nodes().unwrap().create_super_nodes();
         assert_eq!(container.validate(), Ok(Valid));
 
         // Check that there is only one supernode
@@ -542,20 +501,20 @@ mod tests {
     #[test]
     fn test_mna_supermesh() {
         let mut container = create_mna_container();
-        container.create_nodes().create_super_nodes();
+        container.create_nodes().unwrap().create_super_nodes();
         assert_eq!(container.validate(), Ok(Valid));
     }
 
     #[test]
     fn test_create_mesh() {
         let mut basic: Container = create_basic_container();
-        basic.create_nodes();
+        basic.create_nodes().unwrap();
         basic.create_meshes();
         assert_eq!(basic.validate(), Ok(Valid));
         assert_eq!(basic.tools.len(), 3);
 
         let mesh_members: Vec<usize> = vec![0, 1, 2];
-        let mesh = basic.meshes().get(0).unwrap().upgrade().unwrap();
+        let mesh = basic.get_tools(Mesh).get(0).unwrap().upgrade().unwrap();
         assert_eq!(mesh.borrow().members.len(), mesh_members.len());
         for member in mesh.borrow().members.iter() {
             assert!(mesh_members.contains(&member.upgrade().unwrap().id()),);
@@ -565,7 +524,7 @@ mod tests {
     #[test]
     fn test_get_calculation_nodes() {
         let mut basic: Container = create_basic_container();
-        basic.create_nodes();
+        basic.create_nodes().unwrap();
         basic.create_meshes();
         let nodes = basic.get_calculation_nodes();
         assert_eq!(nodes.len(), 2);

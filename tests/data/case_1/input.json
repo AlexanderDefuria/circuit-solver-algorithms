@@ -1,0 +1,84 @@
+{
+  "solver": "NodeStep",
+  "container": {
+    "elements": [
+      {
+        "id": 0,
+        "value": 0.0,
+        "class": "Ground",
+        "positive": [
+          3,
+          2,
+          1
+        ],
+        "negative": []
+      },
+      {
+        "id": 1,
+        "value": 2.0,
+        "class": "Resistor",
+        "positive": [
+          4,
+          5
+        ],
+        "negative": [
+          0
+        ]
+      },
+      {
+        "id": 2,
+        "value": 6.0,
+        "class": "Resistor",
+        "positive": [
+          3,
+          4,
+          5
+        ],
+        "negative": [
+          0
+        ]
+      },
+      {
+        "id": 3,
+        "value": 10.0,
+        "class": "VoltageSrc",
+        "positive": [
+          2,
+          4,
+          5
+        ],
+        "negative": [
+          0
+        ]
+      },
+      {
+        "id": 4,
+        "value": 4.0,
+        "class": "Resistor",
+        "positive": [
+          1,
+          5
+        ],
+        "negative": [
+          2,
+          3,
+          5
+        ]
+      },
+      {
+        "id": 5,
+        "value": 5.0,
+        "class": "CurrentSrc",
+        "positive": [
+          1,
+          4
+        ],
+        "negative": [
+          2,
+          3,
+          4
+        ]
+      }
+    ]
+  }
+}

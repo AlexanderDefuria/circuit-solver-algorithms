@@ -85,12 +85,14 @@ impl Solver for NodeStepSolver {
 impl NodeStepSolver {
     /// Node Pairs
     fn setup_connections(&mut self) -> Result<(), String> {
-        let vec_size: usize = self
+        let vec_size: usize = match self
             .node_pairs
             .iter()
             .max_by(|(a, _, _), (b, _, _)| a.cmp(b))
-            .unwrap()
-            .0;
+        {
+            None => return Err("Node pairs are invalid, cannot do analysis".to_string()),
+            Some(a) => a.0,
+        };
 
         self.node_pairs
             .iter()
@@ -646,16 +648,6 @@ impl NodeStepSolver {
             ));
         });
 
-        let results = self
-            .current_values
-            .iter()
-            .map(|(_, x)| {
-                let mut y = x.clone();
-                y.apply_variables();
-                y
-            })
-            .collect::<Vec<Operation>>();
-
         steps.push(SubStep{
             description: Some("Use potential difference between nodes ($ N_j $) and Ohm's law to solve for current.".to_string()),
             result: None,
@@ -724,7 +716,7 @@ mod tests {
 
     fn setup_mna_solver() -> NodeStepSolver {
         let mut c: Container = create_mna_container();
-        c.create_nodes();
+        c.create_nodes().unwrap();
         c.create_super_nodes();
         let mut solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(c)));
         solver.solve().expect("Unable to solve");

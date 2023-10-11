@@ -6,7 +6,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-circuit-solver-algorithms = { path = "../" }
 assert-json-diff = "2.0.2"
 serde = { version = "1.0.177", features = ["derive", "rc"] }
 serde_json = "1.0.96"
@@ -17,8 +16,12 @@ rustworkx-core = "0.13.0"
 getrandom = { version = "0.2", features = ["js"] }
 ndarray = "0.15.6"
 nalgebra = "0.32.3"
-wasm-bindgen-test = "0.3.0"
 num-traits = "0.2.15"
 js-sys = "0.3.64"
 operations = { path = "../../operations" }
 regex-lite = "0.1.0"
+circuit-solver-algorithms = { path = "../" }
+wasm-bindgen-test = "0.3.0"
+diff = "0.1.12"
+
+[dev-dependencies]

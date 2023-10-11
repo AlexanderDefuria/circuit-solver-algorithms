@@ -2,10 +2,12 @@ use crate::component::Component::{CurrentSrc, Ground, Resistor, VoltageSrc};
 use crate::container::Container;
 use crate::elements::Element;
 
+
 pub(crate) trait PrettyPrint {
     fn pretty_string(&self) -> String;
     fn basic_string(&self) -> String;
 }
+
 
 #[macro_export]
 macro_rules! assert_known_error {
@@ -103,7 +105,7 @@ mod tests {
             id += 1;
 
             assert_eq!(container.validate(), Ok(Valid));
-            container.create_nodes();
+            container.create_nodes().unwrap();
             container.create_super_nodes();
             container.create_meshes();
             container.create_super_meshes();

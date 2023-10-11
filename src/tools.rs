@@ -337,7 +337,7 @@ mod tests {
     #[test]
     fn test_create_node_graph() {
         let mut basic: Container = create_basic_container();
-        let container: Vec<Weak<RefCell<Tool>>> = basic.create_nodes().nodes();
+        let container: Vec<Weak<RefCell<Tool>>> = basic.create_nodes().unwrap().nodes();
         let edges = Tool::node_edges(&container).unwrap();
         let expected = vec![(1, 0), (1, 2), (2, 0)];
 
@@ -346,14 +346,14 @@ mod tests {
             assert!(expected.contains(&edge));
         }
 
-        let container: Vec<Weak<RefCell<Tool>>> = basic.create_nodes().nodes();
+        let container: Vec<Weak<RefCell<Tool>>> = basic.create_nodes().unwrap().nodes();
         let graph = Tool::nodes_to_graph(&container).unwrap();
         assert_eq!(graph.node_count(), 3);
         assert_eq!(graph.edge_count(), 3);
 
         let mut super_node = create_basic_supermesh_container();
         let graph: UnGraph<i32, ()> =
-            Tool::nodes_to_graph(&super_node.create_nodes().nodes()).unwrap();
+            Tool::nodes_to_graph(&super_node.create_nodes().unwrap().nodes()).unwrap();
         println!("{:?}", graph);
         assert_eq!(graph.node_count(), 5);
         assert_eq!(graph.edge_count(), 7);

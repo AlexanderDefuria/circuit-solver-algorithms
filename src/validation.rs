@@ -61,9 +61,15 @@ impl Display for StatusError {
     }
 }
 
-impl Into<JsValue> for StatusError {
-    fn into(self) -> JsValue {
-        JsValue::from_str(&format!("{}", self))
+impl From<String> for StatusError {
+    fn from(str: String) -> Self {
+        StatusError::Known(str)
+    }
+}
+
+impl From<StatusError> for JsValue {
+    fn from(error: StatusError) -> Self {
+        JsValue::from_str(&format!("{}", error))
     }
 }
 

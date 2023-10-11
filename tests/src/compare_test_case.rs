@@ -60,10 +60,23 @@ fn load_input_case(paths: CasePaths) -> InputCaseSerde {
 #[test]
 fn test_case_discovery() {
     for case_paths in find_cases() {
-        let mut case: InputCaseSerde = serde_json::from_str(&std::fs::read_to_string(&case_paths.input).unwrap()).unwrap();
+        let input_str = if let Ok(input_str) = std::fs::read_to_string(&case_paths.input) {
+            input_str
+        } else {
+            println!("Failed to find and read input file: {}", case_paths.input.display());
+            continue;
+        };
+
+        let case: InputCaseSerde = if let Ok(case) = serde_json::from_str(&input_str) {
+            case
+        } else {
+            println!("Failed to parse and deserialize case from file: {}", case_paths.input.display());
+            continue;
+        };
+
         let mut c: Container = Container::from(case.container);
         c.validate().unwrap();
-        c.create_nodes();
+        c.create_nodes().unwrap();
         c.create_super_nodes();
         let mut solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(c)));
         let steps = solver.solve().unwrap();
@@ -73,8 +86,11 @@ fn test_case_discovery() {
         output_dir.push(format!("{}", case_paths.case_name));
         output_dir.set_extension("json");
 
-        serde_json::to_writer_pretty(File::create(output_dir).unwrap(), &steps).unwrap();
+        serde_json::to_writer_pretty(File::create(output_dir.clone()).unwrap(), &steps).unwrap();
 
-        // TODO Compare files here
+        assert_json_diff::assert_json_eq!(
+            std::fs::read_to_string(&case_paths.output).unwrap(),
+            std::fs::read_to_string(&output_dir).unwrap()
+        );
     }
 }

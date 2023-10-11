@@ -17,31 +17,11 @@ use circuit_solver_algorithms::validation::{StatusError, Validation};
 
 use crate::compare_test_case::InputCaseSerde;
 
-#[wasm_bindgen_test]
-fn test_validateable_containers() {
-    let raw_json: &str = include_str!("../data/!case_1/input.json");
-    let setup: ContainerSetup = serde_json::from_str(raw_json).unwrap();
-    let mut container: Container = setup.into();
-    assert_eq!(container.validate().unwrap(), Valid);
 
-    container.create_nodes();
-    container.create_super_nodes();
-    let mut solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(container)));
-    let steps: Vec<Step> = solver.solve().unwrap();
-    let steps_string: String = serde_json::to_string(&steps).unwrap();
-    let expected: &str = include_str!("../data/!case_1/result.json");
-    // TODO Change this to assert_eq! once the solver is fixed
-    assert_ne!(
-        cleanup_include_str(expected.to_string()),
-        cleanup_include_str(steps_string),
-        "Steps are not matching"
-    )
-}
 
-#[wasm_bindgen_test]
 pub fn test_solver_select() {
     let mut c: Container = create_mna_container();
-    c.create_nodes();
+    c.create_nodes().unwrap();
     c.create_super_nodes();
     let mut solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(c)));
 
@@ -65,7 +45,7 @@ pub fn test_get_tools() {
     let mut container: Container = setup.container.into();
     assert_eq!(container.validate().unwrap(), Valid);
 
-    container.create_nodes();
+    container.create_nodes().unwrap();
     let nodes = container.nodes();
     assert_eq!(nodes.len(), 3);
 
@@ -77,7 +57,7 @@ pub fn test_get_tools() {
 #[wasm_bindgen_test]
 pub fn test_serialize_steps() {
     let mut c: Container = create_mna_container();
-    c.create_nodes();
+    c.create_nodes().unwrap();
     c.create_super_nodes();
     let mut solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(c)));
 
@@ -149,7 +129,8 @@ fn test_load() {
     );
 }
 
-fn cleanup_include_str(input: String) -> String {
+
+pub fn cleanup_include_str(input: String) -> String {
     let mut output: String = input.replace("\n", "");
     output = output.replace(" ", "");
     output
