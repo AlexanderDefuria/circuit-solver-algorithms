@@ -17,7 +17,6 @@ use crate::tools::ToolType::SuperNode;
 use serde::Serialize;
 use std::fmt::{Debug, Formatter};
 use std::rc::{Rc, Weak};
-use crate::tools::ToolType::SuperNode;
 
 /// Representation of a Schematic Container
 ///

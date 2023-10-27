@@ -1,0 +1,85 @@
+{
+ "elements": [
+  {
+   "type": 3,
+   "designator": "R0",
+   "np": [
+    "R2"
+   ],
+   "nn": [
+    "R1"
+   ],
+   "npIndex": {
+    "x": 6,
+    "y": 9
+   },
+   "nnIndex": {
+    "x": 19,
+    "y": 8
+   },
+   "value": 10,
+   "id": 0,
+   "positive": [
+    1
+   ],
+   "negative": [
+    2
+   ],
+   "class": "Resistor"
+  },
+  {
+   "type": 3,
+   "designator": "R1",
+   "np": [
+    "R0"
+   ],
+   "nn": [
+    "R2"
+   ],
+   "npIndex": {
+    "x": 19,
+    "y": 8
+   },
+   "nnIndex": {
+    "x": 11,
+    "y": 17
+   },
+   "value": 10,
+   "id": 1,
+   "positive": [
+    2
+   ],
+   "negative": [
+    0
+   ],
+   "class": "Resistor"
+  },
+  {
+   "type": 3,
+   "designator": "R2",
+   "np": [
+    "R0"
+   ],
+   "nn": [
+    "R1"
+   ],
+   "npIndex": {
+    "x": 6,
+    "y": 9
+   },
+   "nnIndex": {
+    "x": 11,
+    "y": 17
+   },
+   "value": 10,
+   "id": 2,
+   "positive": [
+    1
+   ],
+   "negative": [
+    0
+   ],
+   "class": "Resistor"
+  }
+ ]
+}

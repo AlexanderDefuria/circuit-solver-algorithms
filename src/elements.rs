@@ -16,15 +16,15 @@ use std::fmt::Display;
 pub struct Element {
     #[serde(skip_deserializing)]
     pub(crate) name: String,
-    pub(crate) id: usize,
-    pub(crate) value: f64,
+    pub(crate) id: usize, //
+    pub(crate) value: f64, //
     #[serde(skip_deserializing)]
     pub(crate) current: Operation,
     #[serde(skip_deserializing)]
     pub(crate) voltage_drop: f64,
-    pub(crate) class: Component,
+    pub(crate) class: Component, //
     pub(crate) positive: Vec<usize>, // Link to other elements
-    pub(crate) negative: Vec<usize>,
+    pub(crate) negative: Vec<usize>, //
 }
 
 impl Element {
