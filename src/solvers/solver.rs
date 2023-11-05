@@ -182,10 +182,10 @@ impl From<Step> for JsValue {
     }
 }
 
-pub fn serialize_steps(steps: Vec<Step>) -> Result<String, JsValue> {
+pub fn serialize_steps(steps: Vec<Step>) -> Result<String, String> {
     match serde_json::to_string(&steps) {
         Ok(a) => Ok(a),
-        Err(_) => Err(JsValue::from("Error serializing steps")),
+        Err(_) => Err("Error serializing steps".to_string()),
     }
 }
 

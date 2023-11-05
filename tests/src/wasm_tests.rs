@@ -7,7 +7,7 @@ use wasm_bindgen_test::wasm_bindgen_test;
 use circuit_solver_algorithms::component::Component::{Ground, Resistor, VoltageSrc};
 use circuit_solver_algorithms::container::Container;
 use circuit_solver_algorithms::elements::Element;
-use circuit_solver_algorithms::interfaces::{get_tools, load_wasm_container, ContainerSetup};
+use circuit_solver_algorithms::interfaces::{get_tools, load_wasm_container, ContainerSetup, solve};
 use circuit_solver_algorithms::solvers::node_step_solver::NodeStepSolver;
 use circuit_solver_algorithms::solvers::solver::{Solver, Step};
 use circuit_solver_algorithms::util::create_mna_container;
@@ -129,6 +129,21 @@ fn test_load() {
     );
 }
 
+#[wasm_bindgen_test]
+fn test_error() {
+    let c = ContainerSetup {
+        elements: vec![
+            Element::new(VoltageSrc, 1.0, vec![3, 0], vec![2]),
+            Element::new(Resistor, 1.0, vec![1], vec![3]),
+            Element::new(Resistor, 1.0, vec![2], vec![1, 0]),
+        ],
+    };
+    let x: JsValue = serde_wasm_bindgen::to_value(&c).unwrap();
+    assert_eq!(
+        solve(false, true, x),
+        Err("No Sources".to_string())
+    );
+}
 
 pub fn cleanup_include_str(input: String) -> String {
     let mut output: String = input.replace("\n", "");

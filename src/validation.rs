@@ -1,6 +1,7 @@
 use std::cell::RefCell;
 use std::fmt::{Debug, Display, Formatter};
 use std::rc::{Rc, Weak};
+use serde::{Deserialize, Serialize};
 
 use wasm_bindgen::JsValue;
 
@@ -18,7 +19,7 @@ pub enum Status {
 /// Possible Issues
 ///
 /// Valid: Container is valid
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub enum StatusError {
     Unknown,
     Known(String),
@@ -64,6 +65,28 @@ impl Display for StatusError {
 impl From<String> for StatusError {
     fn from(str: String) -> Self {
         StatusError::Known(str)
+    }
+}
+
+impl From<JsValue> for StatusError {
+    fn from(value: JsValue) -> Self {
+        StatusError::Known(value.as_string().unwrap_or("Unknown".to_string()))
+    }
+}
+
+impl From<StatusError> for String {
+    fn from(error: StatusError) -> Self {
+        let contents = match error {
+            StatusError::Unknown => "Unknown Issue".to_string(),
+            StatusError::Known(str) => format!("\"Known Issue... {}\"", str),
+            StatusError::Multiple(error_list) => error_list
+                .iter()
+                .map(|x| format!("\"{}\"", x))
+                .collect::<Vec<String>>()
+                .join(", ")
+        };
+
+        format!("{{\"errors\": [{contents}]}}")
     }
 }
 

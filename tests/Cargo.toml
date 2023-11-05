@@ -23,5 +23,3 @@ regex-lite = "0.1.0"
 circuit-solver-algorithms = { path = "../" }
 wasm-bindgen-test = "0.3.0"
 diff = "0.1.12"
-
-[dev-dependencies]

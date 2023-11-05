@@ -190,7 +190,7 @@ impl Container {
         cleaned
     }
 
-    pub fn create_super_nodes(&mut self) -> &mut Self {
+    pub fn create_super_nodes(&mut self) -> Result<&mut Self, String> {
         let mut super_nodes: Vec<Tool> = Vec::new();
         let mut valid_sources: Vec<Weak<RefCell<Element>>> = Vec::new();
         for element in &self.elements {
@@ -225,7 +225,7 @@ impl Container {
             self.add_tool(node);
         }
 
-        self
+        Ok(self)
     }
 
     pub fn create_meshes(&mut self) -> &mut Self {

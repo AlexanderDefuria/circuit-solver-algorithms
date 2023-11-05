@@ -8,9 +8,6 @@ crate-type = ["cdylib", "rlib"]
 path = "src/lib.rs"
 name = "circuit_solver_algorithms"
 
-
-
-
 [dependencies]
 serde = { version = "1.0.177", features = ["derive", "rc"] }
 serde_json = "1.0.96"

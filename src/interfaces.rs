@@ -14,6 +14,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsValue;
+use crate::validation::StatusError::Known;
 
 #[derive(Serialize, Deserialize)]
 pub struct ContainerSetup {
@@ -36,7 +37,7 @@ pub fn get_tools(container_js: JsValue) -> Result<String, StatusError> {
     let mut c: Container = Container::from(setup);
     c.validate()?;
     c.create_nodes()?;
-    c.create_super_nodes();
+    c.create_super_nodes()?;
     let nodes: Vec<Vec<usize>> = c
         .nodes()
         .iter()
@@ -47,15 +48,20 @@ pub fn get_tools(container_js: JsValue) -> Result<String, StatusError> {
 }
 
 #[wasm_bindgen]
-pub fn solve(matrix: bool, nodal: bool, container_js: JsValue) -> Result<String, JsValue> {
-    let setup: ContainerSetup = from_value(container_js)?;
+pub fn solve(matrix: bool, nodal: bool, container_js: JsValue) -> Result<String, String> {
+    let setup: ContainerSetup = if let Ok(setup) = from_value(container_js) {
+        setup
+    } else {
+        return Err(String::from(Known("Failed to parse and deserialize input case".to_string())));
+    };
+
     let mut c: Container = Container::from(setup);
     c.validate()?;
 
     return match nodal {
         true => {
             c.create_nodes()?;
-            c.create_super_nodes();
+            c.create_super_nodes()?;
             let steps: Vec<Step>;
             if matrix {
                 let mut solver: NodeMatrixSolver = Solver::new(Rc::new(RefCell::new(c)));
@@ -69,28 +75,28 @@ pub fn solve(matrix: bool, nodal: bool, container_js: JsValue) -> Result<String,
         false => {
             c.create_meshes();
             c.create_super_meshes();
-            Err(JsValue::from(format!(
+            Err(format!(
                 "{} Solver not implemented for meshes",
                 if matrix { "Matrix" } else { "Step" }
-            )))
+            ))
         }
     };
 }
 
 #[wasm_bindgen]
-pub fn return_solved_step_example() -> Result<String, JsValue> {
+pub fn return_solved_step_example() -> Result<String, String> {
     let mut c: Container = create_mna_container();
     c.create_nodes()?;
-    c.create_super_nodes();
+    c.create_super_nodes()?;
     let mut solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(c)));
     serialize_steps(solver.solve()?)
 }
 
 #[wasm_bindgen]
-pub fn return_solved_matrix_example() -> Result<String, JsValue> {
+pub fn return_solved_matrix_example() -> Result<String, String> {
     let mut c: Container = create_mna_container();
     c.create_nodes()?;
-    c.create_super_nodes();
+    c.create_super_nodes()?;
     let mut solver: NodeMatrixSolver = Solver::new(Rc::new(RefCell::new(c)));
     serialize_steps(solver.solve()?)
 }
@@ -101,12 +107,12 @@ pub fn test_wasm() -> String {
 }
 
 #[wasm_bindgen]
-pub fn test_error() -> Result<String, JsValue> {
-    Err(JsValue::from_str("Error from Rust! 🦀🦀🦀"))
+pub fn test_error() -> Result<String, String> {
+    Err("Error from Rust! 🦀🦀🦀".to_string())
 }
 
 #[wasm_bindgen]
-pub fn solve_test_container(container_id: i32) -> Result<String, JsValue> {
+pub fn solve_test_container(container_id: i32) -> Result<String, String> {
     let c: Container = match container_id {
         0 => create_basic_container(),
         1 => create_basic_supernode_container(),
