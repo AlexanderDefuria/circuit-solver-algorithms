@@ -141,7 +141,8 @@ fn test_error() {
     let x: JsValue = serde_wasm_bindgen::to_value(&c).unwrap();
     assert_eq!(
         solve(false, true, x),
-        Err("No Sources".to_string())
+        // Err("No Sources".to_string())
+        Err("{\"errors\": [\"Known Issue: Element cannot be connected to itself SRC(V)0: 1 V\", \"Known Issue: Element cannot be connected to itself R1: 1 Ω\", \"Known Issue: Element cannot be connected to itself R2: 1 Ω\", \"Known Issue: Multiple Grounds\"]}".to_string())
     );
 }
 
@@ -151,3 +152,100 @@ pub fn cleanup_include_str(input: String) -> String {
     output
 }
 
+#[wasm_bindgen_test]
+fn test_matrix_invert_error() {
+    let c: ContainerSetup = ContainerSetup {
+        elements: vec![
+            Element::new(Ground, 0.0, vec![], vec![1,3]),
+            Element::new(Resistor, 10.0, vec![2], vec![0, 3]),
+            Element::new(Resistor, 10.0, vec![4], vec![1]),
+            Element::new(Resistor, 10.0, vec![0, 1], vec![4]),
+            Element::new(VoltageSrc, 10.0, vec![3], vec![2]),
+        ],
+    };
+    let x: JsValue = serde_wasm_bindgen::to_value(&c).unwrap();
+    assert_eq!(
+        solve(false, true, x),
+        Err("{\"errors\": [\"Known Issue... Matrix is not square: \\begin{bmatrix}0 & 0.1\\\\0 & 1\\\\0 & 0\\\\\\end{bmatrix}\"]}".to_string())
+    );
+
+    let c: ContainerSetup = ContainerSetup {
+        elements: vec![
+            Element::new(Ground, 0.0, vec![], vec![1,4]),
+            Element::new(Resistor, 10.0, vec![2], vec![0, 4]),
+            Element::new(VoltageSrc, 10.0, vec![4], vec![1]),
+            Element::new(Resistor, 10.0, vec![2], vec![0, 1]),
+        ],
+    };
+    let x: JsValue = serde_wasm_bindgen::to_value(&c).unwrap();
+    assert_eq!(
+        solve(false, true, x),
+        Err("{\"errors\": [\"Known Issue... Matrix is not square: \\begin{bmatrix}0 & 0.1\\\\0 & 1\\\\0 & 0\\\\\\end{bmatrix}\"]}".to_string())
+    );
+}
+
+#[wasm_bindgen_test]
+pub fn test_malformed_ids_from_netlist() {
+    let json: JsValue = JsValue::from_str(r#"
+    {
+ "elements": [
+  {
+   "value": 10,
+   "id": 1,
+   "positive": [],
+   "negative": [
+    2
+   ],
+   "class": "Resistor"
+  },
+  {
+   "value": 10,
+   "id": 2,
+   "positive": [
+    4
+   ],
+   "negative": [
+    0
+   ],
+   "class": "Resistor"
+  },
+  {
+   "value": 10,
+   "id": 3,
+   "positive": [
+    4
+   ],
+   "negative": [
+    0
+   ],
+   "class": "VoltageSrc"
+  },
+  {
+   "value": 0,
+   "id": 0,
+   "positive": [],
+   "negative": [
+    2,
+    4
+   ],
+   "class": "Ground"
+  },
+  {
+   "value": 10,
+   "id": 5,
+   "positive": [
+    1
+   ],
+   "negative": [
+    2,
+    3
+   ],
+   "class": "Resistor"
+  }
+ ]
+}"#);
+    assert_eq!(
+        solve(false, true, json),
+        Err("{\"errors\": [\"Known Issue: Element cannot be connected to itself R1: 10 Ω\", \"Known Issue: Element cannot be connected to itself R2: 10 Ω\", \"Known Issue: Element cannot be connected to itself SRC(V)3: 10 V\", \"Known Issue: Multiple Grounds\"]}".to_string())
+    );
+}

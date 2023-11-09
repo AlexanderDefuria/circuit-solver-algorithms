@@ -1,7 +1,7 @@
+use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use std::fmt::{Debug, Display, Formatter};
 use std::rc::{Rc, Weak};
-use serde::{Deserialize, Serialize};
 
 use wasm_bindgen::JsValue;
 
@@ -83,7 +83,7 @@ impl From<StatusError> for String {
                 .iter()
                 .map(|x| format!("\"{}\"", x))
                 .collect::<Vec<String>>()
-                .join(", ")
+                .join(", "),
         };
 
         format!("{{\"errors\": [{contents}]}}")

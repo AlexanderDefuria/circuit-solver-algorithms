@@ -4,7 +4,8 @@ use crate::elements::Element;
 use crate::solvers::solver::{Solver, Step, SubStep};
 use crate::tools::Tool;
 use crate::tools::ToolType::{Node, SuperNode};
-use crate::validation::Validation;
+use crate::validation::StatusError::Known;
+use crate::validation::{StatusError, Validation};
 use nalgebra::{DMatrix, DVector};
 use operations::mappings::expand;
 use operations::math::EquationMember;
@@ -64,7 +65,7 @@ impl Solver for NodeStepSolver {
     /// Returns a vector of strings that represent the steps to solve the circuit.
     ///
     /// This Handles the formatting of the data into what the frontend requires.
-    fn solve(&mut self) -> Result<Vec<Step>, String> {
+    fn solve(&mut self) -> Result<Vec<Step>, StatusError> {
         // SETUP and CALCULATIONS
         self.setup_connections()?;
         self.setup_node_equations()?;
@@ -121,7 +122,7 @@ impl NodeStepSolver {
         Ok(())
     }
 
-    fn solve_node_voltages(&mut self) -> Result<(), String> {
+    fn solve_node_voltages(&mut self) -> Result<(), StatusError> {
         let mut source_voltages: DVector<f64> = DVector::zeros(self.sources.len() + 1);
 
         self.sources.iter().enumerate().for_each(|(i, x)| {
@@ -147,17 +148,32 @@ impl NodeStepSolver {
             });
         });
 
-        let inverse_result: Result<DMatrix<f64>, Box<dyn Any + Send>> =
-            panic::catch_unwind(|| self.connection_matrix.clone().try_inverse().unwrap());
+        if self.connection_matrix.len() == 0 {
+            return Err(Known("No nodes to solve".to_string()));
+        }
+        if !self.connection_matrix.is_square() {
+            return Err(Known(format!(
+                "Matrix is not square: {}",
+                self.connection_matrix.equation_repr()
+            )));
+        }
+
+        let inverse_result: Result<Option<DMatrix<f64>>, Box<dyn Any + Send>> =
+            panic::catch_unwind(|| self.connection_matrix.clone().try_inverse());
 
         let inverse: DMatrix<f64>;
         if let Err(_) = inverse_result {
-            return Err(format!(
+            return Err(Known(format!(
                 "Unable to invert matrix: {}",
                 self.connection_matrix.equation_repr()
-            ));
+            )));
+        } else if let Ok(None) = inverse_result {
+            return Err(Known(format!(
+                "Unable to invert matrix: {}",
+                self.connection_matrix.equation_repr()
+            )));
         } else {
-            inverse = inverse_result.unwrap();
+            inverse = inverse_result.unwrap().unwrap();
         }
 
         self.inverse = inverse.clone();

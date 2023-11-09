@@ -48,6 +48,14 @@ pub fn get_tools(container_js: JsValue) -> Result<String, StatusError> {
 }
 
 #[wasm_bindgen]
+pub fn validate(container_js: JsValue) -> Result<String, StatusError> {
+    let setup: ContainerSetup = from_value(container_js).unwrap();
+    let mut c: Container = Container::from(setup);
+    c.validate()?;
+    Ok(String::from("Validated Successfully"))
+}
+
+#[wasm_bindgen]
 pub fn solve(matrix: bool, nodal: bool, container_js: JsValue) -> Result<String, String> {
     let setup: ContainerSetup = if let Ok(setup) = from_value(container_js) {
         setup
@@ -64,6 +72,7 @@ pub fn solve(matrix: bool, nodal: bool, container_js: JsValue) -> Result<String,
             c.create_super_nodes()?;
             let steps: Vec<Step>;
             if matrix {
+                return Err(String::from(Known("Matrix solver not implemented for nodal".to_string())));
                 let mut solver: NodeMatrixSolver = Solver::new(Rc::new(RefCell::new(c)));
                 steps = solver.solve()?;
             } else {
@@ -73,32 +82,14 @@ pub fn solve(matrix: bool, nodal: bool, container_js: JsValue) -> Result<String,
             serialize_steps(steps)
         }
         false => {
-            c.create_meshes();
-            c.create_super_meshes();
-            Err(format!(
+            return Err(format!(
                 "{} Solver not implemented for meshes",
                 if matrix { "Matrix" } else { "Step" }
-            ))
+            ));
+            c.create_meshes();
+            c.create_super_meshes();
         }
     };
-}
-
-#[wasm_bindgen]
-pub fn return_solved_step_example() -> Result<String, String> {
-    let mut c: Container = create_mna_container();
-    c.create_nodes()?;
-    c.create_super_nodes()?;
-    let mut solver: NodeStepSolver = Solver::new(Rc::new(RefCell::new(c)));
-    serialize_steps(solver.solve()?)
-}
-
-#[wasm_bindgen]
-pub fn return_solved_matrix_example() -> Result<String, String> {
-    let mut c: Container = create_mna_container();
-    c.create_nodes()?;
-    c.create_super_nodes()?;
-    let mut solver: NodeMatrixSolver = Solver::new(Rc::new(RefCell::new(c)));
-    serialize_steps(solver.solve()?)
 }
 
 #[wasm_bindgen]
@@ -129,7 +120,7 @@ impl From<Vec<Element>> for Container {
     fn from(wasm: Vec<Element>) -> Container {
         let mut container = Container::new();
         for element in wasm {
-            container.add_element_core(element);
+            container.add_element_no_id(element);
         }
         container
     }
@@ -139,7 +130,7 @@ impl From<ContainerSetup> for Container {
     fn from(setup: ContainerSetup) -> Container {
         let mut container = Container::new();
         for element in setup.elements {
-            container.add_element_core(element);
+            container.add_element_no_id(element);
         }
         container
     }

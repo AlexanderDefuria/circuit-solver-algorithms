@@ -3,7 +3,8 @@ use crate::container::Container;
 use crate::elements::Element;
 use crate::solvers::solver::{Solver, Step, SubStep};
 use crate::util::PrettyPrint;
-use crate::validation::Validation;
+use crate::validation::StatusError::Known;
+use crate::validation::{StatusError, Validation};
 use nalgebra::{DMatrix, DVector};
 use operations::math::{EquationMember, EquationRepr};
 use operations::prelude::{Divide, Negate, Operation, Sum, Text, Value, Variable};
@@ -40,7 +41,7 @@ impl Solver for NodeMatrixSolver {
     }
 
     /// Returns a string that represents the matrix equation to solve the circuit.
-    fn solve(&mut self) -> Result<Vec<Step>, String> {
+    fn solve(&mut self) -> Result<Vec<Step>, StatusError> {
         let mut steps: Vec<Step> = Vec::new();
 
         let inverse_result: Option<DMatrix<f64>> = DMatrix::from_iterator(
@@ -56,10 +57,10 @@ impl Solver for NodeMatrixSolver {
                 inverse = a;
             }
             None => {
-                return Err(format!(
+                return Err(Known(format!(
                     "Matrix is not invertible!\nThis might have something to do with sizing.\n{}\n",
                     self.a_matrix.latex_string()
-                ));
+                )));
             }
         }
 

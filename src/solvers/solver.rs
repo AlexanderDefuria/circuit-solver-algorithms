@@ -1,4 +1,5 @@
 use crate::container::Container;
+use crate::validation::StatusError;
 use operations::prelude::*;
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Serialize, Serializer};
@@ -12,7 +13,7 @@ use wasm_bindgen::JsValue;
 
 pub trait Solver {
     fn new(container: Rc<RefCell<Container>>) -> Self;
-    fn solve(&mut self) -> Result<Vec<Step>, String>;
+    fn solve(&mut self) -> Result<Vec<Step>, StatusError>;
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]

@@ -147,7 +147,6 @@ fn load_input_case(paths: CasePaths) -> InputCaseSerde {
     case
 }
 
-
 fn setup_test_case(case_paths: CasePaths) -> Result<InputCaseSerde, String> {
     let input_string: String = read_input_file(&case_paths.input)?;
     let error_string: Option<String> = read_error_file(&case_paths.error);
@@ -225,7 +224,9 @@ fn run_test_case(container_input: ContainerSetup, name: String) -> Result<PathBu
             return Err(StatusError::Known("Failed to write output file".to_string()));
         }
     } else {
-        if let Err(e) = serde_json::to_writer_pretty(File::create(output_dir.clone()).unwrap(), &steps.err().unwrap()) {
+        let error: StatusError = steps.err().unwrap();
+        let json_error = String::from(error.clone());
+        if let Err(e) = serde_json::to_writer_pretty(File::create(output_dir.clone()).unwrap(), &json_error) {
             println!("Failed to write output file: {}", e);
             return Err(StatusError::Known("Failed to write output file".to_string()));
         }

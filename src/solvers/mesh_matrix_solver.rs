@@ -1,5 +1,6 @@
 use crate::container::Container;
 use crate::solvers::solver::{Solver, Step};
+use crate::validation::StatusError;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -14,7 +15,7 @@ impl Solver for MeshMatrixSolver {
         MeshMatrixSolver { container }
     }
 
-    fn solve(&mut self) -> Result<Vec<Step>, String> {
+    fn solve(&mut self) -> Result<Vec<Step>, StatusError> {
         todo!()
     }
 }

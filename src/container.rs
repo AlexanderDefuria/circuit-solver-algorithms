@@ -50,7 +50,7 @@ impl Container {
     pub fn add_element(&mut self, mut element: Element) -> Result<usize, StatusError> {
         element.id = self.elements.len();
         element.validate()?;
-        let id: usize = self.add_element_core(element);
+        let id: usize = self.add_element_no_id(element);
         let check = self.validate();
         if check.is_err() {
             self.elements.pop();
@@ -59,12 +59,21 @@ impl Container {
         Ok(id)
     }
 
-    pub(crate) fn add_element_core(&mut self, mut element: Element) -> usize {
+    pub(crate) fn add_element_no_id(&mut self, mut element: Element) -> usize {
         let id: usize = self.elements.len();
         if element.name == "" {
             element.name = element.class.basic_string();
         }
         element.id = id;
+        self.elements.push(Rc::new(RefCell::new(element)));
+        id
+    }
+
+    pub(crate) fn add_element_core(&mut self, mut element: Element) -> usize {
+        if element.name == "" {
+            element.name = element.class.basic_string();
+        }
+        let id = element.id.clone();
         self.elements.push(Rc::new(RefCell::new(element)));
         id
     }
@@ -389,8 +398,8 @@ mod tests {
         .unwrap();
 
         let mut container = Container::new();
-        container.add_element_core(Element::new(Resistor, 1.0, vec![2], vec![3]));
-        container.add_element_core(Element::new(Resistor, 1.0, vec![2], vec![3]));
+        container.add_element_no_id(Element::new(Resistor, 1.0, vec![2], vec![3]));
+        container.add_element_no_id(Element::new(Resistor, 1.0, vec![2], vec![3]));
         println!("{:?}", container);
         assert!(re.is_match(&format!("{:?}", container)));
     }
@@ -406,7 +415,7 @@ mod tests {
 
         // Test multiple grounds
         container = create_basic_container();
-        container.add_element_core(Element::new(Ground, 1.0, vec![2], vec![]));
+        container.add_element_no_id(Element::new(Ground, 1.0, vec![2], vec![]));
         assert!(container.validate().is_err());
     }
 

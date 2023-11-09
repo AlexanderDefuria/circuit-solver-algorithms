@@ -1,28 +1,30 @@
 use crate::component::Component;
 use crate::component::Component::Ground;
+use crate::container::Container;
 use crate::util::PrettyPrint;
 use crate::validation::Status::Valid;
 use crate::validation::StatusError::Known;
-use crate::validation::{Validation, ValidationResult};
+use crate::validation::{StatusError, Validation, ValidationResult};
 use operations::math::{EquationMember, EquationRepr};
 use operations::prelude::{Operation, Value};
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Serialize, Serializer};
 use std::cell::RefCell;
 use std::fmt::Display;
+use std::rc::{Rc, Weak};
 
 /// Representation of a Schematic Element
 #[derive(Debug, Deserialize, Clone)]
 pub struct Element {
     #[serde(skip_deserializing)]
     pub(crate) name: String,
-    pub(crate) id: usize, //
+    pub(crate) id: usize,  //
     pub(crate) value: f64, //
     #[serde(skip_deserializing)]
     pub(crate) current: Operation,
     #[serde(skip_deserializing)]
     pub(crate) voltage_drop: f64,
-    pub(crate) class: Component, //
+    pub(crate) class: Component,     //
     pub(crate) positive: Vec<usize>, // Link to other elements
     pub(crate) negative: Vec<usize>, //
 }
@@ -83,6 +85,17 @@ impl Element {
 
     pub(crate) fn set_voltage_drop(&mut self, voltage_drop: f64) {
         self.voltage_drop = voltage_drop;
+    }
+
+    pub(crate) fn get_positive_elements(
+        &self,
+        container: &Container,
+    ) -> Result<Vec<Weak<RefCell<Element>>>, StatusError> {
+        let out = Vec::new();
+        for id in self.positive.iter() {
+            let element: Weak<RefCell<Element>> = Rc::downgrade(container.get_element_by_id(*id));
+        }
+        Ok(out)
     }
 }
 

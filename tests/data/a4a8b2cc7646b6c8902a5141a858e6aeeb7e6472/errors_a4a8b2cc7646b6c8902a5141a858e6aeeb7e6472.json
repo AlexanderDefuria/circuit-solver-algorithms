@@ -1,13 +1,1 @@
-{
-  "Multiple": [
-    {
-      "Known": "Element cannot have id 0"
-    },
-    {
-      "Known": "No Sources"
-    },
-    {
-      "Known": "Multiple Grounds"
-    }
-  ]
-}
+"\"{\\\"errors\\\": [\\\"Known Issue: Element cannot have id 0\\\", \\\"Known Issue: No Sources\\\", \\\"Known Issue: Multiple Grounds\\\"]}\""
